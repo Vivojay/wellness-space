@@ -1,1 +1,14 @@
 @import "tailwindcss";
+<<<<<<< HEAD
+=======
+
+@keyframes videoPulse {
+  0% { transform: translateX(-100%); opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+.animate-videoPulse {
+  animation: videoPulse 1.4s linear infinite;
+}
+>>>>>>> master
