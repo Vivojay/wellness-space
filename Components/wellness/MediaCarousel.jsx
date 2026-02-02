@@ -87,7 +87,7 @@ export default function MediaCarousel() {
     };
 
     return (
-        <section className="relative bg-stone-100 py-32">
+        <section className="relative bg-stone-200/60 py-32">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
                 {/* Section header */}
                 <motion.div

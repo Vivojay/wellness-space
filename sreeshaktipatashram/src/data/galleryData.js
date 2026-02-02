@@ -3,7 +3,7 @@ export const galleryData = {
     {
       type: "video", // was "image", but it is actually a video
       media: ["/src/assets/videos/20231027_154553.mp4"], // must be an array
-      caption: "Instagram caption",
+      caption: "FaInstagram caption",
       platform: "instagram",
       externalUrl: "https://instagram.com"
     },

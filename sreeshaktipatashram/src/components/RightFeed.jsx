@@ -1,10 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Minus } from 'lucide-react';
 
-const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems }) => {
+const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems, activeOverlay, setActiveOverlay, feedPanelRef, isDark }) => {
   const feedRef = useRef(null);
 
-  // Auto-scroll to bottom whenever feedItems change
   useEffect(() => {
     if (feedRef.current) {
       feedRef.current.scrollTop = feedRef.current.scrollHeight;
@@ -16,13 +15,18 @@ const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems }) => {
       {/* Open Button */}
       {!rightFeedOpen && (
         <button
-          onClick={() => setRightFeedOpen(true)}
-          className={`fixed right-6 top-1/2 -translate-y-1/2 z-[70]
+          onClick={() => { setRightFeedOpen(true); setActiveOverlay?.("feed"); }}
+          className={`
+            fixed right-6 top-1/2 -translate-y-1/2 z-[70]
             w-10 h-32 rounded-full
+            shadow-2xl
             ${theme.cardBg} border ${theme.border}
             backdrop-blur-xl
             flex items-center justify-center
-            hover:scale-105 transition-all`}
+            hover:scale-105 transition-all
+          `}
+          style={{ zIndex: activeOverlay === "feed" ? 120 : 110 }}
+          data-feed-trigger
         >
           <span className="rotate-90 text-xs tracking-[0.3em]">FEED</span>
         </button>
@@ -31,24 +35,38 @@ const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems }) => {
       {/* Feed Panel */}
       {rightFeedOpen && (
         <div
+          ref={feedPanelRef}
           className={`fixed right-6 top-1/2 z-[70]
             w-80 h-[420px]
             ${theme.cardBg} border ${theme.border}
             backdrop-blur-xl
-            rounded-2xl shadow-2xl
+            shadow-2xl
+            rounded-none overflow-hidden
             flex flex-col
             transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
             ${rightFeedOpen
               ? 'opacity-100 scale-100 -translate-y-1/2'
               : 'opacity-0 scale-95 -translate-y-[45%] pointer-events-none'}
           `}
+          onMouseDown={() => setActiveOverlay?.("feed")}
+          onTouchStart={() => setActiveOverlay?.("feed")}
+          style={{ zIndex: activeOverlay === "feed" ? 120 : 110 }}
         >
           {/* Header */}
           <div className={`flex items-center justify-between p-4 border-b ${theme.border}`}>
             <span className="text-xs tracking-[0.25em]">FEED</span>
+            {/* ✅ FIXED: Only color change on hover, no scale */}
             <button
               onClick={() => setRightFeedOpen(false)}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-110 transition"
+              className={`
+                w-9 h-9 rounded-full
+                flex items-center justify-center
+                border-2 transition-colors duration-200
+                ${isDark 
+                  ? "bg-[#c9a77c] hover:bg-[#b99263] border-[#9b774e]" 
+                  : "bg-[#c9a77c] hover:bg-[#b99263] border-[#9b774e]"
+                }
+              `}
             >
               <Minus className="w-4 h-4" />
             </button>
@@ -63,7 +81,7 @@ const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems }) => {
               feedItems.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`${theme.cardBg} border ${theme.border} rounded-xl p-4 shadow-sm`}
+                  className={`${theme.cardBg} border ${theme.border} p-4 rounded-none`}
                 >
                   <p className="text-xs tracking-wide opacity-60 mb-2">
                     {item.category || 'NEWS'}

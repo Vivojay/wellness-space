@@ -20,7 +20,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
   ];
 
   return (
-    <section className={`py-40 px-8 md:px-24 ${isDark ? 'bg-[#242424]' : 'bg-[#f5f2ed]'} transition-colors duration-500`}>
+    <section id="offerings" className={`py-40 px-8 md:px-24 ${isDark ? 'bg-[#1e1e1e]' : 'bg-[#ebe7e0]'} transition-colors duration-500`}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-24">
           <span className={`text-[10px] tracking-[0.4em] ${theme.textMuted} mb-6 block`}>Our Offerings</span>

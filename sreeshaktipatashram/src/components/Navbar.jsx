@@ -1,48 +1,44 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from "react-router-dom";
 
 export default function Navbar({ isDark }) {
+  const { pathname } = useLocation();
+  const isHome = pathname === "/" || pathname === "";
+
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    // ✅ FIXED: Same scroll behavior on ALL pages (not forced on non-home)
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, []); // ✅ Removed isHome dependency
 
-  // dynamic background color
+  // ✅ FIXED: Use actual scroll state on all pages
   const bgColor = scrolled
-    ? isDark
-      ? 'rgba(26, 26, 26, 0.6)' // dark theme when scrolled
-      : 'rgba(255, 255, 255, 0.6)' // light theme when scrolled
-    : 'rgba(255, 255, 255, 0)'; // initial transparent
+    ? isDark ? 'rgba(26, 26, 26, 0.6)' : 'rgba(255, 255, 255, 0.75)'
+    : isDark ? 'rgba(0,0,0,0.22)' : 'rgba(255,255,255,0.22)';
 
   const borderColor = scrolled
-    ? isDark
-      ? 'rgba(255,255,255,0.3)' // softer border when scrolled
-      : 'rgba(0, 0, 0, 0.9)' // thick white border initially
+    ? isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.25)'
     : 'rgba(21, 97, 108, 0.9)';
 
-  const textColor = isDark
-    ? scrolled
-      ? '#ffffff'
-      : '#ffffff'
-    : scrolled
-      ? '#1a1a1a'
-      : '#000000ff';
+  const textColor = isDark ? '#ffffff' : scrolled ? '#1a1a1a' : '#000000ff';
 
   return (
     <div
-      className={`fixed top-0 left-1/2 -translate-x-1/2 w-full h-[110px] flex items-center justify-center
-                  backdrop-blur-3xl border-b-4 transition-all duration-500 z-[10]`}
-      style={{
-        backgroundColor: bgColor,
-        borderColor: borderColor,
-        color: textColor,
-      }}
+      className={`fixed top-0 left-1/2 -translate-x-1/2 w-full h-[110px]
+                  flex items-center justify-center
+                  backdrop-blur-3xl border-b-4 transition-all duration-500
+                  z-[19] shadow-[0_10px_30px_rgba(0,0,0,0.12)]`}
+      style={{ backgroundColor: bgColor, borderColor, color: textColor }}
     >
-      <span className="text-lg sm:text-xl md:text-2xl font-evafiya tracking-[0.3em]">
+      {/* ✅ Consistent font family across all pages */}
+      <span 
+        className="text-lg sm:text-xl md:text-2xl font-evafiya tracking-[0.3em]"
+        // style={{ fontFamily: "'Evafiya', serif" }}
+      >
         Sree Shaktipat Ashram
       </span>
     </div>

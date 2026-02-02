@@ -13,14 +13,14 @@ const LineageSection = ({ theme }) => {
   ];
 
   return (
-    <section className={`${theme.bg} relative py-40 px-8 md:px-24`}>
+    <section id="lineage" className={`${theme.bg} relative py-40 px-8 md:px-24`}>
       <div className="max-w-6xl mx-auto">
         <div className="mb-20">
           <span className={`text-[10px] tracking-[0.4em] ${theme.textMuted}`}>Lineage</span>
           <h2 className="text-5xl md:text-6xl font-light tracking-tight mt-6 font-playwrite-gb-s-headings">The Shaktipat Lineage</h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
           {lineage.map((item, idx) => (
             <div
               key={idx}

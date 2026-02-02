@@ -74,7 +74,7 @@ export default function TestimonialsMarquee() {
     const duplicatedTestimonials = [...testimonials, ...testimonials];
 
     return (
-        <section className="py-32 bg-gradient-to-b from-stone-100 to-amber-50/30 overflow-hidden">
+        <section className="py-32 bg-gradient-to-b from-stone-200 to-amber-50/30 overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 lg:px-12 mb-16">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

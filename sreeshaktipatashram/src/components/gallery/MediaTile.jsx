@@ -1,7 +1,6 @@
 // components/gallery/MediaTile.jsx
 import { useEffect, useRef, useState } from "react";
-import CarouselMedia from "./CarouselMedia"
-
+import CarouselMedia from "./CarouselMedia";
 
 export default function MediaTile({ item, onOpen }) {
   const [hovered, setHovered] = useState(false);
@@ -14,48 +13,68 @@ export default function MediaTile({ item, onOpen }) {
 
   const isVideo = item.type === "video";
 
+  // Tune these
+  const HOVER_DELAY_MS = 120; // slight delay to feel intentional
+  const HOVER_SCALE = 1.04;
+
   /* ---------- DESKTOP HOVER ---------- */
   const onMouseEnter = () => {
+    setHovered(true);
+
+    // delay "ready" state for smoother intentional hover
+    clearTimeout(hoverTimer.current);
     hoverTimer.current = setTimeout(() => {
       setHoverReady(true);
-    }, 500);
-    setHovered(true);
+    }, HOVER_DELAY_MS);
   };
 
   const onMouseLeave = () => {
     clearTimeout(hoverTimer.current);
     setHovered(false);
     setHoverReady(false);
-    if (videoRef.current) videoRef.current.pause();
+
+    if (videoRef.current) {
+      videoRef.current.pause();
+      // optional: rewind a bit for nicer re-hover behavior
+      // videoRef.current.currentTime = 0;
+    }
   };
 
   useEffect(() => {
-    if (hoverReady && videoRef.current) {
-      videoRef.current.play();
+    if (!videoRef.current) return;
+
+    if (hoverReady) {
+      // play on hoverReady (after delay)
+      const p = videoRef.current.play();
+      // avoid uncaught promise in some browsers
+      if (p?.catch) p.catch(() => {});
+    } else {
+      // pause when hover ends
+      videoRef.current.pause();
     }
   }, [hoverReady]);
 
   /* ---------- MOBILE LONG PRESS ---------- */
   const onTouchStart = () => {
     longPressTimer.current = setTimeout(() => {
-      setLongPressActive(true); // <-- activate visual feedback
+      setLongPressActive(true);
       onOpen?.(item);
-      setTimeout(() => setLongPressActive(false), 100); // remove after short delay
-    }, 450); 
+      setTimeout(() => setLongPressActive(false), 120);
+    }, 450);
   };
 
-  const onTouchEnd = () => {
-    clearTimeout(longPressTimer.current);
-  };
+  const onTouchEnd = () => clearTimeout(longPressTimer.current);
+  const onTouchMove = () => clearTimeout(longPressTimer.current);
 
-  const onTouchMove = () => {
-    // cancel if user scrolls
-    clearTimeout(longPressTimer.current);
-  };
+  const mediaClass =
+    "w-full h-full object-cover " +
+    "transform-gpu will-change-transform " +
+    "transition-transform duration-700 ease-out " + // slower + smoother
+    (hoverReady ? " scale-[1.04]" : " scale-100");
 
   return (
     <div
-      className="relative aspect-[9/16] overflow-hidden bg-black group"
+      className="relative aspect-[9/16] overflow-hidden bg-black group rounded-lg"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onDoubleClick={() => onOpen?.(item)}
@@ -65,15 +84,20 @@ export default function MediaTile({ item, onOpen }) {
     >
       {/* Mobile long-press visual feedback */}
       {longPressActive && (
-        <div className="absolute inset-0 bg-white/10 pointer-events-none rounded-lg transition-opacity" />
+        <div className="absolute inset-0 bg-white/10 pointer-events-none rounded-lg transition-opacity duration-300" />
       )}
+
+      {/* Optional: subtle dim overlay on hover (nice “premium” feel) */}
+      <div
+        className={
+          "absolute inset-0 pointer-events-none transition-opacity duration-700 ease-out " +
+          (hoverReady ? "opacity-10 bg-black" : "opacity-0")
+        }
+      />
 
       {/* Media */}
       {item.type === "carousel" && item.media?.length ? (
-        <CarouselMedia
-          media={item.media}
-          className="transition-transform duration-300"
-        />
+        <CarouselMedia media={item.media} className={mediaClass} />
       ) : item.type === "video" && item.media?.[0] ? (
         <video
           ref={videoRef}
@@ -81,17 +105,10 @@ export default function MediaTile({ item, onOpen }) {
           muted
           playsInline
           preload="metadata"
-          className="w-full h-full object-cover transition-transform duration-300"
-          style={{ transform: hoverReady ? "scale(1.04)" : "scale(1)" }}
+          className={mediaClass}
         />
       ) : item.media?.[0] ? (
-        <img
-          src={item.media[0]}
-          loading="lazy"
-          alt=""
-          className="w-full h-full object-cover transition-transform duration-300"
-          style={{ transform: hoverReady ? "scale(1.04)" : "scale(1)" }}
-        />
+        <img src={item.media[0]} loading="lazy" alt="" className={mediaClass} />
       ) : (
         <div className="w-full h-full bg-gray-800 flex items-center justify-center text-white text-sm">
           No media

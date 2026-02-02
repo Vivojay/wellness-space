@@ -6,12 +6,12 @@ const Hero = ({ scrollProgress, theme, isDark }) => {
       {/* Video Background */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
-        // src="\src\assets\videos\hero-video_trim_rotated.mp4"
         src="https://res.cloudinary.com/sidehustle-01/video/upload/v1765290038/telegram_videos/wj0pmxcjppvmd0sfzjau.mp4"
         autoPlay
         muted
         loop
         playsInline
+        preload="auto"
       />
 
       {/* Shadow Overlay (kept for potential effects, can be empty) */}
@@ -99,6 +99,7 @@ const Hero = ({ scrollProgress, theme, isDark }) => {
               ${isDark ? 'text-teal-100' : 'text-teal-200'}
               drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]
               mt-10
+              pointer-events-none
             `}
             style={{
               transform: `translateY(${scrollProgress * 100}px)`,

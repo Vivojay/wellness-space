@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000/api/blog";
+const API_URL = `${import.meta.env.VITE_API_URL}/blog`;
 
 export async function fetchBlogs() {
   const res = await fetch(API_URL);

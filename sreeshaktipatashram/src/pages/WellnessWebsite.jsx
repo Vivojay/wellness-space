@@ -1,6 +1,7 @@
 import { Menu, Minus, ArrowRight, Circle, Sun, Moon, MessageCircle, Send, X } from 'lucide-react';
+import { FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa';
 import React, { useState, useEffect } from "react";
-import FloatingUI from "../components/FloatingUI";
+import Navbar from "../components/Navbar"; // ✅ ADD THIS
 import MainLayout from "../layouts/MainLayout";
 import Hero from "../components/sections/Hero";
 import RevealSection from "../components/sections/RevealSection";
@@ -8,48 +9,17 @@ import LineageSection from "../components/sections/LineageSection";
 import OfferingsSection from "../components/sections/OfferingsSection";
 import TestimonialsSection from "../components/sections/TestimonialsSection";
 import CTASection from "../components/sections/CTASection";
-import RightFeed from "../components/RightFeed";
 import useLenisSmooth from "@/utils/lenisSmooth";
 import FAQ from "../components/sections/FAQ/FAQ";
+import { useOutletContext } from "react-router-dom";
 
 const WellnessWebsite = () => {
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [cursorVariant, setCursorVariant] = useState('default');
-  const [isDark, setIsDark] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatExpanded, setChatExpanded] = useState(false);
-  const [messages, setMessages] = useState([
-    { type: 'bot', text: 'Welcome to Sreeshakti Patashram. How may I guide you?' }
-  ]);
-  const [rightFeedOpen, setRightFeedOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-  const [botTyping, setBotTyping] = useState(false);
+  // ✅ Get theme and isDark from AppShell
+  const { isDark, theme } = useOutletContext();
 
-  const slides = [
-    {
-      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1920&h=1080&fit=crop&q=90',
-      title: 'Sree Shaktipat Ashram',
-      subtitle: 'Discover the silence within'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=1920&h=1080&fit=crop&q=90',
-      title: 'Divine Balance',
-      subtitle: 'Harmonize your existence'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=1920&h=1080&fit=crop&q=90',
-      title: 'Spiritual Awakening',
-      subtitle: 'Transcend the ordinary'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1447452001602-7090c7ab2db3?w=1920&h=1080&fit=crop&q=90',
-      title: 'Sacred Journey',
-      subtitle: 'Walk the path of enlightenment'
-    }
-  ];
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [uniqueVisitCount, setUniqueVisitCount] = useState(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const testimonials = [
     { author: 'Ananya M.', text: 'A profound transformation. The energy here is unlike anywhere else.', role: 'Seeker' },
@@ -60,12 +30,21 @@ const WellnessWebsite = () => {
     { author: 'Arjun P.', text: 'A space where healing happens naturally and beautifully.', role: 'Explorer' }
   ];
 
-  const quickQuestions = [
-    'What programs do you offer?',
-    'How can I book a retreat?',
-    'Tell me about meditation practices',
-    'What are your visiting hours?'
-  ];
+  useEffect(() => {
+    // Local unique visitor marker (prevents reload recount)
+    const key = "ssa_unique_visited_v1";
+    const countKey = "ssa_unique_counter_v1";
+
+    const already = localStorage.getItem(key);
+    let count = Number(localStorage.getItem(countKey) || "0");
+
+    if (!already) {
+      localStorage.setItem(key, "1");
+      count += 1;
+      localStorage.setItem(countKey, String(count));
+    }
+    setUniqueVisitCount(count);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,118 +52,21 @@ const WellnessWebsite = () => {
       setScrollProgress(progress);
     };
 
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleSendMessage = (text) => {
-    if (!text.trim()) return;
-    setMessages(prev => [...prev, { type: 'user', text }]);
-    setInputValue('');
-
-    setBotTyping(true); // start typing animation
-
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        type: 'bot', 
-        text: 'Thank you for your question. Our team will guide you on your spiritual journey.' 
-      }]);
-      setBotTyping(false); // stop typing
-    }, 1200); // delay for realism
-  };
-
-  const theme = {
-    bg: isDark ? 'bg-[#1a1a1a]' : 'bg-[#faf8f5]',
-    // text: isDark ? 'text-[#e8e4df]' : 'text-[#3a3633]',
-    text: isDark ? 'text-[#fff]' : 'text-[#000]',
-    textMuted: isDark ? 'text-[#a39e99]' : 'text-[#8a827c]',
-    border: isDark ? 'border-[#3a3633]' : 'border-[#e8e4df]',
-    cardBg: isDark ? 'bg-[#242424]' : 'bg-[#ffffff]',
-    sidebarBg: isDark ? 'bg-[#1a1a1a]/98' : 'bg-[#faf8f5]/98',
-    accent: isDark ? 'bg-[#d4a574]' : 'bg-[#c9a77c]',
-    accentHover: isDark ? 'over:bg-[#e0b585]' : 'hover:bg-[#d8b68b]',
-    overlay: isDark ? 'from-[#1a1a1a]/90' : 'from-[#faf8f5]/90'
-  };
-
-  const HamburgerIcon = ({ open }) => (
-    <div className="relative w-5 h-5">
-      {/* Top bar */}
-      <span
-        className={`absolute left-0 w-full h-[2px] bg-current transition-all duration-300
-          ${open
-            ? 'top-1/2 -translate-y-1/2 rotate-45'
-            : 'top-1'
-          }`}
-      />
-
-      {/* Middle bar */}
-      <span
-        className={`absolute left-0 top-1/2 w-full h-[2px] bg-current transition-opacity duration-200
-          ${open
-            ? 'opacity-0'
-            : '-translate-y-1/2 opacity-100'
-          }`}
-      />
-
-      {/* Bottom bar */}
-      <span
-        className={`absolute left-0 w-full h-[2px] bg-current transition-all duration-300
-          ${open
-            ? 'top-1/2 -translate-y-1/2 -rotate-45'
-            : 'top-4'
-          }`}
-      />
-    </div>
-  );
-
   useLenisSmooth();
+
+  const setCursorVariant = () => {}; // No-op since cursor is handled by AppShell
 
   return (
     <MainLayout theme={theme}>
-      <FloatingUI
-        mousePos={mousePos}
-        botTyping={botTyping}
-        cursorVariant={cursorVariant}
-        setCursorVariant={setCursorVariant}
-        isDark={isDark}
-        setIsDark={setIsDark}
-        theme={theme}
-        scrollProgress={scrollProgress}
-        chatOpen={chatOpen}
-        setChatOpen={setChatOpen}
-        chatExpanded={chatExpanded}
-        setChatExpanded={setChatExpanded}
-        messages={messages}
-        quickQuestions={quickQuestions}
-        handleSendMessage={handleSendMessage}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        sidebarExpanded={sidebarExpanded}
-        setSidebarExpanded={setSidebarExpanded}
-        HamburgerIcon={HamburgerIcon}
-        Sun={Sun}
-        Moon={Moon}
-        MessageCircle={MessageCircle}
-        X={X}
-        Send={Send}
-        Circle={Circle}
-      />
+      {/* ✅ ADD NAVBAR HERE - only on home page */}
+      {/* <Navbar isDark={isDark} theme={theme} /> */}
 
       {/* Hero Section */}
       <Hero scrollProgress={scrollProgress} theme={theme} isDark={isDark} />
@@ -197,17 +79,10 @@ const WellnessWebsite = () => {
         style={{ opacity: 1 - scrollProgress * 6 }}
       >
         <div className="w-px h-10 bg-gradient-to-t from-transparent via-current to-transparent opacity-50" />
-
-        <p></p>
         <span className={`text-[10px] tracking-[0.3em] rotate-90 ${theme.textMuted}`}>
           SCROLL
         </span>
-
-        <p></p>
-
         <div className="w-px h-10 bg-gradient-to-t from-transparent via-current to-transparent opacity-50" />
-
-        {/* <div className="w-[1.5]px h-10 bg-gradient-to-b from-transparent via-current to-transparent opacity-50" /> */}
       </div>
 
       {/* Reveal Section */}
@@ -232,15 +107,6 @@ const WellnessWebsite = () => {
       {/* FAQs */}
       <FAQ theme={theme}/>
 
-      {/* Right Vertical Feed */}
-      <RightFeed
-        theme={theme}
-        rightFeedOpen={rightFeedOpen}
-        setRightFeedOpen={setRightFeedOpen}
-        messages={messages}
-        botTyping={botTyping}
-      />
-
       {/* Footer */}
       <footer className={`border-t ${theme.border} py-20 px-8 md:px-24 transition-colors duration-500`}>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
@@ -250,33 +116,39 @@ const WellnessWebsite = () => {
           </div>
           <div className="text-right">
             <p className={`text-xs ${theme.textMuted} mb-3`}>© 2024 All Rights Reserved</p>
-            <div className="flex gap-6">
-              {['Instagram', 'Facebook', 'YouTube'].map((social, idx) => (
+            <div className="flex">
+              {[
+                { name: "Instagram", href: "#", Icon: FaInstagram },
+                { name: "Facebook", href: "#", Icon: FaFacebook },
+                { name: "YouTube", href: "#", Icon: FaYoutube },
+              ].map(({ name, href, Icon }, idx) => (
                 <a
                   key={idx}
-                  href="#"
-                  className={`text-xs ${theme.textMuted} hover:${theme.text} transition-colors`}
-                  onMouseEnter={() => setCursorVariant('hover')}
-                  onMouseLeave={() => setCursorVariant('default')}
+                  href={href}
+                  aria-label={name}
+                  className={`
+                    w-12 h-12
+                    border ${theme.border}
+                    flex items-center justify-center
+                    transition-all duration-300
+                    hover:bg-[#c9a77c]/25
+                  `}
+                  style={{
+                    marginLeft: idx === 0 ? 0 : "-1px",
+                  }}
                 >
-                  {social}
+                  <Icon className="w-5 h-5 opacity-70" />
                 </a>
               ))}
             </div>
+            <p className={`text-[10px] tracking-[0.2em] ${theme.textMuted} opacity-60`}>
+              Unique visits (this device): {uniqueVisitCount ?? "—"}
+            </p>
           </div>
         </div>
       </footer>
 
       <style>{`
-  
-        @font-face {
-          font-family: 'Evafiya';
-          src: url('/fonts/Evafiya.ttf') format('truetype');
-          font-weight: normal;
-          font-style: normal;
-          font-display: swap;
-        }
-
         @font-face {
           font-family: 'PetitFormal';
           src: url('/fonts/petit-formal-script.regular.ttf') format('truetype');
@@ -293,22 +165,12 @@ const WellnessWebsite = () => {
           font-display: swap;
         }
 
-        /* optional helper class */
-        .font-evafiya {
-          font-family: 'Evafiya', serif;
-          // color: black;
-          font-weight: bold;
-        }
-
         .font-petitformal {
           font-family: 'PetitFormal', serif;
-          // color: black;
-          // font-weight: bold;
         }
 
         .font-modernsanslight {
           font-family: 'ModernSansLight', serif;
-          // color: black;
           font-weight: bold;
         }
 
@@ -338,7 +200,7 @@ const WellnessWebsite = () => {
 
         @keyframes tealPulse {
           0% {
-            background-color: rgba(13, 148, 136, 0.12); /* teal-600 */
+            background-color: rgba(13, 148, 136, 0.12);
           }
           50% {
             background-color: rgba(134, 255, 245, 0.6);
@@ -350,7 +212,7 @@ const WellnessWebsite = () => {
 
         @keyframes tealPulseDark {
           0% {
-            background-color: rgba(45, 212, 191, 0.10); /* teal-400 */
+            background-color: rgba(45, 212, 191, 0.10);
           }
           50% {
             background-color: rgba(45, 212, 191, 0.22);
@@ -394,7 +256,6 @@ const WellnessWebsite = () => {
           background-size: 64px 64px;
           opacity: 0.95;
 
-          /* Z-shaped polygon */
           clip-path: polygon(
             0% 40%,
             32% 30%,
@@ -415,11 +276,9 @@ const WellnessWebsite = () => {
           background-position: center;
           background-repeat: no-repeat;
 
-          /* The most important part */
           mix-blend-mode: multiply;
           opacity: 0.35;
 
-          /* realism */
           filter: blur(0.4px) contrast(1.05);
           transform: scale(1.05);
         }

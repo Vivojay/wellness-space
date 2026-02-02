@@ -1,97 +1,81 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Instagram, Facebook, Youtube, Mail, MapPin, Phone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa';
 
-export default function Footer() {
-    return (
-        <footer className="bg-stone-900 text-white py-24">
-            <div className="max-w-7xl mx-auto px-6 lg:px-12">
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
-                    {/* Brand column */}
-                    <div className="lg:col-span-2">
-                        <motion.h3
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true }}
-                            className="text-3xl font-extralight mb-6"
-                        >
-                            Serenity
-                        </motion.h3>
-                        <p className="text-stone-400 font-light leading-relaxed max-w-md mb-8">
-                            A sanctuary dedicated to the art of wellness, where every experience 
-                            is crafted to nurture your journey toward balance and inner peace.
-                        </p>
-                        <div className="flex gap-4">
-                            {[Instagram, Facebook, Youtube].map((Icon, index) => (
-                                <a
-                                    key={index}
-                                    href="#"
-                                    className="w-10 h-10 rounded-full border border-stone-700 flex items-center justify-center hover:border-stone-500 hover:bg-stone-800 transition-all duration-300"
-                                >
-                                    <Icon className="w-4 h-4 text-stone-400" strokeWidth={1.5} />
-                                </a>
-                            ))}
-                        </div>
-                    </div>
+export default function Footer({ theme }) {
+  const [visits, setVisits] = useState(0);
 
-                    {/* Quick links */}
-                    <div>
-                        <h4 className="text-xs tracking-[0.2em] uppercase text-stone-500 mb-6">Explore</h4>
-                        <ul className="space-y-4">
-                            {['Our Story', 'Services', 'Practitioners', 'Retreats', 'Journal'].map((link) => (
-                                <li key={link}>
-                                    <a 
-                                        href="#" 
-                                        className="text-stone-400 font-light hover:text-white transition-colors duration-300"
-                                    >
-                                        {link}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+  useEffect(() => {
+    const key = "serenity_device_visits";
+    const v = Number(localStorage.getItem(key) || "0") + 1;
+    localStorage.setItem(key, String(v));
+    setVisits(v);
+  }, []);
 
-                    {/* Contact */}
-                    <div>
-                        <h4 className="text-xs tracking-[0.2em] uppercase text-stone-500 mb-6">Connect</h4>
-                        <ul className="space-y-4">
-                            <li className="flex items-start gap-3">
-                                <MapPin className="w-4 h-4 text-stone-500 mt-1" strokeWidth={1.5} />
-                                <span className="text-stone-400 font-light text-sm">
-                                    123 Tranquil Lane<br />
-                                    Serenity Valley, CA 90210
-                                </span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <Phone className="w-4 h-4 text-stone-500" strokeWidth={1.5} />
-                                <span className="text-stone-400 font-light text-sm">+1 (555) 123-4567</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <Mail className="w-4 h-4 text-stone-500" strokeWidth={1.5} />
-                                <span className="text-stone-400 font-light text-sm">hello@serenity.com</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+  const digits = String(visits).padStart(6, "0").split("");
 
-                {/* Bottom bar */}
-                <div className="pt-8 border-t border-stone-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-stone-500 text-sm font-light">
-                        © 2024 Serenity Wellness. All rights reserved.
-                    </p>
-                    <div className="flex gap-6">
-                        {['Privacy', 'Terms', 'Cookies'].map((link) => (
-                            <a
-                                key={link}
-                                href="#"
-                                className="text-stone-500 text-sm font-light hover:text-stone-300 transition-colors"
-                            >
-                                {link}
-                            </a>
-                        ))}
-                    </div>
-                </div>
+  return (
+    <footer className={`border-t ${theme.border} py-20 px-8 md:px-24 transition-colors duration-500`}>
+      <div className="max-w-6xl mx-auto">
+        {/* Main content */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+          <div>
+            <h3 className="text-2xl font-light tracking-tight mb-2">Sreeshakti Patashram</h3>
+            <p className={`text-[10px] tracking-[0.3em] ${theme.textMuted}`}>Where Consciousness Expands</p>
+          </div>
+          
+          {/* Right side content */}
+          <div className="flex flex-col items-center md:items-end gap-6">
+            {/* Copyright */}
+            <p className={`text-xs ${theme.textMuted}`}>© 2024 All Rights Reserved</p>
+            
+            {/* Social buttons - CENTERED below copyright */}
+            <div className="flex gap-0">
+              {[
+                { name: "Instagram", href: "#", Icon: FaInstagram },
+                { name: "Facebook", href: "#", Icon: FaFacebook },
+                { name: "YouTube", href: "#", Icon: FaYoutube },
+              ].map(({ name, href, Icon }, idx) => (
+                <a
+                  key={idx}
+                  href={href}
+                  aria-label={name}
+                  className={`
+                    w-12 h-12
+                    border ${theme.border}
+                    flex items-center justify-center
+                    transition-all duration-300
+                    hover:bg-[#c9a77c]/25
+                  `}
+                  style={{
+                    marginLeft: idx === 0 ? 0 : "-1px",
+                  }}
+                >
+                  <Icon className="w-5 h-5 opacity-70" />
+                </a>
+              ))}
             </div>
-        </footer>
-    );
+          </div>
+        </div>
+
+        {/* Visitor Counter - CENTERED AT BOTTOM */}
+        <div className="flex flex-col items-center gap-3 pt-8 border-t border-stone-700/30">
+          <p className="text-[10px] tracking-[0.35em] uppercase text-stone-500">
+            Device Visits
+          </p>
+
+          <div className="flex items-center gap-1 px-4 py-3 rounded-2xl border border-stone-700 bg-stone-950/60">
+            {digits.map((d, i) => (
+              <div
+                key={i}
+                className="w-8 h-10 rounded-lg border border-stone-700 bg-stone-900 flex items-center justify-center"
+                style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" }}
+              >
+                <span className="text-stone-200 text-lg">{d}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

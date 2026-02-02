@@ -6,6 +6,39 @@
   100% { transform: translateX(100%); opacity: 0.3; }
 }
 
+@font-face {
+  font-family: 'Evafiya';
+  src: url('/fonts/Evafiya.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-evafiya {
+  font-family: 'Evafiya', serif;
+  font-weight: bold;
+}
+
 .animate-videoPulse {
   animation: videoPulse 1.4s linear infinite;
+}
+
+/* Hide default number spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden; /* important: prevents the outer page from scrolling */
 }
