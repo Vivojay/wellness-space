@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export const faqs = [
   {
@@ -66,6 +66,8 @@ export const faqs = [
 export default function FAQ({ theme }) {
   const [openIndex, setOpenIndex] = useState(null);
   const [showAll, setShowAll] = useState(false);
+  const sectionRef = useRef(null);
+  const expandButtonRef = useRef(null);
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -73,8 +75,42 @@ export default function FAQ({ theme }) {
 
   const visibleFAQs = showAll ? faqs : faqs.slice(0, 5);
 
+  // ✅ FIX: Update scroll after content expands
+  useEffect(() => {
+    if (showAll && expandButtonRef.current) {
+      // Wait for DOM to update
+      setTimeout(() => {
+        // Get Lenis instance if it exists
+        const lenis = window.lenis || window.__lenis;
+        
+        if (lenis && typeof lenis.resize === 'function') {
+          // Tell Lenis to recalculate scroll boundaries
+          lenis.resize();
+          
+          // Optionally scroll to show new content
+          setTimeout(() => {
+            expandButtonRef.current?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest' 
+            });
+          }, 100);
+        } else {
+          // Fallback for regular scroll
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
+      }, 300); // Wait for animation to complete
+    }
+  }, [showAll]);
+
   return (
-    <section className={`py-12 px-6 md:px-24 ${theme?.bg || "bg-gray-50"}`}>
+    <section 
+      id="faqs" 
+      ref={sectionRef}
+      className={`py-12 px-6 md:px-24 ${theme?.bg || "bg-gray-50"}`}
+    >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className={`text-6xl md:text-7xl font-light tracking-tight leading-tight mb-12 ${theme?.text || "text-gray-900"} font-petitformal`}>
@@ -120,7 +156,7 @@ export default function FAQ({ theme }) {
         </div>
 
         {faqs.length > 5 && (
-          <div className="text-center mt-6">
+          <div className="text-center mt-6" ref={expandButtonRef}>
             <button
               onClick={() => setShowAll(!showAll)}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
