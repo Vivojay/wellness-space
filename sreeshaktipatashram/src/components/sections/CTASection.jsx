@@ -9,12 +9,28 @@ const CTASection = ({ theme, setCursorVariant }) => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative py-40 px-8">
+    <section 
+      className="relative py-40 px-8 transition-colors duration-500"
+      style={{ backgroundColor: theme.colors.bg.primary }}
+    >
       <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-6xl md:text-7xl font-light tracking-tight leading-tight mb-10 font-petitformal">
+        <h2 
+          className="text-6xl md:text-7xl font-light tracking-tight leading-tight mb-10"
+          style={{
+            color: theme.text,
+            fontFamily: "'Source Sans 3', sans-serif",
+            fontWeight: 300
+          }}
+        >
           Begin Your Journey
         </h2>
-        <p className={`text-lg font-light ${theme.textMuted} mb-12`}>
+        <p 
+          className="text-lg font-light mb-12"
+          style={{ 
+            color: theme.textMuted,
+            fontFamily: "'Source Sans 3', sans-serif"
+          }}
+        >
           Step into a space where transformation unfolds naturally
         </p>
 
@@ -27,8 +43,13 @@ const CTASection = ({ theme, setCursorVariant }) => {
             setHovered(false);
             setCursorVariant("default");
           }}
-          className="relative px-16 py-5 bg-[#24bdbf]/40 hover:scale-105 transition-transform duration-300"
-          style={{ border: "none", outline: "none" }}
+          className="relative px-16 py-5 hover:scale-105 transition-transform duration-300"
+          style={{ 
+            border: "none", 
+            outline: "none",
+            backgroundColor: theme.accent + '40',
+            fontFamily: "'Source Sans 3', sans-serif"
+          }}
           onClick={() => navigate("/booking")}
         >
           {/* SVG BORDER using pathLength */}
@@ -49,7 +70,7 @@ const CTASection = ({ theme, setCursorVariant }) => {
               width="100"
               height="40"
               fill="none"
-              stroke="tan"
+              stroke={theme.accentSecondary}
               strokeWidth="2"
               pathLength="1"
               strokeDasharray="1"
@@ -62,7 +83,10 @@ const CTASection = ({ theme, setCursorVariant }) => {
             />
           </svg>
 
-          <span className="relative z-10 tracking-[0.2em] text-sm">
+          <span 
+            className="relative z-10 tracking-[0.2em] text-sm"
+            style={{ color: theme.text }}
+          >
             Book Now
           </span>
         </button>

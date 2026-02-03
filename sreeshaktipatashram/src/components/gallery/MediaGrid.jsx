@@ -10,29 +10,29 @@ export default function MediaGrid({ items = [], onOpen }) {
         <div className="relative mb-8">
           {/* Pulsing background circle - subtle, not distracting */}
           <div 
-            className="absolute inset-0 -m-12 rounded-full bg-white/5"
+            className="absolute inset-0 -m-12 rounded-full bg-neutral-400/20"
             style={{
               animation: 'slowPulse 4s ease-in-out infinite'
             }}
           />
           
           {/* Icon container */}
-          <div className="relative w-24 h-24 rounded-full bg-white/10 border border-white/20 
+          <div className="relative w-24 h-24 rounded-full bg-neutral-700/30 border border-neutral-500/40 
             flex items-center justify-center backdrop-blur-sm">
             <ImageOff 
               size={40} 
               strokeWidth={1.5} 
-              className="text-white/60" 
+              className="text-neutral-300" 
             />
           </div>
         </div>
 
         {/* Text content - elegant and minimal */}
         <div className="text-center space-y-3 max-w-md">
-          <h3 className="text-xl font-light tracking-[0.3em] uppercase text-white/80">
+          <h3 className="text-xl font-light tracking-[0.3em] uppercase text-neutral-200">
             No Media Yet
           </h3>
-          <p className="text-sm text-white/50 leading-relaxed tracking-wide">
+          <p className="text-sm text-neutral-400 leading-relaxed tracking-wide">
             Content from this platform will appear here once available
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function MediaGrid({ items = [], onOpen }) {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="w-1.5 h-1.5 rounded-full bg-white/30"
+              className="w-1.5 h-1.5 rounded-full bg-neutral-500"
             />
           ))}
         </div>

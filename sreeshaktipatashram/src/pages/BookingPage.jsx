@@ -2,69 +2,98 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown } from "lucide-react";
 
+import bgImage from '/photos/Blue Pastel Abstract Grid Line BG.png';
+
 const BG_IMG =
   "https://dhunwellness.com/cdn/shop/files/Sound_healing_room.jpg?v=1751348144&width=1920";
 
 const COUNTRY_META = {
-  India: { code: "+91", states: ["Maharashtra", "Delhi", "Karnataka"] },
-  USA: { code: "+1", states: ["California", "New York", "Texas"] },
-  UK: { code: "+44", states: ["England", "Scotland", "Wales"] },
+  India: { code: "+91", states: ["Maharashtra", "Delhi", "Karnataka", "Tamil Nadu", "West Bengal"] },
+  USA: { code: "+1", states: ["California", "New York", "Texas", "Florida", "Illinois"] },
+  UK: { code: "+44", states: ["England", "Scotland", "Wales", "Northern Ireland"] },
+  Canada: { code: "+1", states: ["Ontario", "Quebec", "British Columbia", "Alberta"] },
+  Australia: { code: "+61", states: ["New South Wales", "Victoria", "Queensland", "Western Australia"] },
 };
 
-function Field({ label, children, hint }) {
+function Field({ label, children, hint, error, theme }) {
   return (
     <div className="space-y-2">
       <div className="flex items-end justify-between gap-4">
-        <label className="text-sm tracking-wide text-white/80">{label}</label>
-        {hint ? <span className="text-[11px] text-white/40">{hint}</span> : null}
+        <label className="text-sm tracking-wide" style={{ color: theme.textLight }}>
+          {label}
+        </label>
+        {hint && <span className="text-[11px]" style={{ color: theme.textMuted }}>{hint}</span>}
       </div>
       {children}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }
 
-function InputBase({ inputBorder, className="", ...props }) {
+function InputBase({ theme, className = "", error, ...props }) {
   return (
     <input
       {...props}
-      className={`w-full bg-white/5 border ${inputBorder} px-4 py-3 text-white outline-none focus:border-white/35 transition-colors ${className}`}
+      className={`w-full px-4 py-3 outline-none transition-colors ${className}`}
+      style={{
+        backgroundColor: theme.colors.bg.card,
+        border: error 
+          ? '1px solid rgba(239, 68, 68, 0.6)' 
+          : `1px solid ${theme.border}`,
+        color: theme.text,
+        boxShadow: error ? '0 0 0 2px rgba(239, 68, 68, 0.1)' : 'none'
+      }}
     />
   );
 }
 
-function SelectBase({ className = "", isDark, ...props }) {
-  const inputBorder = isDark ? "border-white/15" : "border-black/25";
-
+function SelectBase({ className = "", theme, error, ...props }) {
   return (
     <div className="relative">
       <select
         {...props}
-        className={`w-full appearance-none bg-white/5 border ${inputBorder} px-4 py-3 pr-10 text-white outline-none
-          focus:border-white/35 transition-colors ${className}`}
+        className={`w-full appearance-none px-4 py-3 pr-10 outline-none transition-colors ${className}`}
+        style={{
+          backgroundColor: theme.colors.bg.card,
+          border: error 
+            ? '1px solid rgba(239, 68, 68, 0.6)' 
+            : `1px solid ${theme.border}`,
+          color: theme.text,
+          boxShadow: error ? '0 0 0 2px rgba(239, 68, 68, 0.1)' : 'none'
+        }}
       />
       <ChevronDown
         size={18}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none"
+        className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+        style={{ color: theme.textMuted }}
       />
     </div>
   );
 }
 
-
-function TextAreaBase({ inputBorder, className="", ...props }) {
+function TextAreaBase({ theme, className = "", ...props }) {
   return (
     <textarea
       {...props}
-      className={`w-full min-h-[140px] bg-white/5 border ${inputBorder} px-4 py-3 text-white outline-none focus:border-white/35 transition-colors resize-y ${className}`}
+      className={`w-full min-h-[140px] px-4 py-3 outline-none transition-colors resize-y ${className}`}
+      style={{
+        backgroundColor: theme.colors.bg.card,
+        border: `1px solid ${theme.border}`,
+        color: theme.text,
+        '::placeholder': {
+          color: theme.textMuted
+        }
+      }}
     />
   );
 }
 
 export default function BookingPage() {
   const navigate = useNavigate();
-  const { isDark } = useOutletContext(); // ✅ from AppShell
+  const { isDark, theme } = useOutletContext();
   const [step, setStep] = useState(0);
   const [attemptedNext, setAttemptedNext] = useState(false);
+  const [errors, setErrors] = useState({});
   const [location, setLocation] = useState({ country: "India", state: "", city: "" });
   const [phoneCode, setPhoneCode] = useState(COUNTRY_META["India"].code);
 
@@ -90,7 +119,9 @@ export default function BookingPage() {
   const emailInfo = useMemo(() => {
     const v = form.email.trim();
     if (!v) return { ok: false, msg: "Email is required." };
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { ok: false, msg: "Email format is invalid (example: name@domain.com)." };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+      return { ok: false, msg: "Invalid email format (e.g., name@domain.com)" };
+    }
     return { ok: true, msg: "Valid email." };
   }, [form.email]);
 
@@ -111,422 +142,607 @@ export default function BookingPage() {
     []
   );
 
-  const modalBorder = isDark ? "border-white/15" : "border-black/30";
-  const thinBorder  = isDark ? "border-white/10" : "border-black/15";
-  const inputBorder = isDark ? "border-white/15" : "border-black/25";
-
   const set = (key) => (e) => {
     const value =
       e?.target?.type === "checkbox" ? e.target.checked : e.target.value;
     setForm((p) => ({ ...p, [key]: value }));
+    if (errors[key]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[key];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateStep = (stepIndex) => {
+    const newErrors = {};
+
+    if (stepIndex === 0) {
+      if (!form.fullName.trim()) newErrors.fullName = "Full name is required";
+      if (!String(form.age).trim()) newErrors.age = "Age is required";
+      if (!form.gender) newErrors.gender = "Gender is required";
+      if (!location.city.trim()) newErrors.city = "City is required";
+      if (!emailInfo.ok) newErrors.email = emailInfo.msg;
+      if (!form.phone.trim()) newErrors.phone = "Phone number is required";
+    }
+
+    if (stepIndex === 1) {
+      if (!form.education.trim()) newErrors.education = "Education is required";
+      if (!form.religion.trim()) newErrors.religion = "Religion is required";
+    }
+
+    if (stepIndex === 3) {
+      if (form.initiatedBefore === "") {
+        newErrors.initiatedBefore = "Please select an option";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const canNext = () => {
     if (step === 0) {
-        return (
-            form.fullName.trim() &&
-            String(form.age).trim() &&
-            form.gender &&
-            form.city.trim() &&
-            emailInfo.ok &&
-            form.phone.trim()
-        );
+      return (
+        form.fullName.trim() &&
+        String(form.age).trim() &&
+        form.gender &&
+        location.city.trim() &&
+        emailInfo.ok &&
+        form.phone.trim()
+      );
     }
     if (step === 1) return form.education.trim() && form.religion.trim();
     if (step === 2) return true;
-    if (step === 3) {
-      return form.initiatedBefore !== "";
-    }
+    if (step === 3) return form.initiatedBefore !== "";
     return true;
   };
 
   const next = () => {
-    if (!canNext()) {
-        setAttemptedNext(true);
-        setTimeout(() => setAttemptedNext(false), 650);
-        return;
+    if (!validateStep(step)) {
+      setAttemptedNext(true);
+      setTimeout(() => setAttemptedNext(false), 650);
+      return;
     }
     setStep((s) => Math.min(s + 1, steps.length - 1));
+    setAttemptedNext(false);
   };
+
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async () => {
     const payload = {
-        ...form,
-        city: `${location.city}${location.state ? `, ${location.state}` : ""}, ${location.country}`,
-        phone: `${phoneCode} ${form.phone}`.trim(),
+      ...form,
+      city: `${location.city}${location.state ? `, ${location.state}` : ""}, ${location.country}`,
+      phone: `${phoneCode} ${form.phone}`.trim(),
     };
     try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/booking`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/booking`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-        if (!res.ok) throw new Error("Failed to submit booking");
-        await res.json();
-        setStep(steps.length - 1);
+      if (!res.ok) throw new Error("Failed to submit booking");
+      await res.json();
+      setStep(steps.length - 1);
     } catch (e) {
-        console.error(e);
-        alert("Could not submit. Is the backend running?");
+      console.error(e);
+      alert("Could not submit. Please check your connection and try again.");
     }
   };
-  
+
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Background image (modal inspiration only) */}
-      <div className="absolute inset-0">
-        <img
-          src={BG_IMG}
-          alt=""
-          className="w-full h-full object-cover"
-          loading="eager"
-        />
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="absolute inset-0 backdrop-blur-[2px]" />
-      </div>
+    <div 
+      className="min-h-screen text-white relative"
+      style={{ backgroundColor: theme.colors.bg.primary }}
+    >
+      <div className="absolute inset-0 overflow-y-auto">
+        {/* Background image */}
+        <div className="fixed inset-0 pointer-events-none">
+          <img
+            src={BG_IMG}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+          <div 
+            className="absolute inset-0"
+            style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)' }}
+          />
+          <div className="absolute inset-0 backdrop-blur-[2px]" />
+        </div>
 
-      {/* Centered modal */}
-      <div className="relative z-10 px-6 pb-16 pt-10 flex items-center justify-center">
-        <div className={`w-full max-w-4xl border ${modalBorder} bg-black/30 backdrop-blur-xl shadow-2xl flex flex-col min-h-[720px]`}>
-          {/* Header */}
-          <div className={`px-10 py-8 border-b ${thinBorder}`}>
-            <div className="flex items-center justify-between gap-6">
-              <div>
-                <p className="text-[10px] tracking-[0.35em] text-white/60">
-                  BOOKING
-                </p>
-                <h1 className="text-3xl md:text-4xl font-light tracking-tight mt-3">
-                  Begin Your Journey
-                </h1>
-                <p className="text-sm text-white/60 mt-3 max-w-2xl leading-relaxed">
-                  Please fill in the details below. This helps us understand your
-                  intent and guide you with care.
-                </p>
-              </div>
-
-              <div className="hidden md:block text-right">
-                <p className="text-xs text-white/50 tracking-[0.25em]">
-                  STEP {step + 1} / {steps.length}
-                </p>
-                <p className="text-sm text-white/70 mt-2">{steps[step]?.title}</p>
-              </div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="mt-6 relative">
-            <div className="h-[2px] bg-white/10">
-                <div
-                className="h-full bg-teal-400/70 transition-all duration-300"
-                style={{ width: `${((step + 1) / steps.length) * 100}%` }}
-                />
-            </div>
-
-            {/* marker */}
-            <div
-                className="absolute top-0"
-                style={{ left: `calc(${((step + 1) / steps.length) * 100}% - 10px)` }}
+        {/* Centered modal */}
+        <div className="relative z-10 px-6 py-16 flex items-center justify-center min-h-screen">
+          <div
+            className="w-full max-w-4xl border shadow-2xl flex flex-col"
+            style={{
+              backgroundImage: `linear-gradient(${isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.1)'}, ${isDark ? 'rgba(20, 60, 80, 0.5)' : 'rgba(108, 229, 250, 0.3)'}), url(${bgImage})`,
+              backgroundSize: '200%',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '-700px 0px',
+              backgroundColor: theme.colors.bg.card,
+            }}
+          >
+            {/* Header */}
+            <div 
+              className="px-10 py-8 border-b"
+              style={{ borderColor: theme.border }}
             >
-                <div className="w-5 h-5 rounded-full bg-teal-400 -translate-y-1/2" />
-                <div className="text-[11px] text-white/70 mt-3 text-center w-5">
-                {step + 1}
+              <div className="flex items-center justify-between gap-6 mb-6">
+                <div>
+                  <p 
+                    className="text-[10px] tracking-[0.35em]"
+                    style={{ color: theme.textMuted }}
+                  >
+                    BOOKING
+                  </p>
+                  <h1 
+                    className="text-3xl md:text-4xl font-light tracking-tight mt-3"
+                    style={{ color: theme.text }}
+                  >
+                    Begin Your Journey
+                  </h1>
+                  <p 
+                    className="text-sm mt-3 max-w-2xl leading-relaxed"
+                    style={{ color: theme.textMuted }}
+                  >
+                    Please fill in the details below. This helps us understand your
+                    intent and guide you with care.
+                  </p>
                 </div>
-            </div>
-            </div>
 
-          </div>
+                <div className="hidden md:block text-right">
+                  <p 
+                    className="text-xs tracking-[0.25em]"
+                    style={{ color: theme.textMuted }}
+                  >
+                    STEP {step + 1} / {steps.length}
+                  </p>
+                  <p 
+                    className="text-sm mt-2"
+                    style={{ color: theme.textLight }}
+                  >
+                    {steps[step]?.title}
+                  </p>
+                </div>
+              </div>
 
-          {/* Body */}
-          <div className="px-10 py-10">
-            {step === 0 && (
-              <div className="grid md:grid-cols-2 gap-8">
-                <Field label="Full Name">
-                  <InputBase
-                    inputBorder={inputBorder}
-                    type="text"
-                    value={form.fullName}
-                    onChange={set("fullName")}
-                    placeholder="Your full name"
-                    autoComplete="name"
+              {/* Progress indicator */}
+              <div className="relative">
+                <div 
+                  className="h-1 overflow-hidden"
+                  style={{ backgroundColor: theme.borderLight }}
+                >
+                  <div
+                    className="h-full transition-all duration-500 ease-out"
+                    style={{ 
+                      width: `${((step + 1) / steps.length) * 100}%`,
+                      backgroundColor: theme.accentTertiary
+                    }}
                   />
-                </Field>
+                </div>
+                
+                <div className="flex justify-between mt-3">
+                  {steps.slice(0, -1).map((s, i) => (
+                    <div
+                      key={i}
+                      className="text-[10px] tracking-wider transition-colors"
+                      style={{ 
+                        color: i <= step ? theme.accentTertiary : theme.textMuted 
+                      }}
+                    >
+                      {s.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-                <Field label="Age">
-                  <InputBase
-                    inputBorder={inputBorder}
-                    type="number"
-                    min="0"
-                    value={form.age}
-                    onChange={set("age")}
-                    placeholder="Your age"
-                  />
-                </Field>
-
-                <Field label="Gender">
-                  <SelectBase isDark={isDark} value={form.gender} onChange={set("gender")}>
-                    <option value="" className="bg-black">Select…</option>
-                    <option value="male" className="bg-black">Male</option>
-                    <option value="female" className="bg-black">Female</option>
-                    <option value="other" className="bg-black">Other</option>
-                    <option value="celibate" className="bg-black">Celibate</option>
-                  </SelectBase>
-                </Field>
-
-                <Field label="Location">
-                <div className="grid sm:grid-cols-3 gap-4">
-                    <SelectBase isDark={isDark} value={location.country} onChange={(e)=>setLocation(p=>({ ...p, country: e.target.value }))}>
-                    {Object.keys(COUNTRY_META).map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
-                    </SelectBase>
-
-                    <SelectBase isDark={isDark} value={location.state} onChange={(e)=>setLocation(p=>({ ...p, state: e.target.value }))}>
-                    <option value="" className="bg-black">State…</option>
-                    {COUNTRY_META[location.country].states.map(s => <option key={s} value={s} className="bg-black">{s}</option>)}
-                    </SelectBase>
-
+            {/* Body */}
+            <div className="px-10 py-10">
+              {step === 0 && (
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Field label="Full Name" error={errors.fullName} theme={theme}>
                     <InputBase
-                        inputBorder={inputBorder}
+                      theme={theme}
+                      type="text"
+                      value={form.fullName}
+                      onChange={set("fullName")}
+                      placeholder="Your full name"
+                      autoComplete="name"
+                      error={errors.fullName}
+                    />
+                  </Field>
+
+                  <Field label="Age" error={errors.age} theme={theme}>
+                    <InputBase
+                      theme={theme}
+                      type="number"
+                      min="0"
+                      value={form.age}
+                      onChange={set("age")}
+                      placeholder="Your age"
+                      error={errors.age}
+                    />
+                  </Field>
+
+                  <Field label="Gender" error={errors.gender} theme={theme}>
+                    <SelectBase
+                      theme={theme}
+                      value={form.gender}
+                      onChange={set("gender")}
+                      error={errors.gender}
+                    >
+                      <option value="">Select…</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                      <option value="celibate">Celibate</option>
+                    </SelectBase>
+                  </Field>
+
+                  <Field label="Location" error={errors.city} theme={theme}>
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <SelectBase
+                        theme={theme}
+                        value={location.country}
+                        onChange={(e) =>
+                          setLocation((p) => ({ ...p, country: e.target.value }))
+                        }
+                      >
+                        {Object.keys(COUNTRY_META).map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </SelectBase>
+
+                      <SelectBase
+                        theme={theme}
+                        value={location.state}
+                        onChange={(e) =>
+                          setLocation((p) => ({ ...p, state: e.target.value }))
+                        }
+                      >
+                        <option value="">State…</option>
+                        {COUNTRY_META[location.country].states.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </SelectBase>
+
+                      <InputBase
+                        theme={theme}
                         type="text"
                         value={location.city}
-                        onChange={(e)=>setLocation(p=>({ ...p, city: e.target.value }))}
+                        onChange={(e) =>
+                          setLocation((p) => ({ ...p, city: e.target.value }))
+                        }
                         placeholder="City"
-                    />
-                </div>
-                </Field>
+                        error={errors.city}
+                      />
+                    </div>
+                  </Field>
 
-
-                <Field label="Email">
+                  <Field label="Email" error={errors.email} theme={theme}>
                     <InputBase
-                        inputBorder={inputBorder}
-                        type="email"
-                        value={form.email}
-                        onChange={set("email")}
-                        placeholder="you@example.com"
-                        autoComplete="email"
-                        className={attemptedNext && !emailInfo.ok ? "ring-2 ring-red-500/60" : ""}
+                      theme={theme}
+                      type="email"
+                      value={form.email}
+                      onChange={set("email")}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      error={errors.email}
                     />
-                    <p className={`text-xs ${emailInfo.ok ? "text-green-400" : "text-red-400"}`}>
-                        {emailInfo.msg}
-                    </p>
-                </Field>
+                  </Field>
 
-                <Field label="Phone Number">
-                <div className="grid grid-cols-[120px_1fr] gap-4">
-                    <SelectBase isDark={isDark} value={phoneCode} onChange={(e)=>setPhoneCode(e.target.value)}>
-                    {Object.values(COUNTRY_META).map(m => (
-                        <option key={m.code} value={m.code} className="bg-black">{m.code}</option>
-                    ))}
+                  <Field label="Phone Number" error={errors.phone} theme={theme}>
+                    <div className="grid grid-cols-[120px_1fr] gap-4">
+                      <SelectBase
+                        theme={theme}
+                        value={phoneCode}
+                        onChange={(e) => setPhoneCode(e.target.value)}
+                      >
+                        {Object.entries(COUNTRY_META).map(([country, m]) => (
+                          <option key={country} value={m.code}>
+                            {m.code}
+                          </option>
+                        ))}
+                      </SelectBase>
+
+                      <InputBase
+                        theme={theme}
+                        type="tel"
+                        value={form.phone}
+                        onChange={set("phone")}
+                        placeholder="Phone number"
+                        autoComplete="tel"
+                        error={errors.phone}
+                      />
+                    </div>
+                  </Field>
+
+                  <div className="md:col-span-2">
+                    <Field label="Why you wish to join (in detail if possible)" theme={theme}>
+                      <TextAreaBase
+                        theme={theme}
+                        value={form.whyJoin}
+                        onChange={set("whyJoin")}
+                        placeholder="Share your intention and what you are seeking…"
+                      />
+                    </Field>
+                  </div>
+                </div>
+              )}
+
+              {step === 1 && (
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Field label="Education" error={errors.education} theme={theme}>
+                    <InputBase
+                      theme={theme}
+                      type="text"
+                      value={form.education}
+                      onChange={set("education")}
+                      placeholder="Your education"
+                      error={errors.education}
+                    />
+                  </Field>
+
+                  <Field label="Religion" error={errors.religion} theme={theme}>
+                    <InputBase
+                      theme={theme}
+                      type="text"
+                      value={form.religion}
+                      onChange={set("religion")}
+                      placeholder="Your religion"
+                      error={errors.religion}
+                    />
+                  </Field>
+
+                  <Field label="Marital Status" theme={theme}>
+                    <SelectBase
+                      theme={theme}
+                      value={form.maritalStatus}
+                      onChange={set("maritalStatus")}
+                    >
+                      <option value="">Select…</option>
+                      <option value="single">Single</option>
+                      <option value="married">Married</option>
+                      <option value="divorced">Divorced</option>
+                      <option value="widowed">Widowed</option>
                     </SelectBase>
+                  </Field>
 
+                  <Field label="No. of Children" theme={theme}>
                     <InputBase
-                    inputBorder={inputBorder}
-                    type="tel"
-                    value={form.phone}
-                    onChange={set("phone")}
-                    placeholder="Phone number"
-                    autoComplete="tel"
-                    />
-                </div>
-                </Field>
-
-                <div className="md:col-span-2">
-                  <Field label="Why you wish to join (in detail if possible)">
-                    <TextAreaBase
-                      value={form.whyJoin}
-                      onChange={set("whyJoin")}
-                      placeholder="Share your intention and what you are seeking…"
+                      theme={theme}
+                      type="number"
+                      min="0"
+                      value={form.childrenCount}
+                      onChange={set("childrenCount")}
+                      placeholder="0"
                     />
                   </Field>
                 </div>
-              </div>
-            )}
+              )}
 
-            {step === 1 && (
-              <div className="grid md:grid-cols-2 gap-8">
-                <Field label="Education">
-                  <InputBase
-                    inputBorder={inputBorder}
-                    type="text"
-                    value={form.education}
-                    onChange={set("education")}
-                    placeholder="Your education"
-                  />
-                </Field>
-
-                <Field label="Religion">
-                  <InputBase
-                    inputBorder={inputBorder}
-                    type="text"
-                    value={form.religion}
-                    onChange={set("religion")}
-                    placeholder="Your religion"
-                  />
-                </Field>
-
-                <Field label="Marital Status">
-                  <SelectBase
-                    isDark={isDark}
-                    value={form.maritalStatus}
-                    onChange={set("maritalStatus")}
-                  >
-                    <option value="" className="bg-black">Select…</option>
-                    <option value="single" className="bg-black">Single</option>
-                    <option value="married" className="bg-black">Married</option>
-                    <option value="divorced" className="bg-black">Divorced</option>
-                    <option value="widowed" className="bg-black">Widowed</option>
-                  </SelectBase>
-                </Field>
-
-                <Field label="No. of Children">
-                  <InputBase
-                    inputBorder={inputBorder}
-                    type="number"
-                    min="0"
-                    value={form.childrenCount}
-                    onChange={set("childrenCount")}
-                    placeholder="0"
-                  />
-                </Field>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="grid gap-8">
-                <Field label="Taking any meds?" hint="Optional">
-                  <InputBase
-                    inputBorder={inputBorder}
-                    type="text"
-                    value={form.meds}
-                    onChange={set("meds")}
-                    placeholder="If yes, please mention"
-                  />
-                </Field>
-
-                <Field label="Any medical / health issues?">
-                  <TextAreaBase
-                    value={form.healthIssues}
-                    onChange={set("healthIssues")}
-                    placeholder="If yes, please describe (optional)."
-                  />
-                </Field>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="grid gap-8">
-                <Field label="Have you been initiated prior to this?">
-                  <SelectBase
-                    isDark={isDark}
-                    value={form.initiatedBefore}
-                    onChange={set("initiatedBefore")}
-                  >
-                    <option value="no" className="bg-black">No</option>
-                    <option value="yes" className="bg-black">Yes</option>
-                  </SelectBase>
-                </Field>
-
-                {form.initiatedBefore === "yes" && (
-                  <Field label="If yes, please share details of the lineage">
-                    <TextAreaBase
-                      value={form.lineageDetails}
-                      onChange={set("lineageDetails")}
-                      placeholder="Lineage / Guru / tradition details…"
+              {step === 2 && (
+                <div className="grid gap-8">
+                  <Field label="Taking any meds?" hint="Optional" theme={theme}>
+                    <InputBase
+                      theme={theme}
+                      type="text"
+                      value={form.meds}
+                      onChange={set("meds")}
+                      placeholder="If yes, please mention"
                     />
                   </Field>
-                )}
 
-                <Field label="Get members-only club access + benefits">
-                  <label className="flex items-center gap-3 select-none">
-                    <input
-                      type="checkbox"
-                      checked={form.subscribe}
-                      onChange={set("subscribe")}
-                      className="w-4 h-4 accent-white"
+                  <Field label="Any medical / health issues?" theme={theme}>
+                    <TextAreaBase
+                      theme={theme}
+                      value={form.healthIssues}
+                      onChange={set("healthIssues")}
+                      placeholder="If yes, please describe (optional)."
                     />
-                    <span className="text-sm text-white/70">
-                      Yes, keep me updated
-                    </span>
-                  </label>
-                </Field>
-              </div>
-            )}
+                  </Field>
+                </div>
+              )}
 
-            {step === 4 && (
-              <div className="py-10 text-center">
-                <CheckCircle2 className="mx-auto mb-6 opacity-80" size={40} />
-                <h2 className="text-3xl font-light">Submitted</h2>
-                <p className="text-sm text-white/60 mt-3 max-w-xl mx-auto leading-relaxed">
-                  Thank you. We will review your details and guide you on the next steps.
-                </p>
+              {step === 3 && (
+                <div className="grid gap-8">
+                  <Field
+                    label="Have you been initiated prior to this?"
+                    error={errors.initiatedBefore}
+                    theme={theme}
+                  >
+                    <SelectBase
+                      theme={theme}
+                      value={form.initiatedBefore}
+                      onChange={set("initiatedBefore")}
+                      error={errors.initiatedBefore}
+                    >
+                      <option value="no">No</option>
+                      <option value="yes">Yes</option>
+                    </SelectBase>
+                  </Field>
+
+                  {form.initiatedBefore === "yes" && (
+                    <Field label="If yes, please share details of the lineage" theme={theme}>
+                      <TextAreaBase
+                        theme={theme}
+                        value={form.lineageDetails}
+                        onChange={set("lineageDetails")}
+                        placeholder="Lineage / Guru / tradition details…"
+                      />
+                    </Field>
+                  )}
+
+                  <Field label="Get members-only club access + benefits" theme={theme}>
+                    <label className="flex items-center gap-3 select-none">
+                      <input
+                        type="checkbox"
+                        checked={form.subscribe}
+                        onChange={set("subscribe")}
+                        className="w-4 h-4"
+                        style={{ accentColor: theme.accent }}
+                      />
+                      <span 
+                        className="text-sm"
+                        style={{ color: theme.textLight }}
+                      >
+                        Yes, keep me updated
+                      </span>
+                    </label>
+                  </Field>
+                </div>
+              )}
+
+              {step === 4 && (
+                <div className="py-10 text-center">
+                  <CheckCircle2 
+                    className="mx-auto mb-6 opacity-80" 
+                    size={40}
+                    style={{ color: theme.accent }}
+                  />
+                  <h2 
+                    className="text-3xl font-light"
+                    style={{ color: theme.text }}
+                  >
+                    Submitted
+                  </h2>
+                  <p 
+                    className="text-sm mt-3 max-w-xl mx-auto leading-relaxed"
+                    style={{ color: theme.textMuted }}
+                  >
+                    Thank you. We will review your details and guide you on the next
+                    steps.
+                  </p>
+                  <button
+                    onClick={() => navigate("/")}
+                    className="mt-8 px-8 py-3 border text-sm tracking-wide transition-colors"
+                    style={{
+                      borderColor: theme.border,
+                      color: theme.textLight
+                    }}
+                  >
+                    Return Home
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Footer controls */}
+            {step !== 4 && (
+              <div
+                className="px-10 py-8 border-t flex items-center justify-between"
+                style={{ borderColor: theme.border }}
+              >
                 <button
-                  onClick={() => navigate("/")}
-                  className="mt-8 px-8 py-3 border border-white/20 text-sm tracking-wide text-white/80 hover:text-white hover:border-white/35 transition-colors"
+                  onClick={prev}
+                  disabled={step === 0}
+                  className="px-6 py-3 border text-sm tracking-wide transition-colors"
+                  style={{
+                    borderColor: step === 0 ? theme.borderLight : theme.border,
+                    color: step === 0 ? theme.textMuted : theme.textLight,
+                    cursor: step === 0 ? 'not-allowed' : 'pointer',
+                    backgroundColor: step === 0 ? theme.colors.bg.secondary : 'transparent'
+                  }}
                 >
-                  Return Home
+                  Back
                 </button>
+
+                <div className="flex items-center gap-3">
+                  {step < steps.length - 2 ? (
+                    <button
+                      onClick={next}
+                      disabled={!canNext()}
+                      className="px-8 py-3 text-sm tracking-wide border transition-all inline-flex items-center gap-2"
+                      style={{
+                        borderColor: canNext() ? theme.border : theme.borderLight,
+                        color: canNext() ? theme.textLight : theme.textMuted,
+                        cursor: canNext() ? 'pointer' : 'not-allowed',
+                        backgroundColor: canNext() ? 'transparent' : theme.colors.bg.secondary,
+                        opacity: canNext() ? 1 : 0.6
+                      }}
+                      onMouseEnter={(e) => {
+                        if (canNext()) {
+                          e.currentTarget.style.backgroundColor = theme.accent + '20';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (canNext()) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }
+                      }}
+                    >
+                      Next <ArrowRight size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={submit}
+                      className="px-10 py-3 text-sm tracking-wide border transition-all"
+                      style={{
+                        backgroundColor: theme.accent,
+                        borderColor: theme.accent,
+                        color: '#ffffff'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.9';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                    >
+                      Submit
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Footer controls */}
-          {step !== 4 && (
-            <div className={`px-10 py-8 border-t ${thinBorder} flex items-center justify-between`}>
-              <button
-                onClick={prev}
-                disabled={step === 0}
-                className={`px-6 py-3 border text-sm tracking-wide transition-colors ${
-                  step === 0
-                    ? "border-white/10 text-white/30 cursor-not-allowed"
-                    : "border-white/20 text-white/70 hover:text-white hover:border-white/35"
-                }`}
-              >
-                Back
-              </button>
-
-              <div className="flex items-center gap-3">
-                {step < steps.length - 2 ? (
-                  <button
-                    onClick={next}
-                    disabled={!canNext()}
-                    className={`px-8 py-3 text-sm tracking-wide border transition-colors inline-flex items-center gap-2 ${
-                      canNext()
-                        ? "border-white/20 text-white/80 hover:text-white hover:border-white/35"
-                        : "border-white/10 text-white/30 cursor-not-allowed"
-                    }`}
-                  >
-                    Next <ArrowRight size={16} />
-                  </button>
-                ) : (
-                  <button
-                    onClick={submit}
-                    className="px-10 py-3 text-sm tracking-wide bg-white/15 hover:bg-white/25 border border-white/20 transition-colors"
-                  >
-                    Submit
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+        {/* Back to Home button */}
+        <div className="relative z-10 text-center pb-10">
+          <button
+            onClick={() => navigate("/")}
+            className="inline-flex items-center gap-2 px-6 py-3 border text-sm tracking-wide transition-colors"
+            style={{
+              borderColor: theme.border,
+              color: theme.textLight
+            }}
+          >
+            <ArrowLeft size={16} />
+            Back to Home
+          </button>
         </div>
       </div>
 
-      
-        {/* ✅ fixed spot below modal */}
-        <button
-          onClick={() => navigate("/")}
-          className="mt-6 px-10 py-3 border border-white/20 text-sm tracking-wide text-white/80 hover:text-white hover:border-white/35 transition-colors"
-        >
-          Back to Home
-        </button>
-
-
-        {/* <button
-          onClick={() => navigate("/")}
-          className="inline-flex items-center gap-2 text-sm tracking-wide text-white/70 hover:text-white transition-colors"
-        >
-          <ArrowLeft size={16} />
-          Back to Home
-        </button> */}
-
+      <style>{`
+        textarea::placeholder {
+          color: ${theme.textMuted};
+          opacity: 0.7;
+        }
+        
+        input::placeholder {
+          color: ${theme.textMuted};
+          opacity: 0.7;
+        }
+        
+        select {
+          color: ${theme.text};
+        }
+        
+        select option {
+          background-color: ${theme.colors.bg.card};
+          color: ${theme.text};
+        }
+      `}</style>
     </div>
   );
 }

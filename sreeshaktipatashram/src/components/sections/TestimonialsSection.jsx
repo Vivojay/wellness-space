@@ -18,14 +18,37 @@ const QuoteMark = ({ className = "", fillColor }) => (
 
 const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
   return (
-    <section className="py-28 overflow-hidden">
+    <section 
+      className="py-28 overflow-hidden transition-colors duration-500"
+      style={{ backgroundColor: theme.colors.bg.secondary }}
+    >
       {/* Header */}
       <div className="text-center mb-24">
         <span
-          className={`text-[10px] tracking-[0.45em] uppercase ${theme.textMuted}`}
+          className="text-[10px] tracking-[0.45em] uppercase mb-6 block"
+          style={{ 
+            color: theme.textMuted,
+            fontFamily: "'Source Sans 3', sans-serif",
+            fontWeight: 400
+          }}
         >
-          Voices of Transformation
+          VOICES OF TRANSFORMATION
         </span>
+        <h2 className="text-5xl md:text-6xl font-light tracking-tight relative inline-block">
+          <span 
+            style={{
+              background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontFamily: "'Source Sans 3', sans-serif",
+              fontWeight: 300,
+              letterSpacing: '-0.02em'
+            }}
+          >
+            Testimonials
+          </span>
+        </h2>
       </div>
 
       {/* Marquee */}
@@ -35,13 +58,11 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
             key={idx}
             onMouseEnter={() => setCursorVariant("hover")}
             onMouseLeave={() => setCursorVariant("default")}
-            className={`
-              relative flex-shrink-0 w-[420px]
-              ${theme.cardBg}
-              border ${theme.border}
-              px-10 pt-14 pb-10
-              flex flex-col min-h-[100px]
-            `}
+            className="relative flex-shrink-0 w-[420px] px-10 pt-14 pb-10 flex flex-col min-h-[100px] border transition-colors duration-500"
+            style={{
+              backgroundColor: theme.colors.bg.card,
+              borderColor: theme.border
+            }}
           >
             {/* Decorative quote mark */}
             <QuoteMark
@@ -51,21 +72,18 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
                 opacity-45
                 rotate-[6deg]
                 blur-[0.3px]
-                text-neutral-400
                 pointer-events-none
               "
-              fillColor="#3d1818ff"
+              fillColor={theme.textMuted}
             />
 
             {/* Testimonial text */}
             <p
-              className={`
-                text-[15px]
-                font-light
-                leading-[1.8]
-                mb-10
-                ${theme.text}
-              `}
+              className="text-[15px] font-light leading-[1.8] mb-10"
+              style={{
+                color: theme.text,
+                fontFamily: "'Source Sans 3', sans-serif"
+              }}
             >
               {t.text}
             </p>
@@ -73,15 +91,27 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
             {/* Footer */}
             <div className="mt-auto flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium tracking-wide">
+                <p 
+                  className="text-sm font-medium tracking-wide"
+                  style={{ 
+                    color: theme.text,
+                    fontFamily: "'Source Sans 3', sans-serif"
+                  }}
+                >
                   {t.author}
                 </p>
-                <p className={`text-xs mt-1 ${theme.textMuted}`}>
+                <p 
+                  className="text-xs mt-1"
+                  style={{ color: theme.textMuted }}
+                >
                   {t.role}
                 </p>
               </div>
 
-              <div className={`w-12 h-px ${theme.border}`} />
+              <div 
+                className="w-12 h-px"
+                style={{ backgroundColor: theme.border }}
+              />
             </div>
 
           </div>

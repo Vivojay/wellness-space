@@ -20,11 +20,46 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
   ];
 
   return (
-    <section id="offerings" className={`py-40 px-8 md:px-24 ${isDark ? 'bg-[#1e1e1e]' : 'bg-[#ebe7e0]'} transition-colors duration-500`}>
-      <div className="max-w-6xl mx-auto">
+    <section 
+      id="offerings" 
+      className="py-40 px-8 md:px-24 transition-colors duration-500 relative"
+      style={{ backgroundColor: theme.colors.bg.primary }}
+    >
+      {/* Subtle RED accent overlay for this section */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse at top right, rgba(239, 68, 68, 0.03) 0%, transparent 50%)`,
+        }}
+      />
+
+      <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-24">
-          <span className={`text-[10px] tracking-[0.4em] ${theme.textMuted} mb-6 block`}>Our Offerings</span>
-          <h2 className="text-5xl md:text-6xl font-light tracking-tight font-petitformal">The Inner Journey</h2>
+          <span 
+            className="text-[10px] tracking-[0.4em] mb-6 block"
+            style={{ 
+              color: theme.textMuted,
+              fontFamily: "'Source Sans 3', sans-serif",
+              fontWeight: 400
+            }}
+          >
+            OUR OFFERINGS
+          </span>
+          <h2 className="text-5xl md:text-6xl font-light tracking-tight relative inline-block">
+            <span 
+              style={{
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontFamily: "'Source Sans 3', sans-serif",
+                fontWeight: 300,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              The Inner Journey
+            </span>
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-0">
@@ -54,10 +89,29 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
                              opacity-90 group-hover:opacity-100
                              group-hover:-translate-y-2"
                 >
-                  <h3 className="text-2xl font-light tracking-wide text-white mb-3">{item.title}</h3>
-                  <p className="text-sm font-light leading-relaxed text-white/85 max-w-[90%]">{item.desc}</p>
+                  <h3 
+                    className="text-2xl font-light tracking-wide text-white mb-3"
+                    style={{ 
+                      textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                      fontFamily: "'Source Sans 3', sans-serif"
+                    }}
+                  >
+                    {item.title}
+                  </h3>
+                  <p 
+                    className="text-sm font-light leading-relaxed text-white/85 max-w-[90%]"
+                    style={{ 
+                      textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                      fontFamily: "'Source Sans 3', sans-serif"
+                    }}
+                  >
+                    {item.desc}
+                  </p>
 
-                  <div className={`mt-5 w-0 h-[1px] ${theme.accent} group-hover:w-24 transition-all duration-500`} />
+                  <div 
+                    className="mt-5 w-0 h-[1px] group-hover:w-24 transition-all duration-500"
+                    style={{ backgroundColor: '#ef4444' }}
+                  />
                 </div>
               </div>
             </div>

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { Plus, Pencil, Trash2, ArrowUpDown, Calendar, TrendingUp } from "lucide-react";
 
-export default function BlogIndex({ theme }) {
+export default function BlogIndex() {
+  const { isDark, theme } = useOutletContext();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,22 +46,43 @@ export default function BlogIndex({ theme }) {
   }, [blogs, newestFirst, fromDate, toDate]);
 
   return (
-    <section className={`py-16 px-6 md:px-24 ${theme?.bg || "bg-gray-50"} min-h-screen`}>
+    <section 
+      className="py-16 px-6 md:px-24 min-h-screen"
+      style={{ backgroundColor: theme.colors.bg.primary }}
+    >
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className={`text-6xl md:text-7xl font-light tracking-wider leading-tight mb-6 ${theme?.text || "text-gray-900"} font-petitformal`}>
+          <h1 
+            className="text-6xl md:text-7xl font-light tracking-wider leading-tight mb-6 font-petitformal"
+            style={{ color: theme.text }}
+          >
             Blogs & Updates
           </h1>
-          <p className={`text-sm md:text-base ${theme?.textMuted || "text-gray-600"}`}>
+          <p 
+            className="text-sm md:text-base"
+            style={{ color: theme.textMuted }}
+          >
             Writings, reflections, and insights
           </p>
 
           {/* Latest indicator */}
-          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-teal-500/30 bg-teal-50/60">
-            <TrendingUp size={14} className="text-teal-600" />
-            <span className="text-[10px] tracking-[0.35em] uppercase text-teal-700 font-medium">
+          <div 
+            className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+            style={{
+              borderColor: theme.accentTertiary + '40',
+              backgroundColor: theme.accentTertiary + '15'
+            }}
+          >
+            <TrendingUp 
+              size={14} 
+              style={{ color: theme.accentTertiary }}
+            />
+            <span 
+              className="text-[10px] tracking-[0.35em] uppercase font-medium"
+              style={{ color: theme.accent }}
+            >
               {newestFirst ? "Latest on top" : "Oldest on top"}
             </span>
           </div>
@@ -71,7 +93,12 @@ export default function BlogIndex({ theme }) {
           {/* Sort toggle */}
           <button
             onClick={() => setNewestFirst(v => !v)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-black/10 bg-white/70 hover:bg-white transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors"
+            style={{
+              backgroundColor: theme.colors.bg.card,
+              borderColor: theme.border,
+              color: theme.text
+            }}
           >
             <ArrowUpDown size={16} />
             <span className="text-sm">{newestFirst ? "Newest First" : "Oldest First"}</span>
@@ -79,25 +106,47 @@ export default function BlogIndex({ theme }) {
 
           {/* Date range filter */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-black/10 bg-white/70">
-              <Calendar size={16} className="opacity-70" />
+            <div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border"
+              style={{
+                backgroundColor: theme.colors.bg.card,
+                borderColor: theme.border
+              }}
+            >
+              <Calendar 
+                size={16} 
+                className="opacity-70"
+                style={{ color: theme.textMuted }}
+              />
               <input
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
                 className="bg-transparent text-sm outline-none"
+                style={{ color: theme.text }}
               />
-              <span className="text-black/40 text-sm">→</span>
+              <span 
+                className="text-sm"
+                style={{ color: theme.textMuted }}
+              >
+                →
+              </span>
               <input
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
                 className="bg-transparent text-sm outline-none"
+                style={{ color: theme.text }}
               />
               {(fromDate || toDate) && (
                 <button
                   onClick={() => { setFromDate(""); setToDate(""); }}
-                  className="ml-2 text-xs px-2 py-1 rounded-lg border border-black/10 bg-white hover:bg-gray-50"
+                  className="ml-2 text-xs px-2 py-1 rounded-lg border transition-colors"
+                  style={{
+                    backgroundColor: theme.colors.bg.primary,
+                    borderColor: theme.border,
+                    color: theme.text
+                  }}
                 >
                   Clear
                 </button>
@@ -106,35 +155,41 @@ export default function BlogIndex({ theme }) {
           </div>
         </div>
 
-        {/* Floating create button - FIXED POSITION */}
+        {/* Floating create button */}
         <Link
           to="/blog/new"
-          className="
-            fixed right-10 bottom-28 z-[300]
-            w-16 h-16 rounded-full
-            border-2 border-teal-800
-            bg-teal-200 hover:bg-teal-300
-            flex items-center justify-center
-            shadow-2xl hover:shadow-teal-500/50
-            hover:scale-110 transition-all
-            group
-          "
+          className="fixed right-10 bottom-28 z-[300] w-16 h-16 rounded-full
+            border-2 flex items-center justify-center shadow-2xl
+            hover:scale-110 transition-all group"
+          style={{
+            backgroundColor: theme.accentTertiary,
+            borderColor: theme.accent,
+          }}
           aria-label="Create new blog"
           title="Create new blog"
         >
-          <Plus size={32} className="text-black" strokeWidth={2.5} />
+          <Plus size={32} strokeWidth={2.5} style={{ color: '#ffffff' }} />
         </Link>
 
         {/* Loading */}
         {loading && (
-          <p className={`text-center text-neutral-400 dark:text-neutral-500 italic py-24`}>
+          <p 
+            className="text-center italic py-24"
+            style={{ color: theme.textMuted }}
+          >
             Loading posts…
           </p>
         )}
 
         {/* Empty state */}
         {!loading && filtered.length === 0 && (
-          <div className={`border-l-2 border-gray-300 dark:border-gray-700 pl-6 text-gray-500 dark:text-gray-400 italic py-12`}>
+          <div 
+            className="border-l-2 pl-6 italic py-12"
+            style={{ 
+              borderColor: theme.border,
+              color: theme.textMuted
+            }}
+          >
             No blogs published yet (or none in this date range).
           </div>
         )}
@@ -145,21 +200,33 @@ export default function BlogIndex({ theme }) {
             {filtered.map((b) => (
               <div
                 key={b.slug}
-                className="relative group border border-black/10 rounded-2xl p-7 bg-white/80 hover:bg-white transition-all hover:shadow-lg"
+                className="relative group border rounded-2xl p-7 transition-all hover:shadow-lg"
+                style={{
+                  backgroundColor: theme.colors.bg.card,
+                  borderColor: theme.border
+                }}
               >
                 {/* Hover action icons */}
                 <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition flex gap-2">
                   <Link
                     to={`/blog/edit/${b.slug}`}
-                    className="w-10 h-10 rounded-full border border-black/10 bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center justify-center transition-all"
+                    className="w-10 h-10 rounded-full border flex items-center justify-center transition-all"
+                    style={{
+                      backgroundColor: theme.colors.bg.card,
+                      borderColor: theme.border
+                    }}
                     title="Edit"
                     aria-label="Edit"
                   >
-                    <Pencil size={16} className="text-blue-600" />
+                    <Pencil size={16} style={{ color: theme.accent }} />
                   </Link>
 
                   <button
-                    className="w-10 h-10 rounded-full border border-black/10 bg-white hover:bg-red-50 hover:border-red-300 flex items-center justify-center transition-all"
+                    className="w-10 h-10 rounded-full border flex items-center justify-center transition-all"
+                    style={{
+                      backgroundColor: theme.colors.bg.card,
+                      borderColor: theme.border
+                    }}
                     title="Delete"
                     aria-label="Delete"
                     onClick={async (e) => {
@@ -169,21 +236,30 @@ export default function BlogIndex({ theme }) {
                       if (res.ok) setBlogs(prev => prev.filter(x => x.slug !== b.slug));
                     }}
                   >
-                    <Trash2 size={16} className="text-red-600" />
+                    <Trash2 size={16} className="text-red-500" />
                   </button>
                 </div>
 
                 <Link to={`/blog/${b.slug}`} className="block">
-                  <h2 className="text-3xl md:text-4xl font-light text-gray-900 leading-snug group-hover:text-teal-600 transition-colors">
+                  <h2 
+                    className="text-3xl md:text-4xl font-light leading-snug group-hover:text-teal-600 transition-colors"
+                    style={{ color: theme.text }}
+                  >
                     {b.title}
                   </h2>
 
-                  <p className="text-gray-600 mt-3 max-w-3xl text-base">
+                  <p 
+                    className="mt-3 max-w-3xl text-base"
+                    style={{ color: theme.textSecondary }}
+                  >
                     {b.excerpt}
                   </p>
 
                   {b.created_at && (
-                    <span className="text-sm text-gray-400 mt-4 block">
+                    <span 
+                      className="text-sm mt-4 block"
+                      style={{ color: theme.textMuted }}
+                    >
                       {new Date(b.created_at).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long', 

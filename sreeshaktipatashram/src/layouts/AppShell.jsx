@@ -4,6 +4,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import FloatingUI from "@/components/FloatingUI";
 import RightFeed from "@/components/RightFeed";
 import Navbar from "@/components/Navbar";
+import { getTheme, getThemeCSSVars } from "@/config/themeConfig";
 
 import {
   Sun,
@@ -92,31 +93,9 @@ export default function AppShell() {
   const chatPanelRef = useRef(null);
   const feedPanelRef = useRef(null);
 
-  // Theme tokens
-  const theme = useMemo(() => {
-    if (isDark) {
-      return {
-        bg: "bg-[#121212]",
-        text: "text-[#f3f3f3]",
-        textMuted: "text-white/60",
-        cardBg: "bg-[#1a1a1a]/70",
-        sidebarBg: "bg-[#141414]/80",
-        border: "border-white/10",
-        accent: "bg-[#d4a574]",
-        accentHover: "bg-[#c79a5f]",
-      };
-    }
-    return {
-      bg: "bg-[#faf8f5]",
-      text: "text-[#1a1a1a]",
-      textMuted: "text-black/60",
-      cardBg: "bg-white/70",
-      sidebarBg: "bg-white/80",
-      border: "border-black/10",
-      accent: "bg-[#15616c]",
-      accentHover: "bg-[#0f4f58]",
-    };
-  }, [isDark]);
+  // ✅ Use centralized theme configuration
+  const theme = useMemo(() => getTheme(isDark), [isDark]);
+  const themeCSSVars = useMemo(() => getThemeCSSVars(isDark), [isDark]);
 
   // Mouse tracking
   useEffect(() => {
@@ -194,11 +173,14 @@ export default function AppShell() {
   }, []);
 
   return (
-    <div className={`${theme.bg} ${theme.text} min-h-screen transition-colors duration-500`}>
+    <div 
+      className={`${theme.bg} ${theme.text} min-h-screen transition-colors duration-500`}
+      style={themeCSSVars}
+    >
       {/* Topbar on every route */}
       <Navbar isDark={isDark} theme={theme}/>
 
-      {/* ✅ ONLY FloatingUI - it contains the navbar internally */}
+      {/* FloatingUI - contains sidebar internally */}
       <FloatingUI
         mousePos={mousePos}
         botTyping={botTyping}
@@ -243,13 +225,11 @@ export default function AppShell() {
         feedPanelRef={feedPanelRef}
       />
 
-      {/* ✅ Content outlet - navbar topbar padding only for non-home pages */}
-      {/* <div className={isHome ? "" : "pt-[110px]" + " flex-1 overflow-y-auto"}> */}
+      {/* Content outlet */}
       <div className={`
         ${isHome ? '' : 'pt-[110px]'} 
         flex-1 overflow-y-auto
       `}>
-
         <Outlet context={{ isDark, theme }} />
       </div>
     </div>

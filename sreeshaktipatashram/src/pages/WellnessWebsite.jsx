@@ -1,7 +1,7 @@
 import { Menu, Minus, ArrowRight, Circle, Sun, Moon, MessageCircle, Send, X } from 'lucide-react';
 import { FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa';
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar"; // ✅ ADD THIS
+import Navbar from "../components/Navbar";
 import MainLayout from "../layouts/MainLayout";
 import Hero from "../components/sections/Hero";
 import RevealSection from "../components/sections/RevealSection";
@@ -14,7 +14,6 @@ import FAQ from "../components/sections/FAQ/FAQ";
 import { useOutletContext } from "react-router-dom";
 
 const WellnessWebsite = () => {
-  // ✅ Get theme and isDark from AppShell
   const { isDark, theme } = useOutletContext();
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -31,7 +30,6 @@ const WellnessWebsite = () => {
   ];
 
   useEffect(() => {
-    // Local unique visitor marker (prevents reload recount)
     const key = "ssa_unique_visited_v1";
     const countKey = "ssa_unique_counter_v1";
 
@@ -61,13 +59,10 @@ const WellnessWebsite = () => {
 
   useLenisSmooth();
 
-  const setCursorVariant = () => {}; // No-op since cursor is handled by AppShell
+  const setCursorVariant = () => {};
 
   return (
     <MainLayout theme={theme}>
-      {/* ✅ ADD NAVBAR HERE - only on home page */}
-      {/* <Navbar isDark={isDark} theme={theme} /> */}
-
       {/* Hero Section */}
       <Hero scrollProgress={scrollProgress} theme={theme} isDark={isDark} />
 
@@ -78,20 +73,36 @@ const WellnessWebsite = () => {
                   w-fit z-40 hidden md:flex"
         style={{ opacity: 1 - scrollProgress * 6 }}
       >
-        <div className="w-px h-10 bg-gradient-to-t from-transparent via-current to-transparent opacity-50" />
-        <span className={`text-[10px] tracking-[0.3em] rotate-90 ${theme.textMuted}`}>
+        <div 
+          className="w-px h-10 opacity-50"
+          style={{ 
+            background: `linear-gradient(to top, transparent, ${theme.text}, transparent)` 
+          }}
+        />
+        <span 
+          className="text-[10px] tracking-[0.3em] rotate-90"
+          style={{ 
+            color: theme.textMuted,
+            fontFamily: "'Source Sans 3', sans-serif"
+          }}
+        >
           SCROLL
         </span>
-        <div className="w-px h-10 bg-gradient-to-t from-transparent via-current to-transparent opacity-50" />
+        <div 
+          className="w-px h-10 opacity-50"
+          style={{ 
+            background: `linear-gradient(to top, transparent, ${theme.text}, transparent)` 
+          }}
+        />
       </div>
 
-      {/* Reveal Section */}
+      {/* Reveal Section - Notable Gurus */}
       <RevealSection theme={theme} setCursorVariant={setCursorVariant} />
 
       {/* Lineage Section */}
       <LineageSection theme={theme}/>
 
-      {/* Offerings */}
+      {/* Offerings - with RED accent */}
       <OfferingsSection theme={theme} isDark={isDark} setCursorVariant={setCursorVariant} />
 
       {/* Testimonials */}
@@ -104,19 +115,57 @@ const WellnessWebsite = () => {
       {/* CTA */}
       <CTASection theme={theme} setCursorVariant={setCursorVariant} />
 
-      {/* FAQs */}
+      {/* FAQs - with RED accent */}
       <FAQ theme={theme}/>
 
-      {/* Footer */}
-      <footer className={`border-t ${theme.border} py-20 px-8 md:px-24 transition-colors duration-500`}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <div>
-            <h3 className="text-2xl font-light tracking-tight mb-2">Sreeshakti Patashram</h3>
-            <p className={`text-[10px] tracking-[0.3em] ${theme.textMuted}`}>Where Consciousness Expands</p>
+      {/* Footer with properly aligned copyright and social icons */}
+      <footer 
+        className="border-t py-20 px-8 md:px-24 transition-colors duration-500"
+        style={{ 
+          borderColor: theme.border,
+          backgroundColor: theme.colors.bg.primary 
+        }}
+      >
+        <div className="max-w-6xl mx-auto">
+          {/* Header row */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+            <div>
+              <h3 
+                className="text-2xl font-light tracking-tight mb-2"
+                style={{ 
+                  color: theme.text,
+                  fontFamily: "'Source Sans 3', sans-serif"
+                }}
+              >
+                Sreeshakti Patashram
+              </h3>
+              <p 
+                className="text-[10px] tracking-[0.3em]"
+                style={{ 
+                  color: theme.textMuted,
+                  fontFamily: "'Source Sans 3', sans-serif"
+                }}
+              >
+                Where Consciousness Expands
+              </p>
+            </div>
           </div>
-          <div className="text-right">
-            <p className={`text-xs ${theme.textMuted} mb-3`}>© 2024 All Rights Reserved</p>
-            <div className="flex">
+
+          {/* Centered copyright and social icons - COMMON VERTICAL AXIS */}
+          <div className="flex flex-col items-center gap-6">
+            {/* Copyright - centered */}
+            <p 
+              className="text-xs"
+              style={{ 
+                color: theme.textMuted,
+                fontFamily: "'Source Sans 3', sans-serif"
+              }}
+            >
+              © 2024 All Rights Reserved
+            </p>
+            
+            {/* Social buttons - centered below copyright, aligned on same vertical axis */}
+            <div className="flex gap-0">
               {[
                 { name: "Instagram", href: "#", Icon: FaInstagram },
                 { name: "Facebook", href: "#", Icon: FaFacebook },
@@ -126,22 +175,36 @@ const WellnessWebsite = () => {
                   key={idx}
                   href={href}
                   aria-label={name}
-                  className={`
-                    w-12 h-12
-                    border ${theme.border}
-                    flex items-center justify-center
-                    transition-all duration-300
-                    hover:bg-[#c9a77c]/25
-                  `}
+                  className="w-12 h-12 border flex items-center justify-center
+                    transition-all duration-300"
                   style={{
+                    borderColor: theme.border,
                     marginLeft: idx === 0 ? 0 : "-1px",
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.accent + '25';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                 >
-                  <Icon className="w-5 h-5 opacity-70" />
+                  <Icon 
+                    className="w-5 h-5 opacity-70"
+                    style={{ color: theme.text }}
+                  />
                 </a>
               ))}
             </div>
-            <p className={`text-[10px] tracking-[0.2em] ${theme.textMuted} opacity-60`}>
+
+            {/* Visit counter - centered */}
+            <p 
+              className="text-[10px] tracking-[0.2em] opacity-60"
+              style={{ 
+                color: theme.textMuted,
+                fontFamily: "'Source Sans 3', sans-serif"
+              }}
+            >
               Unique visits (this device): {uniqueVisitCount ?? "—"}
             </p>
           </div>
@@ -177,7 +240,6 @@ const WellnessWebsite = () => {
         .font-petitformal {
           font-family: "Playwrite GB S", cursive;
           font-optical-sizing: auto;
-          font-weight: <weight>;
           font-style: normal;
         }
 

@@ -75,19 +75,14 @@ export default function FAQ({ theme }) {
 
   const visibleFAQs = showAll ? faqs : faqs.slice(0, 5);
 
-  // ✅ FIX: Update scroll after content expands
   useEffect(() => {
     if (showAll && expandButtonRef.current) {
-      // Wait for DOM to update
       setTimeout(() => {
-        // Get Lenis instance if it exists
         const lenis = window.lenis || window.__lenis;
         
         if (lenis && typeof lenis.resize === 'function') {
-          // Tell Lenis to recalculate scroll boundaries
           lenis.resize();
           
-          // Optionally scroll to show new content
           setTimeout(() => {
             expandButtonRef.current?.scrollIntoView({ 
               behavior: 'smooth', 
@@ -95,13 +90,12 @@ export default function FAQ({ theme }) {
             });
           }, 100);
         } else {
-          // Fallback for regular scroll
           window.scrollTo({
             top: document.documentElement.scrollHeight,
             behavior: 'smooth'
           });
         }
-      }, 300); // Wait for animation to complete
+      }, 300);
     }
   }, [showAll]);
 
@@ -109,14 +103,41 @@ export default function FAQ({ theme }) {
     <section 
       id="faqs" 
       ref={sectionRef}
-      className={`py-12 px-6 md:px-24 ${theme?.bg || "bg-gray-50"}`}
+      className="py-12 px-6 md:px-24 transition-colors duration-500 relative"
+      style={{ backgroundColor: theme.colors.bg.secondary }}
     >
-      <div className="max-w-6xl mx-auto">
+      {/* Subtle RED accent overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse at bottom left, rgba(239, 68, 68, 0.03) 0%, transparent 50%)`,
+        }}
+      />
+
+      <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <h2 className={`text-6xl md:text-7xl font-light tracking-tight leading-tight mb-12 ${theme?.text || "text-gray-900"} font-petitformal`}>
-            Frequently Asked Questions
+          <h2 className="text-6xl md:text-7xl font-light tracking-tight leading-tight mb-12 relative inline-block">
+            <span 
+              style={{
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontFamily: "'Source Sans 3', sans-serif",
+                fontWeight: 300,
+                letterSpacing: '-0.02em'
+              }}
+            >
+              Frequently Asked Questions
+            </span>
           </h2>
-          <p className={`text-sm md:text-base ${theme?.textMuted || "text-gray-600"}`}>
+          <p 
+            className="text-sm md:text-base"
+            style={{ 
+              color: theme.textMuted,
+              fontFamily: "'Source Sans 3', sans-serif"
+            }}
+          >
             Answers to common queries about Sreeshakti Patashram
           </p>
         </div>
@@ -125,17 +146,20 @@ export default function FAQ({ theme }) {
           {visibleFAQs.map((faq, index) => (
             <div
               key={index}
-              className={`border rounded-lg overflow-hidden transition-shadow duration-300 ${
-                theme?.border ? "border-gray-300" : "border-gray-200"
-              } hover:shadow-lg`}
+              className="border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg"
+              style={{ borderColor: theme.border }}
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className={`w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none ${
-                  theme?.text || "text-gray-900"
-                }`}
+                className="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none"
+                style={{ color: theme.text }}
               >
-                <span className="font-medium">{faq.question}</span>
+                <span 
+                  className="font-medium"
+                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                >
+                  {faq.question}
+                </span>
                 <span className="ml-4 transform transition-transform duration-300">
                   {openIndex === index ? "−" : "+"}
                 </span>
@@ -147,7 +171,11 @@ export default function FAQ({ theme }) {
                 }`}
               >
                 <p
-                  className={`text-sm md:text-base ${theme?.textMuted || "text-gray-600"} leading-relaxed`}
+                  className="text-sm md:text-base leading-relaxed"
+                  style={{ 
+                    color: theme.textMuted,
+                    fontFamily: "'Source Sans 3', sans-serif"
+                  }}
                   dangerouslySetInnerHTML={{ __html: faq.answer }}
                 />
               </div>
@@ -159,9 +187,11 @@ export default function FAQ({ theme }) {
           <div className="text-center mt-6" ref={expandButtonRef}>
             <button
               onClick={() => setShowAll(!showAll)}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-                theme?.accent || "bg-green-500"
-              } hover:${theme?.accentHover || "bg-green-600"} text-white`}
+              className="px-6 py-3 rounded-lg font-medium transition-all duration-300 text-white"
+              style={{
+                backgroundColor: theme.accent,
+                fontFamily: "'Source Sans 3', sans-serif"
+              }}
             >
               {showAll ? "Show Less" : "Show More"}
             </button>

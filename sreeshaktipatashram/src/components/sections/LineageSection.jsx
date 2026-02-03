@@ -13,11 +13,38 @@ const LineageSection = ({ theme }) => {
   ];
 
   return (
-    <section id="lineage" className={`${theme.bg} relative py-40 px-8 md:px-24`}>
+    <section 
+      id="lineage" 
+      className="relative py-40 px-8 md:px-24 transition-colors duration-500"
+      style={{ backgroundColor: theme.colors.bg.secondary }}
+    >
       <div className="max-w-6xl mx-auto">
         <div className="mb-20">
-          <span className={`text-[10px] tracking-[0.4em] ${theme.textMuted}`}>Lineage</span>
-          <h2 className="text-5xl md:text-6xl font-light tracking-tight mt-6 font-playwrite-gb-s-headings">The Shaktipat Lineage</h2>
+          <span 
+            className="text-[10px] tracking-[0.4em]"
+            style={{ 
+              color: theme.textMuted,
+              fontFamily: "'Source Sans 3', sans-serif",
+              fontWeight: 400
+            }}
+          >
+            LINEAGE
+          </span>
+          <h2 className="text-5xl md:text-6xl font-light tracking-tight mt-6 relative inline-block">
+            <span 
+              style={{
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontFamily: "'Source Sans 3', sans-serif",
+                fontWeight: 300,
+                letterSpacing: '-0.02em'
+              }}
+            >
+              The Shaktipat Lineage
+            </span>
+          </h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
@@ -26,20 +53,31 @@ const LineageSection = ({ theme }) => {
               key={idx}
               className="relative aspect-[3/4] overflow-hidden group"
             >
-              {/* Image */}
               <img
                 src={`http://sreeshaktipatashram.com/upload/${item.img}`}
                 alt={item.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-
-              {/* Text */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.4), transparent)'
+                }}
+              />
               <div className="absolute bottom-0 left-0 right-0 p-4">
-                <p className="text-sm font-light tracking-wide text-white">{item.name}</p>
-                <div className={`mt-2 w-0 h-[1px] ${theme.accent} group-hover:w-16 transition-all duration-500`} />
+                <p 
+                  className="text-sm font-light tracking-wide text-white"
+                  style={{ 
+                    textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                    fontFamily: "'Source Sans 3', sans-serif"
+                  }}
+                >
+                  {item.name}
+                </p>
+                <div 
+                  className="mt-2 w-0 h-[1px] group-hover:w-16 transition-all duration-500"
+                  style={{ backgroundColor: theme.accent }}
+                />
               </div>
             </div>
           ))}

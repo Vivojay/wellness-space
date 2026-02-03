@@ -74,7 +74,7 @@ export default function MediaTile({ item, onOpen }) {
 
   return (
     <div
-      className="relative aspect-[9/16] overflow-hidden bg-black group rounded-lg"
+      className="relative aspect-[9/16] overflow-hidden bg-black group rounded-none"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onDoubleClick={() => onOpen?.(item)}

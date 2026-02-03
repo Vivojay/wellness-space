@@ -1,17 +1,38 @@
-// ✅ FIXED: Chat scroll + minimize button hover (only color change, no scale)
-
 import { ArrowDown, Minus, X } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 
-const ScrollToBottomButton = ({ chatRef, messages, isDark }) => {
+const ScrollToBottomButton = ({ chatRef, messages, theme }) => {
   const [isLocked, setIsLocked] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [hover, setHover] = useState(false);
 
   const pressTimer = useRef(null);
+  const clickCount = useRef(0);
+  const clickTimer = useRef(null);
   const LONG_PRESS_MS = 600;
+  const DOUBLE_CLICK_MS = 300;
 
+  // Handle double-click to toggle lock (desktop)
+  const handleClick = () => {
+    clickCount.current += 1;
+    
+    if (clickCount.current === 1) {
+      // First click - start timer
+      clickTimer.current = setTimeout(() => {
+        // Single click - scroll once
+        scrollOnce();
+        clickCount.current = 0;
+      }, DOUBLE_CLICK_MS);
+    } else if (clickCount.current === 2) {
+      // Double click - toggle lock
+      clearTimeout(clickTimer.current);
+      setIsLocked(prev => !prev);
+      clickCount.current = 0;
+    }
+  };
+
+  // Handle long press (mobile)
   const startPress = () => {
     pressTimer.current = setTimeout(() => {
       setIsLocked(prev => !prev);
@@ -23,7 +44,6 @@ const ScrollToBottomButton = ({ chatRef, messages, isDark }) => {
     if (pressTimer.current) {
       clearTimeout(pressTimer.current);
       pressTimer.current = null;
-      scrollOnce();
     }
   };
 
@@ -58,18 +78,16 @@ const ScrollToBottomButton = ({ chatRef, messages, isDark }) => {
   };
 
   const borderColor = isLocked
-    ? 'border-teal-500'
+    ? `2px solid ${theme.accentTertiary}`
     : clicked
-      ? 'border-teal-400'
+      ? `2px solid ${theme.accent}`
       : hover
-        ? 'border-teal-300'
-        : 'border-black';
+        ? `2px solid ${theme.borderSecondary}`
+        : `2px solid ${theme.border}`;
 
   const bgEffect = isLocked
-    ? isDark
-      ? 'pulse-bg-dark bg-teal-900/30'
-      : 'pulse-bg bg-teal-100'
-    : 'bg-transparent';
+    ? { backgroundColor: theme.accentTertiary + '30' }
+    : { backgroundColor: 'transparent' };
 
   const cancelPress = () => {
     if (pressTimer.current) {
@@ -85,8 +103,13 @@ const ScrollToBottomButton = ({ chatRef, messages, isDark }) => {
 
   return (
     <button
-      className={`absolute bottom-20 right-4 w-10 h-10 flex items-center justify-center
-        border-2 rounded-full ${borderColor} ${bgEffect} transition-colors duration-300 z-40`}
+      className="absolute bottom-20 right-4 w-10 h-10 flex items-center justify-center
+        rounded-full transition-all duration-300 z-40"
+      style={{
+        border: borderColor,
+        ...bgEffect
+      }}
+      onClick={handleClick}
       onPointerDown={(e) => { e.preventDefault(); startPress(); }}
       onPointerUp={(e) => { e.preventDefault(); endPress(); }}
       onPointerCancel={cancelPress}
@@ -94,9 +117,12 @@ const ScrollToBottomButton = ({ chatRef, messages, isDark }) => {
       onPointerEnter={() => setHover(true)}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={() => setHover(true)}
+      title={isLocked ? "Locked to bottom (double-click to unlock)" : "Double-click to lock / Long-press on mobile"}
     >
-      <ArrowDown className={`w-5 h-5 transition-transform duration-300 
-        ${isLocked ? 'arrow-locked' : hover ? 'arrow-hover' : ''}`} />
+      <ArrowDown 
+        className="w-5 h-5 transition-transform duration-300"
+        style={{ color: theme.text }}
+      />
     </button>
   );
 };
@@ -170,27 +196,38 @@ export default function FloatingUI(props) {
         }}
       >
         <div
-          className="w-5 h-5 rounded-full border"
+          className="w-5 h-5 rounded-full border-2"
           style={{
-            borderColor: isDark ? '#d4a574' : '#c9a77c',
-            backgroundColor: isDark ? '#00000080': '#ffffff80',
-            borderWidth: "2px",
+            borderColor: theme.accentSecondary,
+            backgroundColor: theme.cardBg,
           }}
         />
       </div>
 
       {/* Progress Bar */}
-      <div className={`fixed top-0 left-0 w-full h-[2px] ${isDark ? 'bg-[#3a3633]' : 'bg-[#e8e4df]'} z-50`}>
-        <div className={`h-full bg-teal-500 transition-all duration-300`}
-          style={{ width: `${scrollProgress * 100}%` }} />
+      <div 
+        className="fixed top-0 left-0 w-full h-[2px] z-50"
+        style={{ backgroundColor: theme.borderLight }}
+      >
+        <div 
+          className="h-full transition-all duration-300"
+          style={{ 
+            width: `${scrollProgress * 100}%`,
+            backgroundColor: theme.accentTertiary
+          }}
+        />
       </div>
 
       {/* Theme Toggle */}
       <button
         onClick={() => setIsDark(!isDark)}
-        className={`fixed right-8 top-8 z-[100] w-11 h-11 rounded-full ${theme.cardBg} 
-          backdrop-blur-xl border ${theme.border} flex items-center justify-center 
-          transition-all duration-300 hover:scale-110`}
+        className="fixed right-8 top-8 z-[100] w-11 h-11 rounded-full backdrop-blur-xl 
+          border flex items-center justify-center transition-all duration-300 hover:scale-110"
+        style={{
+          backgroundColor: theme.cardBg,
+          borderColor: theme.border,
+          color: theme.text
+        }}
         onMouseEnter={() => setCursorVariant('hover')}
         onMouseLeave={() => setCursorVariant('default')}
       >
@@ -209,9 +246,14 @@ export default function FloatingUI(props) {
             onClick={() => { setChatOpen(true); setActiveOverlay?.("chat"); }}
             onMouseEnter={() => setChatExpanded(true)}
             onMouseLeave={() => setChatExpanded(false)}
-            className={`group flex items-center gap-3 ${theme.cardBg} backdrop-blur-xl 
-              border ${theme.border} rounded-full px-5 py-3 transition-all duration-300 
-              hover:scale-105 shadow-lg`}
+            className="group flex items-center gap-3 backdrop-blur-xl 
+              border rounded-full px-5 py-3 transition-all duration-300 
+              hover:scale-105 shadow-lg"
+            style={{
+              backgroundColor: theme.cardBg,
+              borderColor: theme.border,
+              color: theme.text
+            }}
             data-chat-trigger
           >
             <MessageCircle className="w-5 h-5" />
@@ -222,43 +264,70 @@ export default function FloatingUI(props) {
           </button>
         ) : (
           <div className='relative'>
-            <div ref={chatPanelRef} className={`${theme.cardBg} backdrop-blur-xl border 
-              ${theme.border} shadow-2xl w-96 h-[500px] flex flex-col relative rounded-none 
-              overflow-hidden`}>
+            <div 
+              ref={chatPanelRef} 
+              className="backdrop-blur-xl border shadow-2xl w-96 h-[500px] flex flex-col relative rounded-none overflow-hidden"
+              style={{
+                backgroundColor: theme.cardBg,
+                borderColor: theme.border
+              }}
+            >
               {/* Chat Header */}
-              <div className={`flex items-center justify-between p-5 border-b ${theme.border}`}>
+              <div 
+                className="flex items-center justify-between p-5 border-b"
+                style={{ borderColor: theme.border }}
+              >
                 <div>
-                  <h3 className="font-medium text-base">Sreeshakti Guide</h3>
-                  <p className={`text-xs ${theme.textMuted}`}>We're here to help</p>
+                  <h3 className="font-medium text-base" style={{ color: theme.text }}>
+                    Sreeshakti Guide
+                  </h3>
+                  <p className="text-xs" style={{ color: theme.textMuted }}>
+                    We're here to help
+                  </p>
                 </div>
-                {/* ✅ FIXED: Only color change on hover, no scale */}
                 <button
                   onClick={() => setChatOpen(false)}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center 
-                    border-2 transition-colors duration-200
-                    ${isDark 
-                      ? "bg-[#c9a77c] hover:bg-[#b99263] border-[#9b774e]" 
-                      : "bg-[#c9a77c] hover:bg-[#b99263] border-[#9b774e]"
-                    }`}
+                  className="w-9 h-9 rounded-full flex items-center justify-center 
+                    border-2 transition-colors duration-200"
+                  style={{
+                    backgroundColor: theme.accentSecondary,
+                    borderColor: theme.borderStrong
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.accent;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.accentSecondary;
+                  }}
                 >
-                  <Minus className="w-4 h-4" />
+                  <Minus className="w-4 h-4" style={{ color: theme.text }} />
                 </button>
               </div>
 
-              {/* ✅ FIXED: Proper scrollable messages container */}
+              {/* Messages Container */}
               <div className="flex-1 overflow-hidden">
                 <div
                   ref={chatRef}
                   className="h-full px-5 py-5 space-y-4 overflow-y-auto"
                   style={{ 
                     scrollbarWidth: 'thin', 
-                    scrollbarColor: `${isDark ? '#4a4a4a' : '#d0d0d0'} transparent` 
+                    scrollbarColor: `${theme.borderSecondary} transparent` 
                   }}
                 >
                   {messages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] px-4 py-3 text-sm rounded-none 
-                        ${msg.type === 'user' ? `${theme.accent} ${isDark ? 'text-[#1a1a1a]' : 'text-[#faf8f5]'}` : `${theme.cardBg} border ${theme.border}`}`}>
+                      <div 
+                        className="max-w-[80%] px-4 py-3 text-sm rounded-none"
+                        style={{
+                          backgroundColor: msg.type === 'user' 
+                            ? theme.accent 
+                            : theme.cardBg,
+                          color: msg.type === 'user' 
+                            ? '#ffffff' 
+                            : theme.text,
+                          border: msg.type === 'bot' ? `1px solid ${theme.border}` : 'none'
+                        }}
+                      >
                         {msg.text}
                       </div>
                     </div>
@@ -266,13 +335,22 @@ export default function FloatingUI(props) {
 
                   {messages.length === 1 && (
                     <div className="space-y-2 mt-4">
-                      <p className={`text-xs ${theme.textMuted} mb-3`}>Quick questions:</p>
+                      <p className="text-xs mb-3" style={{ color: theme.textMuted }}>
+                        Quick questions:
+                      </p>
                       {quickQuestions.map((q, idx) => (
-                        <button key={idx} onClick={() => handleSendMessage(q)}
-                          className={`w-full text-left text-sm p-3 rounded-none border ${theme.border} 
-                            ${theme.cardBg} hover:${theme.accent} transition-colors`}
+                        <button 
+                          key={idx} 
+                          onClick={() => handleSendMessage(q)}
+                          className="w-full text-left text-sm p-3 rounded-none border transition-colors"
+                          style={{
+                            backgroundColor: theme.cardBg,
+                            borderColor: theme.border,
+                            color: theme.text
+                          }}
                           onMouseEnter={() => setCursorVariant('hover')}
-                          onMouseLeave={() => setCursorVariant('default')}>
+                          onMouseLeave={() => setCursorVariant('default')}
+                        >
                           {q}
                         </button>
                       ))}
@@ -280,12 +358,17 @@ export default function FloatingUI(props) {
                   )}
 
                   {botTyping && (
-                    <div className="flex items-center gap-2 p-3 rounded-none shadow bg-gray-100">
-                      <p className="text-xs opacity-70 mb-0">BOT</p>
+                    <div 
+                      className="flex items-center gap-2 p-3 rounded-none shadow"
+                      style={{ backgroundColor: theme.bgSecondary }}
+                    >
+                      <p className="text-xs opacity-70 mb-0" style={{ color: theme.textMuted }}>
+                        BOT
+                      </p>
                       <div className="flex gap-1">
-                        <span className="w-2 h-2 bg-gray-400 rounded-none animate-bounce delay-75"></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-none animate-bounce delay-150"></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-none animate-bounce delay-200"></span>
+                        <span className="w-2 h-2 rounded-none animate-bounce delay-75" style={{ backgroundColor: theme.textMuted }}></span>
+                        <span className="w-2 h-2 rounded-none animate-bounce delay-150" style={{ backgroundColor: theme.textMuted }}></span>
+                        <span className="w-2 h-2 rounded-none animate-bounce delay-200" style={{ backgroundColor: theme.textMuted }}></span>
                       </div>
                     </div>
                   )}
@@ -293,43 +376,76 @@ export default function FloatingUI(props) {
               </div>
 
               {/* Input */}
-              <div className={`p-4 border-t ${theme.border}`}>
+              <div 
+                className="p-4 border-t"
+                style={{ borderColor: theme.border }}
+              >
                 <div className="flex gap-2">
-                  <input ref={inputRef} type="text" value={inputValue}
+                  <input 
+                    ref={inputRef} 
+                    type="text" 
+                    value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(inputValue); }}
                     placeholder="Type your message..."
-                    className={`flex-1 ${theme.cardBg} border ${theme.border} px-4 py-2 text-sm 
-                      rounded-none focus:outline-none focus:border-[#c9a77c] cursor-text caret-current`}
-                    style={{ cursor: 'text' }} />
-                  <button onClick={() => handleSendMessage(inputValue)}
-                    className={`${theme.accent} ${isDark ? 'text-[#1a1a1a]' : 'text-[#faf8f5]'} 
-                      w-10 h-10 rounded-none border border-neutral-600 flex items-center justify-center 
-                      transition-transform hover:scale-110`}
+                    className="flex-1 border px-4 py-2 text-sm rounded-none 
+                      focus:outline-none cursor-text caret-current"
+                    style={{ 
+                      backgroundColor: theme.cardBg,
+                      borderColor: theme.border,
+                      color: theme.text,
+                      cursor: 'text' 
+                    }}
+                  />
+                  <button 
+                    onClick={() => handleSendMessage(inputValue)}
+                    className="w-10 h-10 rounded-none border flex items-center justify-center 
+                      transition-transform hover:scale-110"
+                    style={{
+                      backgroundColor: theme.accent,
+                      borderColor: theme.borderStrong,
+                      color: '#ffffff'
+                    }}
                     onMouseEnter={() => setCursorVariant('hover')}
-                    onMouseLeave={() => setCursorVariant('default')}>
+                    onMouseLeave={() => setCursorVariant('default')}
+                  >
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
 
-            {chatOpen && <ScrollToBottomButton chatRef={chatRef} messages={messages} isDark={isDark} theme={theme} />}
+            {chatOpen && <ScrollToBottomButton chatRef={chatRef} messages={messages} theme={theme} />}
           </div>
         )}
       </div>
 
       {/* Sidebar */}
-      <aside ref={sidebarRef}
-        className={`fixed left-0 top-0 h-screen ${theme.sidebarBg} backdrop-blur-xl 
-          border-r ${theme.border} transition-all duration-500 ease-out z-50`}
-        style={{ width: sidebarExpanded ? '280px' : '0px', opacity: sidebarExpanded ? 1 : 0 }}>
+      <aside 
+        ref={sidebarRef}
+        className="fixed left-0 top-0 h-screen backdrop-blur-xl 
+          border-r transition-all duration-500 ease-out z-50"
+        style={{ 
+          width: sidebarExpanded ? '280px' : '0px', 
+          opacity: sidebarExpanded ? 1 : 0,
+          backgroundColor: theme.sidebarBg,
+          borderColor: theme.border
+        }}
+      >
         <div className={`h-full flex flex-col justify-between p-10 transition-opacity duration-300 
           ${sidebarExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>
           <div>
             <div className="mb-16">
-              <h2 className="text-2xl font-light tracking-[0.14em] mb-2">Sree shakti</h2>
-              <div className={`w-12 h-[1px] ${theme.accent}`} />
+              <h2 
+                className="text-2xl font-light tracking-[0.14em] mb-2"
+                style={{ color: theme.text }}
+              >
+                Sree shakti
+              </h2>
+              <div 
+                className="w-12 h-[1px]"
+                style={{ backgroundColor: theme.accent }}
+              />
             </div>
             
             <nav className="space-y-5">
@@ -339,21 +455,28 @@ export default function FloatingUI(props) {
                 { name: 'Gallery', onClick: () => navigate("/gallery") },
                 { name: 'Book Session', onClick: () => navigate("/booking") },
                 { name: 'Blogs & Updates', onClick: () => navigate("/blog") },
-                { name: 'New Blog (Admin)', onClick: () => navigate("/blog/new") },
-                { name: 'Offerings', onClick: () => goToSection("offerings") },
                 { name: 'Lineage', onClick: () => goToSection("lineage") },
+                { name: 'Offerings', onClick: () => goToSection("offerings") },
                 { name: 'FAQs', onClick: () => goToSection("faqs") },
               ].map((item, idx) => (
-                <button key={idx} type="button" onClick={item.onClick}
+                <button 
+                  key={idx} 
+                  type="button" 
+                  onClick={item.onClick}
                   className="group block relative text-left w-full"
                   onMouseEnter={() => setCursorVariant('hover')}
-                  onMouseLeave={() => setCursorVariant('default')}>
-                  <span className={`block text-lg font-light tracking-wide transition-all duration-300
-                    group-hover:translate-x-3 ${theme.text}`}>
+                  onMouseLeave={() => setCursorVariant('default')}
+                >
+                  <span 
+                    className="block text-lg font-light tracking-wide transition-all duration-300 group-hover:translate-x-3"
+                    style={{ color: theme.text }}
+                  >
                     {item.name}
                   </span>
-                  <div className={`absolute bottom-0 left-0 w-0 h-[1px] ${theme.accent}
-                    transition-all duration-300 group-hover:w-full`} />
+                  <div 
+                    className="absolute bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full"
+                    style={{ backgroundColor: theme.accent }}
+                  />
                 </button>
               ))}
             </nav>
@@ -361,43 +484,42 @@ export default function FloatingUI(props) {
 
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <Circle className={`w-2 h-2 fill-current ${isDark ? 'text-[#d4a574]' : 'text-[#c9a77c]'}`} />
-              <span className={`text-xs tracking-wide ${theme.textMuted}`}>Open to Seekers</span>
+              <Circle 
+                className="w-2 h-2 fill-current"
+                style={{ color: theme.accentSecondary }}
+              />
+              <span 
+                className="text-xs tracking-wide"
+                style={{ color: theme.textMuted }}
+              >
+                Open to Seekers
+              </span>
             </div>
-            <p className={`text-xs tracking-wide ${theme.textMuted} opacity-50`}>© 2024 Patashram</p>
+            <p 
+              className="text-xs tracking-wide opacity-50"
+              style={{ color: theme.textMuted }}
+            >
+              © 2024 Patashram
+            </p>
           </div>
         </div>
       </aside>
 
       {/* Hamburger icon */}
-      <button ref={hamburgerBtnRef} onClick={() => setSidebarExpanded(!sidebarExpanded)}
-        className={`fixed top-8 z-[60] w-11 h-11 rounded-full ${theme.cardBg}
-          backdrop-blur-xl border ${theme.border} flex items-center justify-center 
-          transition-all duration-500`}
-        style={{ left: sidebarExpanded ? '300px' : '32px' }}>
+      <button 
+        ref={hamburgerBtnRef} 
+        onClick={() => setSidebarExpanded(!sidebarExpanded)}
+        className="fixed top-8 z-[60] w-11 h-11 rounded-full backdrop-blur-xl 
+          border flex items-center justify-center transition-all duration-500"
+        style={{ 
+          left: sidebarExpanded ? '300px' : '32px',
+          backgroundColor: theme.cardBg,
+          borderColor: theme.border,
+          color: theme.text
+        }}
+      >
         <HamburgerIcon open={sidebarExpanded} />
       </button>
-
-      <svg width="0" height="0" aria-hidden>
-        <defs>
-          <filter id="crayonNoise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="noStitch" />
-            <feColorMatrix type="saturate" values="0"/>
-            <feComponentTransfer>
-              <feFuncA type="table" tableValues="0 0.15"/>
-            </feComponentTransfer>
-          </filter>
-          <linearGradient id="crayonFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#f6d463"/>
-            <stop offset="55%" stopColor="#f1c84b"/>
-            <stop offset="100%" stopColor="#e9ba32"/>
-          </linearGradient>
-          <mask id="crayonMask">
-            <rect width="100%" height="100%" fill="white"/>
-            <rect width="100%" height="100%" filter="url(#crayonNoise)" opacity="0.35" />
-          </mask>
-        </defs>
-      </svg>
     </>
   );
 }
