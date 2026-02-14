@@ -55,7 +55,7 @@ const LineageSection = ({ theme }) => {
               className="relative aspect-[3/4] overflow-hidden group"
             >
               <img
-                src={`http://sreeshaktipatashram.com/upload/${item.img}`}
+                src={`https://sreeshaktipatashram.com/upload/${item.img}`}
                 alt={item.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"

@@ -5,167 +5,167 @@ import { FileText, BookOpen, ChevronLeft, ChevronRight, MousePointerClick } from
 const pdfs = [
   {
     name: "The Power Unknown to God (04 October 2020)",
-    link: "http://sreeshaktipatashram.com/upload/The-Power-Unknown-to-God-04-October-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/The-Power-Unknown-to-God-04-October-2020.pdf"
   },
   {
     name: "The Secret Science of Shaktipat – Guide to Initiation",
-    link: "http://sreeshaktipatashram.com/upload/The-Secret-Science-of-Shaktipat_Guide-to-Initiation-13-September-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/The-Secret-Science-of-Shaktipat_Guide-to-Initiation-13-September-2020.pdf"
   },
   {
     name: "Blessed by His Guru",
-    link: "http://sreeshaktipatashram.com/upload/Blessed-by-his-Guru-23-Jan-2022-with-cover-page1.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Blessed-by-his-Guru-23-Jan-2022-with-cover-page1.pdf"
   },
   {
     name: "Born to Be a Yogi",
-    link: "http://sreeshaktipatashram.com/upload/Born-to-be-a-Yogi-updated-on-14-September-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Born-to-be-a-Yogi-updated-on-14-September-2020.pdf"
   },
   {
     name: "Guru Gita (English)",
-    link: "http://sreeshaktipatashram.com/upload/Guru-Gita-English-updated-on-19-Sep-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-English-updated-on-19-Sep-2020.pdf"
   },
   {
     name: "Secrets of Shaktipath and Kundalini Yoga – Vol 1 (English)",
-    link: "http://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-1-updated-on-18-12-2019-English.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-1-updated-on-18-12-2019-English.pdf"
   },
   {
     name: "Secrets of Shaktipath and Kundalini Yoga – Vol 2 (English)",
-    link: "http://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-2-updated-on-18-September-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-2-updated-on-18-September-2020.pdf"
   },
   {
     name: "Secrets of Shaktipath and Kundalini Yoga – Vol 3 (English)",
-    link: "http://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-3-updated-on-17-September-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-3-updated-on-17-September-2020.pdf"
   },
   {
     name: "The Illusion (English)",
-    link: "http://sreeshaktipatashram.com/upload/The-Illusion-updated-on-11-Oct-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/The-Illusion-updated-on-11-Oct-2020.pdf"
   },
   {
     name: "The Power Unknown to God (Russian)",
-    link: "http://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Russian.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Russian.pdf"
   },
   {
     name: "The Power Unknown to God (Afrikaans)",
-    link: "http://sreeshaktipatashram.com/upload/Afrikaans-Power-Unknown-to-God-Afrikaans.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Afrikaans-Power-Unknown-to-God-Afrikaans.pdf"
   },
   {
     name: "The Power Unknown to God (German)",
-    link: "http://sreeshaktipatashram.com/upload/Die-Kraft-die-Gott-nicht-kennt-Power-Unknown-to-God-German-updated-on-13-Sep-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Die-Kraft-die-Gott-nicht-kennt-Power-Unknown-to-God-German-updated-on-13-Sep-2020.pdf"
   },
   {
     name: "The Power Unknown to God (Spanish)",
-    link: "http://sreeshaktipatashram.com/upload/El-poder-desconocido-para-Dios-Power-Unknown-to-God-Spanish.pdf"
+    link: "https://sreeshaktipatashram.com/upload/El-poder-desconocido-para-Dios-Power-Unknown-to-God-Spanish.pdf"
   },
   {
     name: "French Q&A – Volume 1",
-    link: "http://sreeshaktipatashram.com/upload/French-QA-Vol-1-Paperback-with-cover-06-Feb-2023.pdf"
+    link: "https://sreeshaktipatashram.com/upload/French-QA-Vol-1-Paperback-with-cover-06-Feb-2023.pdf"
   },
   {
     name: "Guru Gita (German)",
-    link: "http://sreeshaktipatashram.com/upload/Guru-Gita-German-7th-April-2021.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-German-7th-April-2021.pdf"
   },
   {
     name: "Guru Gita (Italian)",
-    link: "http://sreeshaktipatashram.com/upload/Guru-Gita-Italian-23rd-March-2021.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-Italian-23rd-March-2021.pdf"
   },
   {
     name: "Guru Gita (Malayalam)",
-    link: "http://sreeshaktipatashram.com/upload/Guru-Gita-Malayalam-13-October-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-Malayalam-13-October-2020.pdf"
   },
   {
     name: "I Segreti di Shaktipat e Kundalini Yoga – Vol 1 (Italian)",
-    link: "http://sreeshaktipatashram.com/upload/I-segreti-di-Shaktipat-e-Kundalini-Yoga-Vol-1-13-March-2023-Paperback-with-cover-Italian.pdf"
+    link: "https://sreeshaktipatashram.com/upload/I-segreti-di-Shaktipat-e-Kundalini-Yoga-Vol-1-13-March-2023-Paperback-with-cover-Italian.pdf"
   },
   {
     name: "The Power Unknown to God (Italian)",
-    link: "http://sreeshaktipatashram.com/upload/La-potente-energia-sconosciuta-a-Dio-Power-Unknown-to-God-Italian.pdf"
+    link: "https://sreeshaktipatashram.com/upload/La-potente-energia-sconosciuta-a-Dio-Power-Unknown-to-God-Italian.pdf"
   },
   {
     name: "The Power Unknown to God (French)",
-    link: "http://sreeshaktipatashram.com/upload/Le-pouvoir-inconnu-à-Dieu-Power-Unknown-to-God-French.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Le-pouvoir-inconnu-à-Dieu-Power-Unknown-to-God-French.pdf"
   },
   {
     name: "The Power Unknown to God (Portuguese)",
-    link: "http://sreeshaktipatashram.com/upload/O-Poder-Desconhecido-para-Deus-Power-Unknown-to-God-Portuguese.pdf"
+    link: "https://sreeshaktipatashram.com/upload/O-Poder-Desconhecido-para-Deus-Power-Unknown-to-God-Portuguese.pdf"
   },
   {
     name: "The Power Unknown to God (Malayalam)",
-    link: "http://sreeshaktipatashram.com/upload/Parashakti-Power-Unknown-to-God-Malayalam.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Parashakti-Power-Unknown-to-God-Malayalam.pdf"
   },
   {
     name: "The Power Unknown to God (Tamil)",
-    link: "http://sreeshaktipatashram.com/upload/Parashakti-Power-Unknown-to-God-Tamil.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Parashakti-Power-Unknown-to-God-Tamil.pdf"
   },
   {
     name: "Portuguese Q&A – Volume 1",
-    link: "http://sreeshaktipatashram.com/upload/Portuguese-QA-Vol-1-Paperback-with-cover-26-Feb-2023.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Portuguese-QA-Vol-1-Paperback-with-cover-26-Feb-2023.pdf"
   },
   {
     name: "Portuguese Q&A – Volume 2",
-    link: "http://sreeshaktipatashram.com/upload/Portuguese-QA-Vol-2-Paperback-with-cover-28-Feb-2023.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Portuguese-QA-Vol-2-Paperback-with-cover-28-Feb-2023.pdf"
   },
   {
     name: "The Power Unknown to God (Polish)",
-    link: "http://sreeshaktipatashram.com/upload/Power-Uknown-to-GOD-Polish-31st-March-2021.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Power-Uknown-to-GOD-Polish-31st-March-2021.pdf"
   },
   {
     name: "The Power Unknown to God (Chinese)",
-    link: "http://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Chinese.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Chinese.pdf"
   },
   {
     name: "The Power Unknown to God (Gujarati)",
-    link: "http://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Gujarati.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Gujarati.pdf"
   },
   {
     name: "The Power Unknown to God (Marathi)",
-    link: "http://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Marathi.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Marathi.pdf"
   },
   {
     name: "The Power Unknown to God (Vietnamese)",
-    link: "http://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Vietnamese-.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Vietnamese-.pdf"
   },
   {
     name: "The Power Unknown to God (Bengali & Sanskrit)",
-    link: "http://sreeshaktipatashram.com/upload/Sanskrit_Bengali-Power-Unknown-to-God-Bengali_Sanskrit-15-11-2017.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Sanskrit_Bengali-Power-Unknown-to-God-Bengali_Sanskrit-15-11-2017.pdf"
   },
   {
     name: "Secretos de Shaktipat y Kundalini Yoga – Vol 1 (Spanish)",
-    link: "http://sreeshaktipatashram.com/upload/Secretos-de-Shaktipat-y-Kundalini-Yoga-Vol-1-Paperback-with-cover-27-Feb-2023-Spanish.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Secretos-de-Shaktipat-y-Kundalini-Yoga-Vol-1-Paperback-with-cover-27-Feb-2023-Spanish.pdf"
   },
   {
     name: "Sekrety Shaktipat i Kundalini Jogi – Tom 1 (Polish)",
-    link: "http://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-1-Paperback-with-cover-02-Feb-2023-Polish.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-1-Paperback-with-cover-02-Feb-2023-Polish.pdf"
   },
   {
     name: "Sekrety Shaktipat i Kundalini Jogi – Tom 2 (Polish)",
-    link: "http://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-2-Paperback-with-cover-12-Feb-2023-1-Polish.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-2-Paperback-with-cover-12-Feb-2023-1-Polish.pdf"
   },
   {
     name: "Sekrety Shaktipat i Kundalini Jogi – Tom 3 (Polish)",
-    link: "http://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-3-Paperback-with-cover-15-March-2023-1-Polish.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-3-Paperback-with-cover-15-March-2023-1-Polish.pdf"
   },
   {
     name: "Shaktipat Chintamani – Part 1 (Hindi)",
-    link: "http://sreeshaktipatashram.com/upload/Shaktipat-Chintamani-Hindi-1.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Shaktipat-Chintamani-Hindi-1.pdf"
   },
   {
     name: "Shaktipat Chintamani – Part 2 (Hindi)",
-    link: "http://sreeshaktipatashram.com/upload/Shaktipat-Chintamani-Hindi-2.pdf"
+    link: "https://sreeshaktipatashram.com/upload/Shaktipat-Chintamani-Hindi-2.pdf"
   },
   {
     name: "The Illusion (French)",
-    link: "http://sreeshaktipatashram.com/upload/The-Illusion-French-15th-April-2021.pdf"
+    link: "https://sreeshaktipatashram.com/upload/The-Illusion-French-15th-April-2021.pdf"
   },
   {
     name: "The Illusion (German)",
-    link: "http://sreeshaktipatashram.com/upload/The-Illusion-German-1st-April-2021.pdf"
+    link: "https://sreeshaktipatashram.com/upload/The-Illusion-German-1st-April-2021.pdf"
   },
   {
     name: "The Illusion (Telugu)",
-    link: "http://sreeshaktipatashram.com/upload/The-Illusion-Telugu-27-October-2020.pdf"
+    link: "https://sreeshaktipatashram.com/upload/The-Illusion-Telugu-27-October-2020.pdf"
   },
   {
     name: "The Power Unknown to God (Dutch)",
-    link: "http://sreeshaktipatashram.com/upload/The-Power-Unknown-to-God-Dutch-14th-April-2021.pdf"
+    link: "https://sreeshaktipatashram.com/upload/The-Power-Unknown-to-God-Dutch-14th-April-2021.pdf"
   }
 ];
 
