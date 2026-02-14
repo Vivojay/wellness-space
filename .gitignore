@@ -111,3 +111,5 @@ test_db.db
 # Secrets / config
 # ----------------------------
 backend/serviceAccountKey.json
+
+!!sreeshaktipatahshram/src/assets/videos/hero-video_trim_rotated.mp4
