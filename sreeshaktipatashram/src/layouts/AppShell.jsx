@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import FloatingUI from "@/components/FloatingUI";
 import RightFeed from "@/components/RightFeed";
 import Navbar from "@/components/Navbar";
+import SiteFooter from "@/components/SiteFooter";
 import { getTheme, getThemeCSSVars } from "@/config/themeConfig";
 
 import {
@@ -54,7 +55,6 @@ export default function AppShell() {
   const [isDark, setIsDark] = useState(false);
 
   const [cursorVariant, setCursorVariant] = useState("default");
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -87,7 +87,9 @@ export default function AppShell() {
     { category: "NEWS", text: "Welcome to Sreeshakti – new blog posts coming soon." },
   ]);
 
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { pathname } = location;
   const isHome = pathname === "/" || pathname === "";
 
   const chatPanelRef = useRef(null);
@@ -97,12 +99,6 @@ export default function AppShell() {
   const theme = useMemo(() => getTheme(isDark), [isDark]);
   const themeCSSVars = useMemo(() => getThemeCSSVars(isDark), [isDark]);
 
-  // Mouse tracking
-  useEffect(() => {
-    const onMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
 
   // Scroll progress
   useEffect(() => {
@@ -120,12 +116,57 @@ export default function AppShell() {
   }, []);
 
   useEffect(() => {
+    const targetId = location.state?.scrollTo;
+    if (!targetId || !isHome) return;
+
+    let attempts = 0;
+    const tryScroll = () => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        navigate(location.pathname, { replace: true, state: {} });
+        return;
+      }
+      attempts += 1;
+      if (attempts < 12) {
+        requestAnimationFrame(tryScroll);
+      }
+    };
+
+    requestAnimationFrame(tryScroll);
+  }, [isHome, location.pathname, location.state, navigate]);
+
+  useEffect(() => {
     if (chatOpen) setActiveOverlay("chat");
   }, [chatOpen]);
 
   useEffect(() => {
     if (rightFeedOpen) setActiveOverlay("feed");
   }, [rightFeedOpen]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadFeed = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/feed?limit=10`);
+        if (!res.ok) throw new Error("Failed to load feed");
+        const data = await res.json();
+        if (isMounted && Array.isArray(data) && data.length) {
+          setFeedItems(data);
+        }
+      } catch (e) {
+        if (isMounted) {
+          setFeedItems((prev) => prev);
+        }
+      }
+    };
+
+    loadFeed();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Click outside handler - CLOSE BOTH PANELS
   useEffect(() => {
@@ -174,7 +215,7 @@ export default function AppShell() {
 
   return (
     <div 
-      className={`${theme.bg} ${theme.text} min-h-screen transition-colors duration-500`}
+      className={`${theme.bg} ${theme.text} app-shell min-h-screen flex flex-col transition-colors duration-500`}
       style={themeCSSVars}
     >
       {/* Topbar on every route */}
@@ -182,7 +223,6 @@ export default function AppShell() {
 
       {/* FloatingUI - contains sidebar internally */}
       <FloatingUI
-        mousePos={mousePos}
         botTyping={botTyping}
         cursorVariant={cursorVariant}
         setCursorVariant={setCursorVariant}
@@ -226,11 +266,17 @@ export default function AppShell() {
       />
 
       {/* Content outlet */}
-      <div className={`
+      <div
+        id="app-scroll"
+        className={`
         ${isHome ? '' : 'pt-[110px]'} 
-        flex-1 overflow-y-auto
-      `}>
-        <Outlet context={{ isDark, theme }} />
+        flex-1 overflow-y-auto flex flex-col
+      `}
+      >
+        <div className="flex-1">
+          <Outlet context={{ isDark, theme, setCursorVariant }} />
+        </div>
+        <SiteFooter theme={theme} />
       </div>
     </div>
   );

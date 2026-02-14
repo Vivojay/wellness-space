@@ -19,7 +19,7 @@ const QuoteMark = ({ className = "", fillColor }) => (
 const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
   return (
     <section 
-      className="py-28 overflow-hidden transition-colors duration-500"
+      className="cv-auto py-28 overflow-hidden transition-colors duration-500"
       style={{ backgroundColor: theme.colors.bg.secondary }}
     >
       {/* Header */}
@@ -36,11 +36,10 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
         </span>
         <h2 className="text-5xl md:text-6xl font-light tracking-tight relative inline-block">
           <span 
+            className="gradient-text"
             style={{
               background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              display: 'inline-block',
               fontFamily: "'Source Sans 3', sans-serif",
               fontWeight: 300,
               letterSpacing: '-0.02em'

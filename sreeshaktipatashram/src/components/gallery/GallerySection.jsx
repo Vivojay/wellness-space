@@ -4,6 +4,7 @@ import MaximizedViewer from "./MaximizedViewer";
 import PlatformIcon from "./PlatformIcon";
 
 export function GallerySection({ platform }) {
+  const isDark = document.documentElement.classList.contains('dark');
   const [items, setItems] = useState([]);
   const [activeIndex, setActiveIndex] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +36,7 @@ export function GallerySection({ platform }) {
           {/* Platform indicator while loading */}
           <div className="flex items-center gap-4 mb-8">
             <PlatformIcon platform={platform} />
-            <h2 className="text-2xl font-light tracking-[0.35em] uppercase text-white/70">
+            <h2 className={`text-2xl font-light tracking-[0.35em] uppercase ${isDark ? 'text-white/70' : 'text-neutral-700'}`}>
               {platform}
             </h2>
           </div>
@@ -53,7 +54,7 @@ export function GallerySection({ platform }) {
             ))}
           </div>
 
-          <p className="mt-6 text-sm text-white/40 tracking-wide">Loading media...</p>
+          <p className={`mt-6 text-sm tracking-wide ${isDark ? 'text-white/40' : 'text-neutral-500'}`}>Loading media...</p>
 
           <style>{`
             @keyframes pulse {
@@ -65,16 +66,18 @@ export function GallerySection({ platform }) {
       )}
 
       {/* Section header with platform indication */}
-      {!loading && items.length > 0 && (
-        <div className="px-6 py-8 border-b border-white/10">
+      {!loading && (
+        <div className="px-6 py-8 border-b" style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
           <div className="flex items-center gap-4 mb-3">
             <PlatformIcon platform={platform} />
-            <h2 className="text-2xl font-light tracking-[0.35em] uppercase text-white/80">
+            <h2 className={`text-2xl font-light tracking-[0.35em] uppercase ${isDark ? 'text-white/80' : 'text-neutral-700'}`}>
               {platform}
             </h2>
           </div>
-          <p className="text-sm text-white/50">
-            {items.length} {items.length === 1 ? 'post' : 'posts'}
+          <p className={`text-sm ${isDark ? 'text-white/50' : 'text-neutral-500'}`}>
+            {items.length > 0
+              ? `${items.length} ${items.length === 1 ? 'post' : 'posts'}`
+              : 'No media yet…'}
           </p>
         </div>
       )}

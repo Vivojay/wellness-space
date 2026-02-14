@@ -10,7 +10,7 @@ const CTASection = ({ theme, setCursorVariant }) => {
 
   return (
     <section 
-      className="relative py-40 px-8 transition-colors duration-500"
+      className="cv-auto relative py-40 px-8 transition-colors duration-500"
       style={{ backgroundColor: theme.colors.bg.primary }}
     >
       <div className="max-w-4xl mx-auto text-center">

@@ -31,7 +31,7 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
 
   return (
     <section 
-      className="relative py-40 px-8 md:px-24 transition-colors duration-500"
+      className="cv-auto relative py-40 px-8 md:px-24 transition-colors duration-500"
       style={{ backgroundColor: theme.colors.bg.primary }}
     >
       <div className="max-w-6xl mx-auto">
@@ -39,12 +39,10 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
         <div className="mb-16">
           <h2 className="text-5xl md:text-6xl font-light tracking-tight mb-6 relative inline-block">
             <span 
-              className="relative"
+              className="relative gradient-text"
               style={{
                 background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
                 letterSpacing: '-0.02em'
@@ -71,6 +69,7 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div 
                   className="absolute inset-0 lg:hidden"

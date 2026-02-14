@@ -15,7 +15,7 @@ const LineageSection = ({ theme }) => {
   return (
     <section 
       id="lineage" 
-      className="relative py-40 px-8 md:px-24 transition-colors duration-500"
+      className="cv-auto relative py-40 px-8 md:px-24 transition-colors duration-500"
       style={{ backgroundColor: theme.colors.bg.secondary }}
     >
       <div className="max-w-6xl mx-auto">
@@ -30,16 +30,17 @@ const LineageSection = ({ theme }) => {
           >
             LINEAGE
           </span>
-          <h2 className="text-5xl md:text-6xl font-light tracking-tight mt-6 relative inline-block">
+          <h2 className="text-5xl md:text-6xl font-light tracking-tight mt-6 leading-[1.15]">
             <span 
+              className="gradient-text"
               style={{
                 background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
-                letterSpacing: '-0.02em'
+                letterSpacing: '-0.02em',
+                paddingBottom: '2px',
+                lineHeight: '1.15'
               }}
             >
               The Shaktipat Lineage
@@ -57,6 +58,8 @@ const LineageSection = ({ theme }) => {
                 src={`http://sreeshaktipatashram.com/upload/${item.img}`}
                 alt={item.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+                decoding="async"
               />
               <div 
                 className="absolute inset-0"

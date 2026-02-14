@@ -19,6 +19,8 @@ export default function AboutSection() {
                                 src="https://images.unsplash.com/photo-1600618528240-fb9fc964b853?w=800&q=80"
                                 alt="Wellness space"
                                 className="w-full h-full object-cover"
+                                loading="lazy"
+                                decoding="async"
                             />
                         </div>
                         {/* Floating accent card */}

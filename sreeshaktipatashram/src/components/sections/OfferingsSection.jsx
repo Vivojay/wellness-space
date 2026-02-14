@@ -22,7 +22,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
   return (
     <section 
       id="offerings" 
-      className="py-40 px-8 md:px-24 transition-colors duration-500 relative"
+      className="cv-auto py-40 px-8 md:px-24 transition-colors duration-500 relative"
       style={{ backgroundColor: theme.colors.bg.primary }}
     >
       {/* Subtle RED accent overlay for this section */}
@@ -45,16 +45,17 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
           >
             OUR OFFERINGS
           </span>
-          <h2 className="text-5xl md:text-6xl font-light tracking-tight relative inline-block">
+          <h2 className="text-5xl md:text-6xl font-light tracking-tight leading-[1.15]">
             <span 
+              className="gradient-text"
               style={{
                 background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
                 letterSpacing: '-0.02em',
+                paddingBottom: '2px',
+                lineHeight: '1.15'
               }}
             >
               The Inner Journey
@@ -77,6 +78,8 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
                   alt={item.title}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   style={{ filter: 'contrast(0.95) saturate(0.9)' }}
+                  loading="lazy"
+                  decoding="async"
                 />
 
                 {/* Dark-to-transparent veil */}

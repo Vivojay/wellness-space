@@ -104,11 +104,17 @@ export default function MediaTile({ item, onOpen }) {
           src={item.media[0]}
           muted
           playsInline
-          preload="metadata"
+          preload="none"
           className={mediaClass}
         />
       ) : item.media?.[0] ? (
-        <img src={item.media[0]} loading="lazy" alt="" className={mediaClass} />
+        <img
+          src={item.media[0]}
+          loading="lazy"
+          decoding="async"
+          alt=""
+          className={mediaClass}
+        />
       ) : (
         <div className="w-full h-full bg-gray-800 flex items-center justify-center text-white text-sm">
           No media

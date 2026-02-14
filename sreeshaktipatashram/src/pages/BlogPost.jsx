@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { fetchBlog } from "@/api/blogApi";
 
 export default function BlogPost() {
   const { isDark, theme } = useOutletContext();
@@ -18,11 +19,7 @@ export default function BlogPost() {
     setLoading(true);
     setError(null);
 
-    fetch(`${import.meta.env.VITE_API_URL}/blog/${slug}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load blog post");
-        return res.json();
-      })
+    fetchBlog(slug)
       .then((data) => setBlog(data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -75,7 +72,7 @@ export default function BlogPost() {
       </Helmet>
 
       <article 
-        className="max-w-4xl mx-auto rounded-lg p-12 shadow-sm"
+        className="max-w-4xl mx-auto rounded-none p-12 shadow-sm"
         style={{ 
           backgroundColor: theme.colors.bg.card,
           borderColor: theme.border
@@ -160,7 +157,7 @@ export default function BlogPost() {
               code: ({node, inline, ...props}) => 
                 inline ? (
                   <code 
-                    className="px-1 py-0.5 rounded text-sm"
+                    className="px-1 py-0.5 rounded-none text-sm"
                     style={{ 
                       backgroundColor: theme.colors.bg.secondary,
                       color: theme.accent
@@ -169,7 +166,7 @@ export default function BlogPost() {
                   />
                 ) : (
                   <code 
-                    className="block p-4 rounded my-4 overflow-x-auto text-sm"
+                    className="block p-4 rounded-none my-4 overflow-x-auto text-sm"
                     style={{ 
                       backgroundColor: theme.colors.bg.secondary,
                       color: theme.text

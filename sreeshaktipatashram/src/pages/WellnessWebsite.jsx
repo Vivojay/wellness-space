@@ -9,7 +9,7 @@ import LineageSection from "../components/sections/LineageSection";
 import OfferingsSection from "../components/sections/OfferingsSection";
 import TestimonialsSection from "../components/sections/TestimonialsSection";
 import CTASection from "../components/sections/CTASection";
-import useLenisSmooth from "@/utils/lenisSmooth";
+// import useLenisSmooth from "@/utils/lenisSmooth";
 import FAQ from "../components/sections/FAQ/FAQ";
 import { useOutletContext } from "react-router-dom";
 
@@ -17,10 +17,10 @@ const WellnessWebsite = () => {
   const { isDark, theme } = useOutletContext();
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [uniqueVisitCount, setUniqueVisitCount] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  const testimonials = [
+  const [testimonials, setTestimonials] = useState([]);
+  const fallbackTestimonials = [
     { author: 'Ananya M.', text: 'A profound transformation. The energy here is unlike anywhere else.', role: 'Seeker' },
     { author: 'Rajesh K.', text: 'Pure serenity. Every moment spent here deepens my practice.', role: 'Practitioner' },
     { author: 'Priya S.', text: 'Life-changing wisdom delivered with grace and compassion.', role: 'Devotee' },
@@ -29,35 +29,57 @@ const WellnessWebsite = () => {
     { author: 'Arjun P.', text: 'A space where healing happens naturally and beautifully.', role: 'Explorer' }
   ];
 
-  useEffect(() => {
-    const key = "ssa_unique_visited_v1";
-    const countKey = "ssa_unique_counter_v1";
-
-    const already = localStorage.getItem(key);
-    let count = Number(localStorage.getItem(countKey) || "0");
-
-    if (!already) {
-      localStorage.setItem(key, "1");
-      count += 1;
-      localStorage.setItem(countKey, String(count));
-    }
-    setUniqueVisitCount(count);
-  }, []);
 
   useEffect(() => {
+    const wrapper = document.getElementById("app-scroll");
+    const target = wrapper || window;
+
     const handleScroll = () => {
-      const progress = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      if (wrapper) {
+        const max = Math.max(1, wrapper.scrollHeight - wrapper.clientHeight);
+        const progress = wrapper.scrollTop / max;
+        setScrollProgress(progress);
+        return;
+      }
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = window.scrollY / max;
       setScrollProgress(progress);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    target.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      target.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  useLenisSmooth();
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTestimonials = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/testimonials?limit=10`);
+        if (!res.ok) throw new Error("Failed to load testimonials");
+        const data = await res.json();
+        if (isMounted && Array.isArray(data) && data.length) {
+          setTestimonials(data.slice(0, 10));
+        } else if (isMounted) {
+          setTestimonials(fallbackTestimonials);
+        }
+      } catch (e) {
+        if (isMounted) setTestimonials(fallbackTestimonials);
+      }
+    };
+
+    loadTestimonials();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Temporarily disable Lenis smooth scrolling
+  // useLenisSmooth();
 
   const setCursorVariant = () => {};
 
@@ -116,100 +138,8 @@ const WellnessWebsite = () => {
       <CTASection theme={theme} setCursorVariant={setCursorVariant} />
 
       {/* FAQs - with RED accent */}
-      <FAQ theme={theme}/>
+      <FAQ theme={theme} isDark={isDark} />
 
-      {/* Footer with properly aligned copyright and social icons */}
-      <footer 
-        className="border-t py-20 px-8 md:px-24 transition-colors duration-500"
-        style={{ 
-          borderColor: theme.border,
-          backgroundColor: theme.colors.bg.primary 
-        }}
-      >
-        <div className="max-w-6xl mx-auto">
-          {/* Header row */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
-            <div>
-              <h3 
-                className="text-2xl font-light tracking-tight mb-2"
-                style={{ 
-                  color: theme.text,
-                  fontFamily: "'Source Sans 3', sans-serif"
-                }}
-              >
-                Sreeshakti Patashram
-              </h3>
-              <p 
-                className="text-[10px] tracking-[0.3em]"
-                style={{ 
-                  color: theme.textMuted,
-                  fontFamily: "'Source Sans 3', sans-serif"
-                }}
-              >
-                Where Consciousness Expands
-              </p>
-            </div>
-          </div>
-
-          {/* Centered copyright and social icons - COMMON VERTICAL AXIS */}
-          <div className="flex flex-col items-center gap-6">
-            {/* Copyright - centered */}
-            <p 
-              className="text-xs"
-              style={{ 
-                color: theme.textMuted,
-                fontFamily: "'Source Sans 3', sans-serif"
-              }}
-            >
-              © 2024 All Rights Reserved
-            </p>
-            
-            {/* Social buttons - centered below copyright, aligned on same vertical axis */}
-            <div className="flex gap-0">
-              {[
-                { name: "Instagram", href: "#", Icon: FaInstagram },
-                { name: "Facebook", href: "#", Icon: FaFacebook },
-                { name: "YouTube", href: "#", Icon: FaYoutube },
-              ].map(({ name, href, Icon }, idx) => (
-                <a
-                  key={idx}
-                  href={href}
-                  aria-label={name}
-                  className="w-12 h-12 border flex items-center justify-center
-                    transition-all duration-300"
-                  style={{
-                    borderColor: theme.border,
-                    marginLeft: idx === 0 ? 0 : "-1px",
-                    backgroundColor: 'transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.accent + '25';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <Icon 
-                    className="w-5 h-5 opacity-70"
-                    style={{ color: theme.text }}
-                  />
-                </a>
-              ))}
-            </div>
-
-            {/* Visit counter - centered */}
-            <p 
-              className="text-[10px] tracking-[0.2em] opacity-60"
-              style={{ 
-                color: theme.textMuted,
-                fontFamily: "'Source Sans 3', sans-serif"
-              }}
-            >
-              Unique visits (this device): {uniqueVisitCount ?? "—"}
-            </p>
-          </div>
-        </div>
-      </footer>
 
       <style>{`
         @font-face {
@@ -253,8 +183,10 @@ const WellnessWebsite = () => {
         .animate-marquee:hover {
           animation-play-state: paused;
         }
-        * {
-          cursor: none;
+        @media (pointer: coarse) {
+          * {
+            cursor: auto;
+          }
         }
         .will-change-transform {
           will-change: transform;

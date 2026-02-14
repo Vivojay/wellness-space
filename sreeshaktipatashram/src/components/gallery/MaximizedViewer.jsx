@@ -150,7 +150,13 @@ export default function MaximizedViewer({ items = [], activeIndex = 0, setActive
               ) : item.type === "carousel" && item.media?.length ? (
                 <CarouselMedia media={item.media} className="w-full h-full" />
               ) : item.type === "image" && item.media?.[0] ? (
-                <img src={item.media[0]} className="w-full h-full object-cover" draggable={false} />
+                <img
+                  src={item.media[0]}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                  loading="lazy"
+                  decoding="async"
+                />
               ) : item.type === "video" && item.media?.[0] ? (
                 <video
                   src={item.media[0]}
@@ -159,6 +165,7 @@ export default function MaximizedViewer({ items = [], activeIndex = 0, setActive
                   loop
                   controls
                   playsInline
+                  preload="metadata"
                   className="w-full h-full object-cover"
                 />
               ) : (

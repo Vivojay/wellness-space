@@ -59,6 +59,8 @@ const TestimonialCard = ({ testimonial }) => (
                     src={testimonial.image}
                     alt={testimonial.author}
                     className="w-12 h-12 rounded-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                 />
                 <div>
                     <p className="text-stone-800 font-medium text-sm">{testimonial.author}</p>

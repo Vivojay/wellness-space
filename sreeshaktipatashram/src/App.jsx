@@ -6,6 +6,7 @@ import BlogPost from "./pages/BlogPost";
 import GalleryPage from "./pages/GalleryPage";
 import BookingPage from "./pages/BookingPage";
 import BlogEditor from "./pages/BlogEditor";
+import DonatePage from "./pages/DonatePage";
 import AppShell from "./layouts/AppShell";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/blog/edit/:slug" element={<BlogEditor />} />
         <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/donate" element={<DonatePage />} />
         <Route path="/booking" element={<BookingPage />} />
       </Route>
     </Routes>

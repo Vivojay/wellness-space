@@ -52,11 +52,11 @@ export const colorPalettes = {
   dark: {
     // Background colors
     bg: {
-      primary: '#0a0a0a',      // Deep black
-      secondary: '#141414',    // Slightly lighter black
-      card: 'rgba(20, 20, 20, 0.85)',
-      sidebar: 'rgba(15, 15, 15, 0.9)',
-      gallery: '#000000',      // Pure black for gallery
+      primary: '#0b1013',      // Deep charcoal with subtle teal
+      secondary: '#182127',    // Clearer contrast for alternating sections
+      card: 'rgba(18, 24, 28, 0.85)',
+      sidebar: 'rgba(15, 20, 24, 0.9)',
+      gallery: '#0a0f12',      // Soft near-black
     },
     
     // Text colors

@@ -129,7 +129,7 @@ const ScrollToBottomButton = ({ chatRef, messages, theme }) => {
 
 export default function FloatingUI(props) {
   const {
-    mousePos, botTyping, cursorVariant, setCursorVariant, isDark, setIsDark,
+    botTyping, cursorVariant, setCursorVariant, isDark, setIsDark,
     theme, scrollProgress, chatOpen, setChatOpen, chatExpanded, setChatExpanded,
     messages, quickQuestions, handleSendMessage, inputValue, setInputValue,
     sidebarExpanded, setSidebarExpanded, HamburgerIcon, Sun, Moon,
@@ -140,19 +140,21 @@ export default function FloatingUI(props) {
   const inputRef = useRef(null);
   const sidebarRef = useRef(null);
   const hamburgerBtnRef = useRef(null);
+  const [showCursor, setShowCursor] = useState(true);
+  const cursorRef = useRef(null);
+  const lastPos = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
 
   const location = useLocation();
   const navigate = useNavigate();
+  const isDonatePage = location.pathname === "/donate";
 
   const goToSection = async (id) => {
     if (location.pathname !== "/") {
-      navigate("/");
-      setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
-    } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      navigate("/", { state: { scrollTo: id } });
+      return;
     }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   useEffect(() => {
@@ -185,24 +187,98 @@ export default function FloatingUI(props) {
     return () => window.removeEventListener("mousemove", onMove);
   }, [sidebarExpanded, setSidebarExpanded]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const media = window.matchMedia('(pointer: fine)');
+    const update = () => setShowCursor(media.matches);
+    update();
+    if (media.addEventListener) {
+      media.addEventListener('change', update);
+      return () => media.removeEventListener('change', update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  useEffect(() => {
+    if (!showCursor) return;
+
+    const handleMove = (e) => {
+      lastPos.current = { x: e.clientX, y: e.clientY };
+      if (rafRef.current) return;
+      rafRef.current = requestAnimationFrame(() => {
+        const node = cursorRef.current;
+        if (node) {
+          node.style.transform = `translate3d(${lastPos.current.x}px, ${lastPos.current.y}px, 0)`;
+        }
+        rafRef.current = null;
+      });
+    };
+
+    window.addEventListener('pointermove', handleMove, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+  }, [showCursor]);
+
   return (
     <>
       {/* Custom Cursor */}
-      <div
-        className="fixed pointer-events-none z-[9999]"
-        style={{
-          left: mousePos.x, top: mousePos.y,
-          transform: `translate(-50%, -50%) scale(${cursorVariant === 'hover' ? 1.6 : 1})`,
-        }}
-      >
+      {showCursor && (
         <div
-          className="w-5 h-5 rounded-full border-2"
+          className="fixed pointer-events-none z-[9999]"
+          ref={cursorRef}
           style={{
-            borderColor: theme.accentSecondary,
-            backgroundColor: theme.cardBg,
+            left: 0,
+            top: 0,
+            transform: `translate3d(${lastPos.current.x}px, ${lastPos.current.y}px, 0)`,
+            willChange: 'transform'
           }}
-        />
-      </div>
+        >
+          {cursorVariant === 'text' ? (
+            <div
+              className="relative w-3 h-4"
+              style={{ transform: 'translate(-50%, -50%)' }}
+            >
+              <span
+                className="absolute left-1/2 -translate-x-1/2 w-[1px] h-4"
+                style={{ backgroundColor: theme.text, opacity: 0.7 }}
+              />
+              <span
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{
+                  top: 0,
+                  width: '8px',
+                  height: '1px',
+                  backgroundColor: theme.text,
+                  opacity: 0.7
+                }}
+              />
+              <span
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{
+                  bottom: 0,
+                  width: '8px',
+                  height: '1px',
+                  backgroundColor: theme.text,
+                  opacity: 0.7
+                }}
+              />
+            </div>
+          ) : (
+            <div
+              className="w-5 h-5 rounded-full border-2"
+              style={{
+                borderColor: theme.accentSecondary,
+                backgroundColor: theme.cardBg,
+                transform: `translate(-50%, -50%) scale(${cursorVariant === 'hover' ? 1.6 : 1})`
+              }}
+            />
+          )}
+        </div>
+      )}
 
       {/* Progress Bar */}
       <div 
@@ -258,8 +334,9 @@ export default function FloatingUI(props) {
           >
             <MessageCircle className="w-5 h-5" />
             <span className={`overflow-hidden transition-all duration-1000 
-              ${chatExpanded ? 'w-32 opacity-100' : 'w-0 opacity-0'}`}>
-              <span className="text-sm whitespace-nowrap">Chat with us</span>
+              ${chatExpanded ? 'w-38 opacity-100' : 'w-0 opacity-0'}`}>
+              {/* <span className="text-sm whitespace-nowrap">Chat with us (UNDER DEVELOPMENT)</span> */}
+              <span className="text-sm whitespace-nowrap">[UNDER DEVELOPMENT]</span>
             </span>
           </button>
         ) : (
@@ -279,7 +356,7 @@ export default function FloatingUI(props) {
               >
                 <div>
                   <h3 className="font-medium text-base" style={{ color: theme.text }}>
-                    Sreeshakti Guide
+                    Chat with us [UNDER DEVELOPMENT]
                   </h3>
                   <p className="text-xs" style={{ color: theme.textMuted }}>
                     We're here to help
@@ -300,7 +377,7 @@ export default function FloatingUI(props) {
                     e.currentTarget.style.backgroundColor = theme.accentSecondary;
                   }}
                 >
-                  <Minus className="w-4 h-4" style={{ color: theme.text }} />
+                  <Minus className="w-4 h-4" style={{ color: isDark ? theme.textMuted : theme.text }} />
                 </button>
               </div>
 
@@ -453,7 +530,8 @@ export default function FloatingUI(props) {
                 { name: 'Home', onClick: () => navigate("/") },
                 { name: 'Readings', onClick: () => navigate("/readings") },
                 { name: 'Gallery', onClick: () => navigate("/gallery") },
-                { name: 'Book Session', onClick: () => navigate("/booking") },
+                { name: 'Donate', onClick: () => navigate("/donate"), isDonate: true },
+                { name: 'Join Us', onClick: () => navigate("/booking") },
                 { name: 'Blogs & Updates', onClick: () => navigate("/blog") },
                 { name: 'Lineage', onClick: () => goToSection("lineage") },
                 { name: 'Offerings', onClick: () => goToSection("offerings") },
@@ -469,13 +547,13 @@ export default function FloatingUI(props) {
                 >
                   <span 
                     className="block text-lg font-light tracking-wide transition-all duration-300 group-hover:translate-x-3"
-                    style={{ color: theme.text }}
+                    style={{ color: item.isDonate ? "#b91c1c" : theme.text }}
                   >
                     {item.name}
                   </span>
                   <div 
                     className="absolute bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full"
-                    style={{ backgroundColor: theme.accent }}
+                    style={{ backgroundColor: item.isDonate ? "#b91c1c" : theme.accent }}
                   />
                 </button>
               ))}
@@ -520,6 +598,29 @@ export default function FloatingUI(props) {
       >
         <HamburgerIcon open={sidebarExpanded} />
       </button>
+
+      {/* Donate quick access */}
+      {!isDonatePage && (
+        <button
+          type="button"
+          onClick={() => navigate("/donate")}
+          className="fixed bottom-8 left-8 z-[60] px-4 py-2 rounded-full border text-sm tracking-[0.12em] uppercase transition-all duration-300"
+          style={{
+            backgroundColor: theme.cardBg,
+            borderColor: "#b91c1c",
+            color: "#b91c1c",
+            boxShadow: "0 12px 30px rgba(185, 28, 28, 0.18)"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(185, 28, 28, 0.12)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = theme.cardBg;
+          }}
+        >
+          Donate
+        </button>
+      )}
     </>
   );
 }

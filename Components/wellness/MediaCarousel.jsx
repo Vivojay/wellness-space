@@ -118,6 +118,8 @@ export default function MediaCarousel() {
                                     src={currentItem.src}
                                     alt={currentItem.title}
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                             ) : (
                                 <video
@@ -127,6 +129,7 @@ export default function MediaCarousel() {
                                     muted
                                     loop
                                     playsInline
+                                    preload="metadata"
                                     className="w-full h-full object-cover"
                                 />
                             )}

@@ -1,28 +1,7 @@
 // src/pages/Gallery.jsx (new file)
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import MainLayout from '../layouts/MainLayout';
-import { Instagram, Facebook, Youtube, X } from 'lucide-react'; // Assuming lucide-react for icons
-
-// Define configurable color palette
-// src/config/themeConfig.js (new file, but inlined here for response)
-const lightPalette = {
-  primary: '#f5f5f5', // neutral light
-  text: '#333333',
-  muted: '#666666',
-  border: '#e0e0e0',
-  bg: '#ffffff',
-  accent: '#c9a77c', // subtle gold
-};
-
-const darkPalette = {
-  primary: '#1a1a1a', // neutral dark
-  text: '#f5f5f5',
-  muted: '#999999',
-  border: '#333333',
-  bg: '#121212',
-  accent: '#a88b5e', // muted gold
-};
+import { Instagram, Facebook, Youtube, X } from 'lucide-react';
 
 // Social media colors (muted, non-garish)
 const socialColors = {
@@ -33,8 +12,7 @@ const socialColors = {
 };
 
 const Gallery = () => {
-  const { isDark } = useOutletContext(); // Get isDark from AppShell
-  const theme = isDark ? { ...darkPalette } : { ...lightPalette }; // Use configurable palette
+  const { isDark, theme } = useOutletContext();
   const [currentSection, setCurrentSection] = useState('instagram');
   const [feeds, setFeeds] = useState({ instagram: [], facebook: [], youtube: [], x: [] });
   const [loading, setLoading] = useState(true);
@@ -72,10 +50,16 @@ const Gallery = () => {
   };
 
   return (
-    <MainLayout theme={theme}>
-      <div className={`min-h-screen ${theme.bg} ${theme.text} relative overflow-hidden`}>
+      <div
+        className="relative pb-32"
+        style={{
+          backgroundColor: theme.colors.bg.gallery,
+          color: theme.text,
+          minHeight: '100vh'
+        }}
+      >
         {/* Quarter Annular Ring (large, small hole, top-right pivot) */}
-        <div className="fixed top-0 right-0 z-50" style={{ width: '50vw', height: '50vh' }}>
+        <div className="absolute top-0 right-0 z-0 pointer-events-none" style={{ width: '50vw', height: '50vh' }}>
           <svg viewBox="0 0 200 200" className="w-full h-full" style={{ transform: `rotate(-${rotation}deg)`, transition: 'transform 0.5s ease' }}>
             <defs>
               <clipPath id="quarterClip">
@@ -109,12 +93,18 @@ const Gallery = () => {
         </div>
 
         {/* Navigation (optional, or integrate into ring) */}
-        <div className="fixed top-4 right-4 z-40 flex gap-2">
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
           {sections.map((sec, idx) => (
             <button
               key={sec.id}
               onClick={() => handleSectionChange(sec.id, idx)}
-              className={`p-2 rounded-full ${currentSection === sec.id ? 'bg-accent' : theme.bg} ${theme.border}`}
+              className="p-2 rounded-full"
+              style={{
+                backgroundColor: currentSection === sec.id
+                  ? theme.accentSecondary
+                  : theme.colors.bg.card,
+                border: `1px solid ${theme.border}`
+              }}
             >
               <sec.icon size={24} color={theme.text} />
             </button>
@@ -124,21 +114,51 @@ const Gallery = () => {
         {/* Feed Display */}
         <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           {loading ? (
-            <p className={theme.text}>Loading feeds...</p>
+            <p style={{ color: theme.text }}>Loading feeds...</p>
           ) : (
             feeds[currentSection].map((item, idx) => (
-              <div key={idx} className={`p-4 ${theme.cardBg || theme.bg} ${theme.border} rounded-lg shadow-md`}>
-                {item.type === 'image' && <img src={item.media[0]} alt={item.caption} className="w-full h-auto" />}
-                {item.type === 'video' && <video src={item.media[0]} controls className="w-full h-auto" />}
+              <div
+                key={idx}
+                className="p-4 rounded-none shadow-md"
+                style={{
+                  backgroundColor: theme.colors.bg.card,
+                  border: `1px solid ${theme.border}`
+                }}
+              >
+                {item.type === 'image' && (
+                  <img
+                    src={item.media[0]}
+                    alt={item.caption}
+                    className="w-full h-auto"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                {item.type === 'video' && (
+                  <video
+                    src={item.media[0]}
+                    controls
+                    className="w-full h-auto"
+                    preload="none"
+                    playsInline
+                  />
+                )}
                 {item.type === 'carousel' && <div>Carousel: {item.media.length} items</div>}
-                <p className={theme.text}>{item.caption}</p>
-                <a href={item.externalUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500">View on {currentSection}</a>
+                <p style={{ color: theme.text }}>{item.caption}</p>
+                <a
+                  href={item.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: theme.accentTertiary }}
+                >
+                  View on {currentSection}
+                </a>
               </div>
             ))
           )}
         </div>
+        <div style={{ height: '40vh' }} />
       </div>
-    </MainLayout>
   );
 };
 

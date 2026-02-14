@@ -87,7 +87,7 @@ export default function BlogEditor() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/blog")}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm tracking-wide border transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-none text-sm tracking-wide border transition-colors"
               style={{
                 borderColor: theme.border,
                 color: theme.text,
@@ -115,7 +115,7 @@ export default function BlogEditor() {
           <button
             onClick={publish}
             disabled={!canPublish || isSubmitting}
-            className="px-8 py-3 rounded-lg text-sm tracking-wide border transition-all"
+            className="px-8 py-3 rounded-none text-sm tracking-wide border transition-all"
             style={{
               backgroundColor: canPublish && !isSubmitting ? theme.accent : theme.colors.bg.secondary,
               borderColor: canPublish && !isSubmitting ? theme.accent : theme.border,
@@ -147,7 +147,7 @@ export default function BlogEditor() {
             Title *
           </label>
           <input 
-            className="w-full border p-4 text-lg rounded-lg outline-none transition-colors"
+            className="w-full border p-4 text-lg rounded-none outline-none transition-colors"
             placeholder="Enter blog title..." 
             value={title} 
             onChange={e => setTitle(e.target.value)}
@@ -162,7 +162,7 @@ export default function BlogEditor() {
         {/* Auto-generated slug preview */}
         {slug && (
           <div 
-            className="px-4 py-3 rounded-lg border"
+            className="px-4 py-3 rounded-none border"
             style={{
               backgroundColor: theme.colors.bg.secondary,
               borderColor: theme.border
@@ -186,7 +186,7 @@ export default function BlogEditor() {
         {/* Auto-generated excerpt preview */}
         {excerpt && (
           <div 
-            className="px-4 py-3 rounded-lg border"
+            className="px-4 py-3 rounded-none border"
             style={{
               backgroundColor: theme.colors.bg.secondary,
               borderColor: theme.border

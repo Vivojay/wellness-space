@@ -16,7 +16,7 @@ function QuarterRingIndicator({ platforms, activeIndex, theme, isDark }) {
   
   return (
     <div 
-      className="fixed top-0 right-0 pointer-events-none z-[900]" 
+      className="absolute top-0 right-0 pointer-events-none z-10" 
       style={{ 
         width: '40vw', 
         height: '40vh',
@@ -175,10 +175,10 @@ export default function GalleryPage() {
       {/* Properly scrollable container with theme background */}
       <div
         ref={containerRef}
-        className="fixed inset-0 w-full h-full overflow-y-auto 
-          scroll-smooth snap-y snap-mandatory overscroll-behavior-y-contain text-white"
+        className="relative w-full min-h-screen overflow-y-visible scroll-smooth snap-y snap-mandatory overscroll-behavior-y-contain"
         style={{ 
           backgroundColor: theme.colors.bg.gallery,
+          color: theme.text,
           transition: 'background-color 0.5s ease'
         }}
       >

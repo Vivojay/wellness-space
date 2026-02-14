@@ -13,6 +13,7 @@
     "@studio-freight/lenis": "^1.0.42",
     "@tailwindcss/vite": "^4.1.18",
     "@uiw/react-md-editor": "^4.0.11",
+    "country-state-city": "^3.2.1",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
     "react": "18.3.1",

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useOutletContext } from "react-router-dom";
 import { FileText, BookOpen, ChevronLeft, ChevronRight, MousePointerClick } from "lucide-react";
 
 const pdfs = [
@@ -168,7 +169,8 @@ const pdfs = [
   }
 ];
 
-function ReadingsPage({ isDark }) {
+function ReadingsPage() {
+  const { isDark } = useOutletContext();
   const [query, setQuery] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -177,6 +179,9 @@ function ReadingsPage({ isDark }) {
   // const lastKeyTimeRef = useRef(0);
   const [isSidebarPinned, setIsSidebarPinned] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const pdfViewerRef = useRef(null);
+  const sidebarWidth = 320;
+  const entryWidth = 48;
 
   const theme = {
     bg: isDark ? 'bg-neutral-900' : 'bg-neutral-50',
@@ -215,6 +220,44 @@ function ReadingsPage({ isDark }) {
       setCurrentIndex(prev => Math.min(prev, filteredTotal - 1));
     }
   }, [filteredTotal]);
+
+  useEffect(() => {
+    if (!openPdf) return;
+    const prevOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow || "";
+      document.documentElement.style.overflow = prevHtmlOverflow || "";
+    };
+  }, [openPdf]);
+
+  useEffect(() => {
+    if (!openPdf) return;
+
+    const handleMove = (e) => {
+      if (isSidebarPinned) return;
+      const rect = pdfViewerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const insideY = e.clientY >= rect.top && e.clientY <= rect.bottom;
+      const leftEdge = rect.left;
+      const openEdge = leftEdge + sidebarWidth;
+
+      if (!isSidebarHovered) {
+        if (insideY && e.clientX >= leftEdge && e.clientX <= leftEdge + entryWidth) {
+          setIsSidebarHovered(true);
+        }
+        return;
+      }
+
+      if (e.clientX <= openEdge + 8) return;
+      if (e.clientX > openEdge + 8) setIsSidebarHovered(false);
+    };
+
+    window.addEventListener('pointermove', handleMove, { passive: true });
+    return () => window.removeEventListener('pointermove', handleMove);
+  }, [openPdf, isSidebarPinned, isSidebarHovered]);
 
   // ACCELERATING KEYBOARD NAVIGATION
   useEffect(() => {
@@ -404,7 +447,7 @@ function ReadingsPage({ isDark }) {
 
   return (
     // <div className={`min-h-screen ${theme.bg} ${theme.text} px-12 pt-32`}>
-    <div className={`relative h-screen overflow-hidden ${theme.bg} ${theme.text} px-12 pt-32`}>
+    <div className={`relative min-h-screen ${theme.text} px-12 pt-32 overflow-x-hidden`}>
       <div className="fixed inset-0 z-0 pointer-events-none">
         <svg
           className="fixed inset-0 w-full h-screen pointer-events-none"
@@ -440,6 +483,10 @@ function ReadingsPage({ isDark }) {
         
       </div>
 
+      <div className="absolute inset-0 z-[1] pointer-events-none" style={{
+        backgroundColor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.2)'
+      }} />
+
       <div className="relative z-10 h-full flex flex-col">
 
       {/* ENHANCED SEARCH + Results counter */}
@@ -461,7 +508,13 @@ function ReadingsPage({ isDark }) {
           />
           
           {/* Add the Ctrl+K indicator pill */}
-          <div className="absolute right-12 top-1/2 -translate-y-1/2 bg-neutral-400/30 text-neutral-700 text-xs px-3 py-2 font-mono select-none pointer-events-none">
+          <div
+            className="absolute right-12 top-1/2 -translate-y-1/2 text-xs px-3 py-2 font-mono select-none pointer-events-none"
+            style={{
+              backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+              color: isDark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.65)'
+            }}
+          >
             Ctrl + K
           </div>
 
@@ -499,12 +552,26 @@ function ReadingsPage({ isDark }) {
           {/* <div className="absolute inset-0 bg-black/40 backdrop-blur-xl" /> */}
 
           {/* Content */}
-          <div className="relative text-center p-12 bg-white/50 w-3xl shadow-xl backdrop-blur-xl">
-            <FileText className="w-20 h-20 mx-auto mb-6 text-black/70" />
-            <p className="text-3xl font-semibold text-black mb-2">
+          <div
+            className="relative text-center p-12 w-3xl shadow-xl backdrop-blur-xl"
+            style={{
+              backgroundColor: isDark ? 'rgba(20, 20, 20, 0.7)' : 'rgba(255, 255, 255, 0.7)'
+            }}
+          >
+            <FileText
+              className="w-20 h-20 mx-auto mb-6"
+              style={{ color: isDark ? 'rgba(245, 245, 245, 0.7)' : 'rgba(0, 0, 0, 0.7)' }}
+            />
+            <p
+              className="text-3xl font-semibold mb-2"
+              style={{ color: isDark ? '#f5f5f5' : '#111111' }}
+            >
               No matches found
             </p>
-            <p className="text-lg text-black/70">
+            <p
+              className="text-lg"
+              style={{ color: isDark ? 'rgba(245, 245, 245, 0.7)' : 'rgba(0, 0, 0, 0.7)' }}
+            >
               Try searching for "Guru", "Dutch", or "Shaktipat"
             </p>
           </div>
@@ -513,112 +580,146 @@ function ReadingsPage({ isDark }) {
 
 
       {/* ENHANCED LIBRARY */}
-      <div className="relative mx-auto" style={{ 
-        width: `${tileSize + (visibleCount-1) * peekOffset}px`,
-        height: `${tileSize + 80}px` // Extra height for descriptions
-      }}>
-        <div className={`absolute inset-0 flex items-center ${isAnimating ? 'transition-all duration-400 ease-out-back' : 'transition-all duration-300 ease-out'}`}>
-          {visiblePdfs.map(({ pdf, offset, leftPos, absOffset, heightScale, bgOpacity, textOpacity, blurValue }, index) => {
-            const isCenter = offset === 0 || filteredTotal <= 3;
-            const zIndex = 50 - absOffset;
-            const scaledHeight = tileSize * heightScale;
-            const topOffset = (tileSize - scaledHeight) / 2;
+      <div
+        className="relative mt-6 py-8"
+        style={{
+          backgroundColor: isDark ? 'rgba(10, 14, 16, 0.35)' : 'rgba(255, 255, 255, 0.5)'
+        }}
+      >
+        <div className="relative mx-auto" style={{ 
+          width: `${tileSize + (visibleCount-1) * peekOffset}px`,
+          height: `${tileSize + 80}px`
+        }}>
+          <div className={`absolute inset-0 flex items-center ${isAnimating ? 'transition-all duration-400 ease-out-back' : 'transition-all duration-300 ease-out'}`}>
+            {visiblePdfs.map(({ pdf, offset, leftPos, absOffset, heightScale, bgOpacity, textOpacity, blurValue }, index) => {
+              const isCenter = offset === 0 || filteredTotal <= 3;
+              const zIndex = 50 - absOffset;
+              const scaledHeight = tileSize * heightScale;
+              const topOffset = (tileSize - scaledHeight) / 2;
 
-            return (
-              <div
-                key={`${pdf.link}-${currentIndex}`}
-                style={{
-                  left: `calc(50% - ${tileSize/2}px + ${leftPos}px)`,
-                  zIndex,
-                  width: tileSize,
-                  height: scaledHeight,
-                  top: topOffset,
-                  transform: isCenter ? `scale(1.05)` : `scale(0.95)`,
-                  transformOrigin: 'center center',
-                }}
-                className={`absolute flex flex-col items-center justify-center cursor-pointer select-none border-1 overflow-hidden transition-all duration-300 group
-                  ${isCenter 
-                    ? 'border-neutral-400 shadow-2xl scale-100 hover:scale-105' 
-                    : 'border-neutral-300 hover:border-neutral-400 hover:shadow-xl'
-                  } 
-                  ${isAnimating ? 'will-change-transform transition-transform duration-400 ease-out-back' : 'transition-transform duration-300 ease-out'}
-                `}
-                onClick={() => handleTileClick(offset)}
-              >
-                {/* Enhanced background with glow */}
-                <div 
-                  className="absolute inset-0 border-inset group-hover:bg-gradient-to-br group-hover:from-neutral-100/20 group-hover:to-neutral-200/10 transition-all duration-300"
-                  style={{ 
-                    // Base colors for dark/light mode in RGB
-                    backgroundColor: isDark 
-                      ? `rgba(30,30,30,${bgOpacity})`    // dark mode: dark grey
-                      : `rgba(245,245,245,${bgOpacity})`, // light mode: whitish-grey
-                    backdropFilter: `blur(${blurValue}px)`   // dynamic blur
+              return (
+                <div
+                  key={`${pdf.link}-${currentIndex}`}
+                  style={{
+                    left: `calc(50% - ${tileSize/2}px + ${leftPos}px)`,
+                    zIndex,
+                    width: tileSize,
+                    height: scaledHeight,
+                    top: topOffset,
+                    transform: isCenter ? `scale(1.05)` : `scale(0.95)`,
+                    transformOrigin: 'center center',
                   }}
-                />
-
-                {/* Icon */}
-                <div className="flex-1 flex items-center justify-center z-20 pointer-events-none p-6">
-                  <FileText 
-                    className={`w-28 h-36 transition-all duration-300 group-hover:scale-110 ${isCenter ? 'w-36 h-44 scale-90 drop-shadow-2xl' : ''}`}
-                    style={{ opacity: textOpacity, color: 'hsl(0 0% 55%)' }}
+                  className={`absolute flex flex-col items-center justify-center cursor-pointer select-none border-1 overflow-hidden transition-all duration-300 group
+                    ${isCenter 
+                      ? 'border-neutral-400 shadow-2xl scale-100 hover:scale-105' 
+                      : 'border-neutral-300 hover:border-neutral-400 hover:shadow-xl'
+                    } 
+                    ${isAnimating ? 'will-change-transform transition-transform duration-400 ease-out-back' : 'transition-transform duration-300 ease-out'}
+                  `}
+                  onClick={() => handleTileClick(offset)}
+                >
+                  {/* Enhanced background with glow */}
+                  <div 
+                    className="absolute inset-0 border-inset group-hover:bg-gradient-to-br group-hover:from-neutral-100/20 group-hover:to-neutral-200/10 transition-all duration-300"
+                    style={{ 
+                      backgroundColor: isDark 
+                        ? `rgba(30,30,30,${bgOpacity})`
+                        : `rgba(245,245,245,${bgOpacity})`,
+                      backdropFilter: `blur(${blurValue}px)`
+                    }}
                   />
+
+                  {/* Icon */}
+                  <div className="flex-1 flex items-center justify-center z-20 pointer-events-none p-6">
+                    <FileText 
+                      className={`w-28 h-36 transition-all duration-300 group-hover:scale-110 ${isCenter ? 'w-36 h-44 scale-90 drop-shadow-2xl' : ''}`}
+                      style={{ opacity: textOpacity, color: 'hsl(0 0% 55%)' }}
+                    />
+                  </div>
+
+                  {/* NEW: Click indicator for center */}
+                  {isCenter && (
+                    <div className="absolute bottom-30 right-3 w-8 h-8 bg-teal-600 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300 z-30">
+                      <MousePointerClick className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+
+                  {/* Enhanced title + description */}
+                  {(isCenter || filteredTotal <= 3) && (
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[100%] z-20 px-0 pb-0 pt-0">
+                      <div className="bg-neutral-300/20 backdrop-blur-md px-4 py-13 border-neutral-500">
+                        <p
+                          className="text-xs font-semibold leading-tight tracking-wide mb-1 line-clamp-2"
+                          style={{ color: isDark ? '#ffffff' : 'rgba(0,0,0,0.95)' }}
+                        >
+                          {pdf.name}
+                        </p>
+                        <p className="text-xs text-neutral-400 font-normal leading-tight line-clamp-2">
+                          {pdf.desc || 'No Description'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ENHANCED Navigation buttons */}
+                  {!isCenter && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className={`text-sm font-bold px-6 py-3 border-2 shadow-2xl backdrop-blur-xl flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-white/20
+                        ${offset > 0 
+                          ? 'border-emerald-400 bg-emerald-500/95 text-white shadow-emerald-500/25 hover:bg-emerald-600' 
+                          : 'border-blue-400 bg-blue-500/95 text-white shadow-blue-500/25 hover:bg-blue-600'
+                        }`}>
+                        {offset > 0 ? (
+                          <>
+                            <ChevronRight className="w-4 h-4" />
+                            Next
+                          </>
+                        ) : (
+                          <>
+                            Prev
+                            <ChevronLeft className="w-4 h-4" />
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* NEW: Click indicator for center */}
-                {isCenter && (
-                  <div className="absolute bottom-30 right-3 w-8 h-8 bg-teal-600 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300 z-30">
-                    <MousePointerClick className="w-4 h-4 text-white" />
-                  </div>
-                )}
-
-                {/* Enhanced title + description */}
-                {(isCenter || filteredTotal <= 3) && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[100%] z-20 px-0 pb-0 pt-0">
-                    <div className="bg-neutral-300/20 backdrop-blur-md px-4 py-13 border-neutral-500">
-                      <p className="text-xs font-semibold leading-tight tracking-wide text-black/95 mb-1 line-clamp-2">
-                        {pdf.name}
-                      </p>
-                      <p className="text-xs text-neutral-400 font-normal leading-tight line-clamp-2">
-                        {pdf.desc || 'No Description'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* ENHANCED Navigation buttons */}
-                {!isCenter && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <div className={`text-sm font-bold px-6 py-3 border-2 shadow-2xl backdrop-blur-xl flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-white/20
-                      ${offset > 0 
-                        ? 'border-emerald-400 bg-emerald-500/95 text-white shadow-emerald-500/25 hover:bg-emerald-600' 
-                        : 'border-blue-400 bg-blue-500/95 text-white shadow-blue-500/25 hover:bg-blue-600'
-                      }`}>
-                      {offset > 0 ? (
-                        <>
-                          <ChevronRight className="w-4 h-4" />
-                          Next
-                        </>
-                      ) : (
-                        <>
-                          Prev
-                          <ChevronLeft className="w-4 h-4" />
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-        
-        {/* Index indicator */}
+
+        <div className="mt-6 flex justify-center">
+          <div
+            className="backdrop-blur-md px-4 py-2 border text-xs font-mono"
+            style={{
+              backgroundColor: isDark ? 'rgba(15, 18, 22, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+              borderColor: theme.border,
+              color: theme.text
+            }}
+          >
+            <span>Arrow ← → to navigate</span>
+            <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+            <span>Enter to open</span>
+            <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+            <span>Esc to close</span>
+          </div>
+        </div>
+
         {filteredTotal > 0 && (
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md px-6 py-3 border border-white/30 shadow-2xl z-40">
-            <span className="text-sm font-bold text-white tracking-wide">
-              {Math.floor(currentIndex) + 1} / {filteredTotal}
-            </span>
+          <div className="mt-3 flex justify-center">
+            <div
+              className="backdrop-blur-md px-6 py-3 border shadow-2xl"
+              style={{
+                backgroundColor: isDark ? 'rgba(10, 12, 16, 0.85)' : 'rgba(255, 255, 255, 0.9)',
+                borderColor: theme.border,
+                color: theme.text
+              }}
+            >
+              <span className="text-sm font-bold tracking-wide">
+                {Math.floor(currentIndex) + 1} / {filteredTotal}
+              </span>
+            </div>
           </div>
         )}
       </div>
@@ -626,42 +727,42 @@ function ReadingsPage({ isDark }) {
       {/* PDF OVERLAY - enhanced */}
       {openPdf && (
         <div
-          className="fixed inset-0 z-[1000] bg-black/55 backdrop-blur-lg flex items-center justify-center p-6" 
+          className="fixed inset-0 z-[1000] bg-black/55 backdrop-blur-lg flex justify-center overflow-y-auto" 
+          style={{ touchAction: 'pan-y pinch-zoom', padding: '120px 16px 24px' }}
           onClick={(e) => {
             if (!e.target.closest('.pdf-viewer-content')) {
               setOpenPdf(null);
             }
           }}
         >
-          <div className={`relative pdf-viewer-content ${theme.cardBg} shadow-2xl border border-neutral-800/30 max-w-[100rem] max-h-[92vh] w-full h-full overflow-hidden flex`}>
-            
-            {/* Collapsible Description Sidebar with proper hover handling */}
-            <div 
-              className="group relative"
-              onMouseEnter={() => !isSidebarPinned && setIsSidebarHovered(true)}
-              onMouseLeave={(e) => {
-                // Only collapse if mouse leaves the sidebar entirely (not just moves to the right)
-                const relatedTarget = e.relatedTarget;
-                const sidebar = e.currentTarget;
-                
-                // Check if mouse is leaving to outside the sidebar area
-                if (!isSidebarPinned && !sidebar.contains(relatedTarget)) {
-                  setIsSidebarHovered(false);
-                }
+            <div
+              ref={pdfViewerRef}
+              className={`relative pdf-viewer-content ${theme.cardBg} shadow-2xl border border-neutral-800/30 max-w-[100rem] w-full overflow-hidden flex`}
+              style={{
+                touchAction: 'pan-y pinch-zoom',
+                height: 'calc(100vh - 144px)',
+                maxHeight: 'calc(100vh - 144px)'
               }}
             >
-              {/* Invisible hover trigger */}
-              <div
-                className="absolute top-0 right-[-48px] h-full w-12 z-20"
-                onMouseEnter={() => !isSidebarPinned && setIsSidebarHovered(true)}
-              />
+             
+            {/* Hover trigger always available */}
+            <div
+              className="absolute left-0 top-0 h-full w-12 z-50"
+              onMouseEnter={() => !isSidebarPinned && setIsSidebarHovered(true)}
+            />
 
-              {/* Single thin vertical teal pull-tab/pill - Shows only in collapsed state */}
-              <div className={`
-                absolute top-1/2 -translate-y-1/2 w-1.5 h-24 bg-teal-200 rounded-full z-30 pointer-events-none transition-all duration-300
-                ${(isSidebarPinned || isSidebarHovered) ? 'right-[-12px]' : '-right-3'}
-              `}></div>
-              
+            {/* Single thin vertical teal pull-tab/pill */}
+            <div
+              className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-24 bg-teal-200 rounded-full z-50 pointer-events-none transition-all duration-300 ${
+                isSidebarPinned || isSidebarHovered ? 'left-[308px]' : 'left-2'
+              }`}
+            />
+
+            {/* Collapsible Description Sidebar with proper hover handling */}
+            <div 
+              className="absolute left-0 top-0 h-full z-40"
+              style={{ pointerEvents: isSidebarPinned || isSidebarHovered ? 'auto' : 'none' }}
+            >
               {/* Sidebar Content */}
               <div className={`
                 h-full ${theme.cardBg} border-r ${theme.border} flex flex-col overflow-hidden transition-all duration-300 ease-out
@@ -795,9 +896,9 @@ function ReadingsPage({ isDark }) {
             </div>
             
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="h-full flex-1 flex flex-col min-w-0 overflow-hidden">
               {/* Header with better font and rectangular close button */}
-              <div className={`relative flex items-center justify-between px-8 py-5 border-b ${theme.border} bg-gradient-to-r from-transparent via-neutral-50/5 to-transparent ${isDark ? 'via-neutral-800/5' : ''}`}>
+              <div className={`sticky top-0 z-30 flex items-center justify-between px-8 py-5 border-b ${theme.border} bg-gradient-to-r from-transparent via-neutral-50/5 to-transparent ${isDark ? 'via-neutral-800/5' : ''}`}>
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="flex-shrink-0">
                     <FileText className="w-8 h-10 text-neutral-500" />
@@ -805,8 +906,11 @@ function ReadingsPage({ isDark }) {
                   <div className="min-w-0">
                     {/* Better font for PDF title - using font-sans with better tracking */}
                       <h2
-                        className="text-2xl font-semibold tracking-wide leading-tight truncate text-neutral-600"
-                        style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                        className="text-2xl font-semibold tracking-wide leading-tight truncate"
+                        style={{
+                          fontFamily: "'Source Sans 3', sans-serif",
+                          color: theme.text
+                        }}
                       >
                         {openPdf.name}
                       </h2>
@@ -833,11 +937,12 @@ function ReadingsPage({ isDark }) {
                   title={openPdf.name}
                   loading="lazy"
                   allow="fullscreen"
+                  style={{ touchAction: 'pinch-zoom' }}
                 />
               </div>
 
               {/* Footer */}
-              <div className={`px-8 py-4 border-t ${theme.border} flex items-center justify-between`}>
+              <div className={`px-8 py-4 border-t ${theme.border} flex flex-col items-center gap-3`}>
                 <div className={`text-sm ${theme.textSecondary} flex items-center gap-3`}>
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
@@ -867,14 +972,6 @@ function ReadingsPage({ isDark }) {
         </div>
       )}
 
-      {/* Keyboard hints */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1 bg-black/50 backdrop-blur-md px-4 py-2 border border-white/20 text-xs text-neutral-100 font-mono z-30">
-        <span>Arrow ← → to navigate</span>
-        <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-        <span>Click to read</span>
-        <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-        <span>[Ctrl+K] to search</span>
-      </div>
     </div>
     </div>
   );

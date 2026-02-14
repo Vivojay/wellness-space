@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { Plus, Pencil, Trash2, ArrowUpDown, Calendar, TrendingUp } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUpDown, Calendar, RotateCcw } from "lucide-react";
+import { fetchBlogs } from "@/api/blogApi";
 
 export default function BlogIndex() {
   const { isDark, theme } = useOutletContext();
@@ -12,13 +13,17 @@ export default function BlogIndex() {
   const [toDate, setToDate] = useState("");
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/blog`)
-      .then(res => res.json())
+    let isMounted = true;
+    fetchBlogs()
       .then(data => {
+        if (!isMounted) return;
         setBlogs(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -67,25 +72,35 @@ export default function BlogIndex() {
             Writings, reflections, and insights
           </p>
 
-          {/* Latest indicator */}
-          <div 
-            className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+          {/* Refresh indicator */}
+          <button
+            onClick={() => {
+              setLoading(true);
+              fetchBlogs({ force: true })
+                .then(data => {
+                  setBlogs(Array.isArray(data) ? data : []);
+                  setLoading(false);
+                })
+                .catch(() => setLoading(false));
+            }}
+            className="mt-6 inline-flex items-center gap-2 px-4 py-2 border transition-colors rounded-none"
             style={{
               borderColor: theme.accentTertiary + '40',
-              backgroundColor: theme.accentTertiary + '15'
+              backgroundColor: theme.accentTertiary + '15',
+              color: theme.accent
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.accentTertiary + '25';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = theme.accentTertiary + '15';
+            }}
+            aria-label="Refresh blogs"
+            title="Refresh"
           >
-            <TrendingUp 
-              size={14} 
-              style={{ color: theme.accentTertiary }}
-            />
-            <span 
-              className="text-[10px] tracking-[0.35em] uppercase font-medium"
-              style={{ color: theme.accent }}
-            >
-              {newestFirst ? "Latest on top" : "Oldest on top"}
-            </span>
-          </div>
+            <RotateCcw size={14} style={{ color: isDark ? '#ffffff' : '#000000' }} />
+            <span className="text-[10px] tracking-[0.35em] uppercase font-medium">Refresh</span>
+          </button>
         </div>
 
         {/* Controls row */}
@@ -93,7 +108,7 @@ export default function BlogIndex() {
           {/* Sort toggle */}
           <button
             onClick={() => setNewestFirst(v => !v)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-none border transition-colors"
             style={{
               backgroundColor: theme.colors.bg.card,
               borderColor: theme.border,
@@ -107,7 +122,7 @@ export default function BlogIndex() {
           {/* Date range filter */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <div 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-none border"
               style={{
                 backgroundColor: theme.colors.bg.card,
                 borderColor: theme.border
@@ -141,7 +156,7 @@ export default function BlogIndex() {
               {(fromDate || toDate) && (
                 <button
                   onClick={() => { setFromDate(""); setToDate(""); }}
-                  className="ml-2 text-xs px-2 py-1 rounded-lg border transition-colors"
+                  className="ml-2 text-xs px-2 py-1 rounded-none border transition-colors"
                   style={{
                     backgroundColor: theme.colors.bg.primary,
                     borderColor: theme.border,
@@ -200,7 +215,7 @@ export default function BlogIndex() {
             {filtered.map((b) => (
               <div
                 key={b.slug}
-                className="relative group border rounded-2xl p-7 transition-all hover:shadow-lg"
+                className="relative group border rounded-none p-7 transition-all hover:shadow-lg"
                 style={{
                   backgroundColor: theme.colors.bg.card,
                   borderColor: theme.border
@@ -210,7 +225,7 @@ export default function BlogIndex() {
                 <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition flex gap-2">
                   <Link
                     to={`/blog/edit/${b.slug}`}
-                    className="w-10 h-10 rounded-full border flex items-center justify-center transition-all"
+                    className="w-10 h-10 rounded-none border flex items-center justify-center transition-all"
                     style={{
                       backgroundColor: theme.colors.bg.card,
                       borderColor: theme.border
@@ -222,7 +237,7 @@ export default function BlogIndex() {
                   </Link>
 
                   <button
-                    className="w-10 h-10 rounded-full border flex items-center justify-center transition-all"
+                    className="w-10 h-10 rounded-none border flex items-center justify-center transition-all"
                     style={{
                       backgroundColor: theme.colors.bg.card,
                       borderColor: theme.border

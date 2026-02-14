@@ -42,3 +42,42 @@ body {
   margin: 0;
   overflow: hidden; /* important: prevents the outer page from scrolling */
 }
+
+.app-shell {
+  height: 100vh;
+  overflow: hidden;
+}
+
+@media (pointer: coarse) {
+  body {
+    overflow: auto;
+  }
+
+  .app-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+}
+
+@media (pointer: fine) {
+  .app-shell,
+  .app-shell * {
+    cursor: none;
+  }
+}
+
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 800px;
+}
+
+.gradient-text {
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background-color: transparent !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+}

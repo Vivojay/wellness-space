@@ -22,6 +22,8 @@ export default function CarouselMedia({ media = [], className = "" }) {
         src={media[index]}
         className="w-full h-full object-cover"
         draggable={false}
+        loading="lazy"
+        decoding="async"
       />
 
       {media.length > 1 && (

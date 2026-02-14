@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Minus } from 'lucide-react';
 
-const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems, activeOverlay, setActiveOverlay, feedPanelRef }) => {
+const RightFeed = ({ theme, isDark, rightFeedOpen, setRightFeedOpen, feedItems, activeOverlay, setActiveOverlay, feedPanelRef }) => {
   const feedRef = useRef(null);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems, activeOv
               className="text-xs tracking-[0.25em]"
               style={{ color: theme.text }}
             >
-              FEED
+              FEED [UNDER DEVELOPMENT]
             </span>
             <button
               onClick={() => setRightFeedOpen(false)}
@@ -74,7 +74,7 @@ const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems, activeOv
               style={{
                 backgroundColor: theme.accentSecondary,
                 borderColor: theme.borderStrong,
-                color: theme.text
+                color: isDark ? theme.textMuted : theme.text
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = theme.accent;
@@ -83,7 +83,7 @@ const RightFeed = ({ theme, rightFeedOpen, setRightFeedOpen, feedItems, activeOv
                 e.currentTarget.style.backgroundColor = theme.accentSecondary;
               }}
             >
-              <Minus className="w-4 h-4" />
+              <Minus className="w-4 h-4" style={{ color: isDark ? theme.textMuted : theme.text }} />
             </button>
           </div>
 

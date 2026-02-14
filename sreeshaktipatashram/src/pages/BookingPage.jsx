@@ -1,23 +1,20 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, RotateCcw } from "lucide-react";
 
 import bgImage from '/photos/Blue Pastel Abstract Grid Line BG.png';
+import { colorPalettes } from "@/config/themeConfig";
+import { Country, State } from "country-state-city";
 
 const BG_IMG =
   "https://dhunwellness.com/cdn/shop/files/Sound_healing_room.jpg?v=1751348144&width=1920";
 
-const COUNTRY_META = {
-  India: { code: "+91", states: ["Maharashtra", "Delhi", "Karnataka", "Tamil Nadu", "West Bengal"] },
-  USA: { code: "+1", states: ["California", "New York", "Texas", "Florida", "Illinois"] },
-  UK: { code: "+44", states: ["England", "Scotland", "Wales", "Northern Ireland"] },
-  Canada: { code: "+1", states: ["Ontario", "Quebec", "British Columbia", "Alberta"] },
-  Australia: { code: "+61", states: ["New South Wales", "Victoria", "Queensland", "Western Australia"] },
-};
+const AGE_MIN = 16;
+const AGE_MAX = 100;
 
-function Field({ label, children, hint, error, theme }) {
+function Field({ label, children, hint, error, theme, clearAction, className = "" }) {
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className}`}>
       <div className="flex items-end justify-between gap-4">
         <label className="text-sm tracking-wide" style={{ color: theme.textLight }}>
           {label}
@@ -25,15 +22,19 @@ function Field({ label, children, hint, error, theme }) {
         {hint && <span className="text-[11px]" style={{ color: theme.textMuted }}>{hint}</span>}
       </div>
       {children}
+      {clearAction}
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }
 
-function InputBase({ theme, className = "", error, ...props }) {
+function InputBase({ theme, className = "", error, title, value, ...props }) {
+  const resolvedTitle = title ?? (value !== undefined && value !== null ? String(value) : "");
   return (
     <input
       {...props}
+      value={value}
+      title={resolvedTitle}
       className={`w-full px-4 py-3 outline-none transition-colors ${className}`}
       style={{
         backgroundColor: theme.colors.bg.card,
@@ -47,11 +48,14 @@ function InputBase({ theme, className = "", error, ...props }) {
   );
 }
 
-function SelectBase({ className = "", theme, error, ...props }) {
+function SelectBase({ className = "", theme, error, style, title, value, ...props }) {
+  const resolvedTitle = title ?? (value !== undefined && value !== null ? String(value) : "");
   return (
     <div className="relative">
       <select
         {...props}
+        value={value}
+        title={resolvedTitle}
         className={`w-full appearance-none px-4 py-3 pr-10 outline-none transition-colors ${className}`}
         style={{
           backgroundColor: theme.colors.bg.card,
@@ -59,7 +63,8 @@ function SelectBase({ className = "", theme, error, ...props }) {
             ? '1px solid rgba(239, 68, 68, 0.6)' 
             : `1px solid ${theme.border}`,
           color: theme.text,
-          boxShadow: error ? '0 0 0 2px rgba(239, 68, 68, 0.1)' : 'none'
+          boxShadow: error ? '0 0 0 2px rgba(239, 68, 68, 0.1)' : 'none',
+          ...style
         }}
       />
       <ChevronDown
@@ -71,10 +76,13 @@ function SelectBase({ className = "", theme, error, ...props }) {
   );
 }
 
-function TextAreaBase({ theme, className = "", ...props }) {
+function TextAreaBase({ theme, className = "", title, value, ...props }) {
+  const resolvedTitle = title ?? (value !== undefined && value !== null ? String(value) : "");
   return (
     <textarea
       {...props}
+      value={value}
+      title={resolvedTitle}
       className={`w-full min-h-[140px] px-4 py-3 outline-none transition-colors resize-y ${className}`}
       style={{
         backgroundColor: theme.colors.bg.card,
@@ -90,12 +98,24 @@ function TextAreaBase({ theme, className = "", ...props }) {
 
 export default function BookingPage() {
   const navigate = useNavigate();
-  const { isDark, theme } = useOutletContext();
+  const { isDark, theme, setCursorVariant } = useOutletContext();
   const [step, setStep] = useState(0);
   const [attemptedNext, setAttemptedNext] = useState(false);
   const [errors, setErrors] = useState({});
-  const [location, setLocation] = useState({ country: "India", state: "", city: "" });
-  const [phoneCode, setPhoneCode] = useState(COUNTRY_META["India"].code);
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const defaultCountry = useMemo(
+    () => countries.find((c) => c.name === "India") || countries[0],
+    [countries]
+  );
+  const [location, setLocation] = useState(() => ({
+    country: defaultCountry?.name ?? "",
+    countryCode: defaultCountry?.isoCode ?? "",
+    state: "",
+    city: ""
+  }));
+  const [phoneCode, setPhoneCode] = useState(() =>
+    defaultCountry?.phonecode ? `+${defaultCountry.phonecode}` : ""
+  );
 
   const [form, setForm] = useState({
     fullName: "",
@@ -109,9 +129,10 @@ export default function BookingPage() {
     childrenCount: "",
     phone: "",
     whyJoin: "",
+    medsTaking: "",
     meds: "",
     healthIssues: "",
-    initiatedBefore: "no",
+    initiatedBefore: "",
     lineageDetails: "",
     subscribe: false,
   });
@@ -125,11 +146,50 @@ export default function BookingPage() {
     return { ok: true, msg: "Valid email." };
   }, [form.email]);
 
-  useEffect(() => {
-    const meta = COUNTRY_META[location.country];
-    if (meta) setPhoneCode(meta.code);
-    setLocation((p) => ({ ...p, state: "", city: "" }));
-  }, [location.country]);
+  const phoneCodes = useMemo(() => {
+    const unique = new Set(
+      countries
+        .map((c) => String(c.phonecode || "").replace(/^\+/, ""))
+        .filter(Boolean)
+    );
+    return Array.from(unique)
+      .sort((a, b) => Number(a) - Number(b))
+      .map((code) => `+${code}`);
+  }, [countries]);
+
+  const getCountryByCode = (code) =>
+    countries.find((country) => country.isoCode === code);
+
+  const applyCountry = (country) => {
+    if (!country) return;
+    setLocation((p) => ({
+      ...p,
+      country: country.name,
+      countryCode: country.isoCode,
+      state: "",
+      city: ""
+    }));
+    const normalized = String(country.phonecode || "").replace(/^\+/, "");
+    setPhoneCode(normalized ? `+${normalized}` : "");
+  };
+
+  const setPhoneCodeAndCountry = (code) => {
+    if (!code) {
+      setPhoneCode("");
+      return;
+    }
+    const normalized = String(code).replace(/^\+/, "");
+    const matches = countries.filter(
+      (c) => String(c.phonecode || "").replace(/^\+/, "") === normalized
+    );
+    if (!matches.length) {
+      setPhoneCode(code);
+      return;
+    }
+    const currentMatch = matches.find((c) => c.isoCode === location.countryCode);
+    const nextCountry = currentMatch || matches[0];
+    applyCountry(nextCountry);
+  };
 
   const steps = useMemo(
     () => [
@@ -142,10 +202,12 @@ export default function BookingPage() {
     []
   );
 
-  const set = (key) => (e) => {
-    const value =
-      e?.target?.type === "checkbox" ? e.target.checked : e.target.value;
-    setForm((p) => ({ ...p, [key]: value }));
+  const statesForCountry = useMemo(() => {
+    if (!location.countryCode) return [];
+    return State.getStatesOfCountry(location.countryCode) || [];
+  }, [location.countryCode]);
+
+  const clearError = (key) => {
     if (errors[key]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -155,21 +217,136 @@ export default function BookingPage() {
     }
   };
 
+  const set = (key) => (e) => {
+    const value =
+      e?.target?.type === "checkbox" ? e.target.checked : e.target.value;
+    setForm((p) => ({ ...p, [key]: value }));
+    clearError(key);
+  };
+
+  const setMedsTaking = (e) => {
+    const value = e?.target?.value ?? "";
+    setForm((p) => ({
+      ...p,
+      medsTaking: value,
+      meds: value === "yes" ? p.meds : ""
+    }));
+  };
+
+  const cursorTextHandlers = {
+    onMouseEnter: () => setCursorVariant?.('text'),
+    onMouseLeave: () => setCursorVariant?.('default')
+  };
+
+  const renderClear = (onClick, disabled) => (
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className="text-[11px] tracking-wide inline-flex items-center gap-1 px-2 py-1 rounded-full"
+        style={{
+          color: disabled ? theme.textMuted : theme.accent,
+          backgroundColor: 'transparent',
+          opacity: disabled ? 0.6 : 1
+        }}
+        onMouseEnter={(e) => {
+          if (!disabled) {
+            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.color = theme.accentHover;
+            e.currentTarget.style.textDecoration = 'underline';
+            e.currentTarget.style.backgroundColor = theme.accent + '18';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!disabled) {
+            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.color = theme.accent;
+            e.currentTarget.style.textDecoration = 'none';
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
+      >
+        <RotateCcw size={12} />
+        Reset
+      </button>
+    </div>
+  );
+
+  const setAge = (e) => {
+    const raw = e?.target?.value ?? "";
+    if (raw === "") {
+      setForm((p) => ({ ...p, age: "" }));
+      clearError("age");
+      return;
+    }
+    if (!/^[0-9]+$/.test(raw)) return;
+    setForm((p) => ({ ...p, age: raw }));
+    clearError("age");
+  };
+
+  const clampAge = () => {
+    const raw = String(form.age ?? "").trim();
+    if (!raw) return;
+    const parsed = Number(raw);
+    if (Number.isNaN(parsed)) return;
+    const nextValue = String(Math.min(Math.max(parsed, AGE_MIN), AGE_MAX));
+    if (nextValue !== raw) {
+      setForm((p) => ({ ...p, age: nextValue }));
+    }
+  };
+
+  const bumpAge = (delta) => {
+    setForm((p) => {
+      const raw = String(p.age ?? "").trim();
+      const base = raw ? Number(raw) : AGE_MIN;
+      const safeBase = Number.isNaN(base) ? AGE_MIN : base;
+      const nextValue = Math.min(Math.max(safeBase + delta, AGE_MIN), AGE_MAX);
+      return { ...p, age: String(nextValue) };
+    });
+    clearError("age");
+  };
+
   const validateStep = (stepIndex) => {
     const newErrors = {};
+    const phoneDigits = form.phone.replace(/\D/g, "");
 
     if (stepIndex === 0) {
       if (!form.fullName.trim()) newErrors.fullName = "Full name is required";
-      if (!String(form.age).trim()) newErrors.age = "Age is required";
+      if (!String(form.age).trim()) {
+        newErrors.age = "Age is required";
+      } else {
+        const ageValue = Number(form.age);
+        if (Number.isNaN(ageValue) || ageValue < AGE_MIN || ageValue > AGE_MAX) {
+          newErrors.age = `Age must be between ${AGE_MIN} and ${AGE_MAX}`;
+        }
+      }
       if (!form.gender) newErrors.gender = "Gender is required";
+      if (!location.countryCode) newErrors.country = "Country is required";
+      if (statesForCountry.length > 0 && !location.state) {
+        newErrors.state = "State is required";
+      }
       if (!location.city.trim()) newErrors.city = "City is required";
       if (!emailInfo.ok) newErrors.email = emailInfo.msg;
-      if (!form.phone.trim()) newErrors.phone = "Phone number is required";
+      if (!phoneCode) newErrors.phoneCode = "Country code is required";
+      if (!phoneDigits) {
+        newErrors.phone = "Phone number is required";
+      } else if (phoneDigits.length !== 10) {
+        newErrors.phone = "Phone number must be 10 digits";
+      }
     }
 
     if (stepIndex === 1) {
       if (!form.education.trim()) newErrors.education = "Education is required";
       if (!form.religion.trim()) newErrors.religion = "Religion is required";
+      if (!form.maritalStatus) newErrors.maritalStatus = "Marital status is required";
+    }
+
+    if (stepIndex === 2) {
+      if (!form.medsTaking) newErrors.medsTaking = "Please select an option";
+      if (!form.healthIssues.trim()) {
+        newErrors.healthIssues = "Health issues detail is required";
+      }
     }
 
     if (stepIndex === 3) {
@@ -184,17 +361,27 @@ export default function BookingPage() {
 
   const canNext = () => {
     if (step === 0) {
+      const ageValue = Number(form.age);
+      const phoneDigits = form.phone.replace(/\D/g, "");
       return (
         form.fullName.trim() &&
         String(form.age).trim() &&
+        !Number.isNaN(ageValue) &&
+        ageValue >= AGE_MIN &&
+        ageValue <= AGE_MAX &&
         form.gender &&
+        location.countryCode &&
+        (statesForCountry.length === 0 || location.state) &&
         location.city.trim() &&
         emailInfo.ok &&
-        form.phone.trim()
+        phoneCode &&
+        phoneDigits.length === 10
       );
     }
-    if (step === 1) return form.education.trim() && form.religion.trim();
-    if (step === 2) return true;
+    if (step === 1) {
+      return form.education.trim() && form.religion.trim() && form.maritalStatus;
+    }
+    if (step === 2) return form.medsTaking && form.healthIssues.trim();
     if (step === 3) return form.initiatedBefore !== "";
     return true;
   };
@@ -212,8 +399,9 @@ export default function BookingPage() {
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async () => {
+    const { medsTaking, ...rest } = form;
     const payload = {
-      ...form,
+      ...rest,
       city: `${location.city}${location.state ? `, ${location.state}` : ""}, ${location.country}`,
       phone: `${phoneCode} ${form.phone}`.trim(),
     };
@@ -233,19 +421,27 @@ export default function BookingPage() {
     }
   };
 
+  const ageNumber = String(form.age).trim() ? Number(form.age) : null;
+  const ageAtMin = ageNumber === null || Number.isNaN(ageNumber) || ageNumber <= AGE_MIN;
+  const ageAtMax = ageNumber !== null && !Number.isNaN(ageNumber) && ageNumber >= AGE_MAX;
+
   return (
     <div 
-      className="min-h-screen text-white relative"
-      style={{ backgroundColor: theme.colors.bg.primary }}
+      className="min-h-screen relative"
+      style={{
+        backgroundColor: 'transparent',
+        color: theme.text
+      }}
     >
-      <div className="absolute inset-0 overflow-y-auto">
+      <div className="relative">
         {/* Background image */}
-        <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <img
             src={BG_IMG}
             alt=""
             className="w-full h-full object-cover"
-            loading="eager"
+            loading="lazy"
+            decoding="async"
           />
           <div 
             className="absolute inset-0"
@@ -256,16 +452,17 @@ export default function BookingPage() {
 
         {/* Centered modal */}
         <div className="relative z-10 px-6 py-16 flex items-center justify-center min-h-screen">
-          <div
-            className="w-full max-w-4xl border shadow-2xl flex flex-col"
-            style={{
-              backgroundImage: `linear-gradient(${isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.1)'}, ${isDark ? 'rgba(20, 60, 80, 0.5)' : 'rgba(108, 229, 250, 0.3)'}), url(${bgImage})`,
-              backgroundSize: '200%',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: '-700px 0px',
-              backgroundColor: theme.colors.bg.card,
-            }}
-          >
+            <div
+              className="w-full max-w-4xl border shadow-2xl flex flex-col"
+              style={{
+                backgroundImage: `linear-gradient(${isDark ? 'rgba(6, 12, 16, 0.85)' : 'rgba(255, 255, 255, 0.1)'}, ${isDark ? 'rgba(10, 22, 30, 0.85)' : 'rgba(108, 229, 250, 0.3)'}), url(${bgImage})`,
+                backgroundSize: '200%',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '-700px 0px',
+                backgroundColor: theme.colors.bg.card,
+                borderColor: theme.border,
+              }}
+            >
             {/* Header */}
             <div 
               className="px-10 py-8 border-b"
@@ -345,7 +542,19 @@ export default function BookingPage() {
             <div className="px-10 py-10">
               {step === 0 && (
                 <div className="grid md:grid-cols-2 gap-8">
-                  <Field label="Full Name" error={errors.fullName} theme={theme}>
+                  <Field
+                    label="Full Name"
+                    error={errors.fullName}
+                    theme={theme}
+                    clearAction={renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, fullName: "" }));
+                        clearError("fullName");
+                      },
+                      !form.fullName
+                    )}
+                    className="md:col-span-2"
+                  >
                     <InputBase
                       theme={theme}
                       type="text"
@@ -354,81 +563,257 @@ export default function BookingPage() {
                       placeholder="Your full name"
                       autoComplete="name"
                       error={errors.fullName}
+                      {...cursorTextHandlers}
                     />
                   </Field>
 
-                  <Field label="Age" error={errors.age} theme={theme}>
-                    <InputBase
-                      theme={theme}
-                      type="number"
-                      min="0"
-                      value={form.age}
-                      onChange={set("age")}
-                      placeholder="Your age"
-                      error={errors.age}
-                    />
-                  </Field>
-
-                  <Field label="Gender" error={errors.gender} theme={theme}>
-                    <SelectBase
-                      theme={theme}
-                      value={form.gender}
-                      onChange={set("gender")}
+                  <div className="grid gap-8">
+                    <Field
+                      label="Gender"
                       error={errors.gender}
+                      theme={theme}
+                      clearAction={renderClear(
+                        () => {
+                          setForm((p) => ({ ...p, gender: "" }));
+                          clearError("gender");
+                        },
+                        !form.gender
+                      )}
                     >
-                      <option value="">Select…</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                      <option value="celibate">Celibate</option>
-                    </SelectBase>
-                  </Field>
-
-                  <Field label="Location" error={errors.city} theme={theme}>
-                    <div className="grid sm:grid-cols-3 gap-4">
                       <SelectBase
                         theme={theme}
-                        value={location.country}
-                        onChange={(e) =>
-                          setLocation((p) => ({ ...p, country: e.target.value }))
-                        }
+                        value={form.gender}
+                        onChange={set("gender")}
+                        error={errors.gender}
+                        {...cursorTextHandlers}
                       >
-                        {Object.keys(COUNTRY_META).map((c) => (
-                          <option key={c} value={c}>
-                            {c}
+                        <option value="">Select…</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </SelectBase>
+                    </Field>
+
+                    <Field
+                      label="Age"
+                      error={errors.age}
+                      theme={theme}
+                      clearAction={renderClear(
+                        () => {
+                          setForm((p) => ({ ...p, age: "" }));
+                          clearError("age");
+                        },
+                        !String(form.age).trim()
+                      )}
+                    >
+                      <div className="grid grid-cols-[44px_1fr_44px] gap-3 items-center">
+                        <button
+                          type="button"
+                          onClick={() => bumpAge(-1)}
+                          disabled={ageAtMin}
+                          className="h-11 w-11 border text-lg font-semibold transition-colors"
+                          style={{
+                          borderColor: ageAtMin
+                            ? theme.borderLight
+                            : isDark
+                              ? theme.borderStrong
+                              : theme.border,
+                          color: ageAtMin
+                            ? theme.textMuted
+                            : theme.text,
+                          backgroundColor: ageAtMin
+                            ? theme.colors.bg.secondary
+                            : isDark
+                              ? theme.colors.bg.secondary
+                              : theme.colors.bg.card,
+                            cursor: ageAtMin ? 'not-allowed' : 'pointer'
+                          }}
+                          aria-label="Decrease age"
+                        >
+                          -
+                        </button>
+
+                        <InputBase
+                          theme={theme}
+                          type="number"
+                          min={AGE_MIN}
+                          max={AGE_MAX}
+                          value={form.age}
+                          onChange={setAge}
+                          onBlur={clampAge}
+                          placeholder="Your age"
+                          error={errors.age}
+                          className="text-center"
+                          inputMode="numeric"
+                          {...cursorTextHandlers}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => bumpAge(1)}
+                          disabled={ageAtMax}
+                          className="h-11 w-11 border text-lg font-semibold transition-colors"
+                          style={{
+                          borderColor: ageAtMax
+                            ? theme.borderLight
+                            : isDark
+                              ? theme.borderStrong
+                              : theme.border,
+                          color: ageAtMax
+                            ? theme.textMuted
+                            : theme.text,
+                          backgroundColor: ageAtMax
+                            ? theme.colors.bg.secondary
+                            : isDark
+                              ? theme.colors.bg.secondary
+                              : theme.colors.bg.card,
+                            cursor: ageAtMax ? 'not-allowed' : 'pointer'
+                          }}
+                          aria-label="Increase age"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </Field>
+                  </div>
+
+                  <div
+                    className="grid gap-8 border p-5"
+                    style={{
+                      borderColor: theme.border,
+                      backgroundColor: theme.colors.bg.secondary,
+                      fontSize: '0.75rem'
+                    }}
+                  >
+                    <Field label="Country" theme={theme} error={errors.country}>
+                      <SelectBase
+                        theme={theme}
+                        value={location.countryCode}
+                        title={location.country}
+                        onChange={(e) => {
+                          if (!e.target.value) {
+                            setLocation((p) => ({
+                              ...p,
+                              country: "",
+                              countryCode: "",
+                              state: "",
+                              city: ""
+                            }));
+                            setPhoneCode("");
+                            return;
+                          }
+                          applyCountry(getCountryByCode(e.target.value));
+                        }}
+                        {...cursorTextHandlers}
+                      >
+                        <option value="">Select…</option>
+                        {countries.map((country) => (
+                          <option key={country.isoCode} value={country.isoCode}>
+                            {country.name}
                           </option>
                         ))}
                       </SelectBase>
+                      {renderClear(
+                        () => {
+                          setLocation((p) => ({
+                            ...p,
+                            country: "",
+                            countryCode: "",
+                            state: "",
+                            city: ""
+                          }));
+                          setPhoneCode("");
+                        },
+                        !location.countryCode
+                      )}
+                    </Field>
 
-                      <SelectBase
-                        theme={theme}
-                        value={location.state}
-                        onChange={(e) =>
-                          setLocation((p) => ({ ...p, state: e.target.value }))
-                        }
-                      >
-                        <option value="">State…</option>
-                        {COUNTRY_META[location.country].states.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </SelectBase>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <Field label="State" theme={theme} error={errors.state}>
+                        <SelectBase
+                          theme={theme}
+                          value={location.state}
+                          title={location.state}
+                          onChange={(e) =>
+                            setLocation((p) => ({ ...p, state: e.target.value }))
+                          }
+                          {...cursorTextHandlers}
+                        >
+                          <option value="">State…</option>
+                          {statesForCountry.map((state) => (
+                            <option
+                              key={`${state.isoCode}-${state.name}`}
+                              value={state.name}
+                            >
+                              {state.name}
+                            </option>
+                          ))}
+                        </SelectBase>
+                        {renderClear(
+                          () => setLocation((p) => ({ ...p, state: "" })),
+                          !location.state
+                        )}
+                      </Field>
 
-                      <InputBase
-                        theme={theme}
-                        type="text"
-                        value={location.city}
-                        onChange={(e) =>
-                          setLocation((p) => ({ ...p, city: e.target.value }))
-                        }
-                        placeholder="City"
-                        error={errors.city}
-                      />
+                      <Field label="City" error={errors.city} theme={theme}>
+                        <InputBase
+                          theme={theme}
+                          type="text"
+                          value={location.city}
+                          onChange={(e) =>
+                            setLocation((p) => ({ ...p, city: e.target.value }))
+                          }
+                          placeholder="City"
+                          error={errors.city}
+                          {...cursorTextHandlers}
+                        />
+                        {renderClear(
+                          () => {
+                            setLocation((p) => ({ ...p, city: "" }));
+                            clearError("city");
+                          },
+                          !location.city
+                        )}
+                      </Field>
                     </div>
-                  </Field>
 
-                  <Field label="Email" error={errors.email} theme={theme}>
+                    <Field label="Country Code" theme={theme} error={errors.phoneCode}>
+                      <SelectBase
+                        theme={theme}
+                        value={phoneCode}
+                        title={phoneCode}
+                        onChange={(e) => setPhoneCodeAndCountry(e.target.value)}
+                        style={{
+                          fontSize: phoneCode && phoneCode.length > 4 ? '0.75rem' : '0.875rem'
+                        }}
+                        {...cursorTextHandlers}
+                      >
+                        <option value="">Code…</option>
+                        {phoneCodes.map((code) => (
+                          <option key={code} value={code}>
+                            {code}
+                          </option>
+                        ))}
+                      </SelectBase>
+                      {renderClear(
+                        () => setPhoneCode(""),
+                        !phoneCode
+                      )}
+                    </Field>
+                  </div>
+
+                  <Field
+                    label="Email"
+                    error={errors.email}
+                    theme={theme}
+                    clearAction={renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, email: "" }));
+                        clearError("email");
+                      },
+                      !form.email
+                    )}
+                  >
                     <InputBase
                       theme={theme}
                       type="email"
@@ -437,42 +822,45 @@ export default function BookingPage() {
                       placeholder="you@example.com"
                       autoComplete="email"
                       error={errors.email}
+                      {...cursorTextHandlers}
                     />
                   </Field>
 
                   <Field label="Phone Number" error={errors.phone} theme={theme}>
-                    <div className="grid grid-cols-[120px_1fr] gap-4">
-                      <SelectBase
-                        theme={theme}
-                        value={phoneCode}
-                        onChange={(e) => setPhoneCode(e.target.value)}
-                      >
-                        {Object.entries(COUNTRY_META).map(([country, m]) => (
-                          <option key={country} value={m.code}>
-                            {m.code}
-                          </option>
-                        ))}
-                      </SelectBase>
-
-                      <InputBase
-                        theme={theme}
-                        type="tel"
-                        value={form.phone}
-                        onChange={set("phone")}
-                        placeholder="Phone number"
-                        autoComplete="tel"
-                        error={errors.phone}
-                      />
-                    </div>
+                    <InputBase
+                      theme={theme}
+                      type="tel"
+                      value={form.phone}
+                      onChange={set("phone")}
+                      placeholder="Phone number"
+                      autoComplete="tel"
+                      error={errors.phone}
+                      {...cursorTextHandlers}
+                    />
+                    {renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, phone: "" }));
+                        clearError("phone");
+                      },
+                      !form.phone
+                    )}
                   </Field>
 
                   <div className="md:col-span-2">
-                    <Field label="Why you wish to join (in detail if possible)" theme={theme}>
+                    <Field
+                      label="Why you wish to join (in detail if possible)"
+                      theme={theme}
+                      clearAction={renderClear(
+                        () => setForm((p) => ({ ...p, whyJoin: "" })),
+                        !form.whyJoin
+                      )}
+                    >
                       <TextAreaBase
                         theme={theme}
                         value={form.whyJoin}
                         onChange={set("whyJoin")}
                         placeholder="Share your intention and what you are seeking…"
+                        {...cursorTextHandlers}
                       />
                     </Field>
                   </div>
@@ -481,7 +869,18 @@ export default function BookingPage() {
 
               {step === 1 && (
                 <div className="grid md:grid-cols-2 gap-8">
-                  <Field label="Education" error={errors.education} theme={theme}>
+                  <Field
+                    label="Education"
+                    error={errors.education}
+                    theme={theme}
+                    clearAction={renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, education: "" }));
+                        clearError("education");
+                      },
+                      !form.education
+                    )}
+                  >
                     <InputBase
                       theme={theme}
                       type="text"
@@ -489,10 +888,22 @@ export default function BookingPage() {
                       onChange={set("education")}
                       placeholder="Your education"
                       error={errors.education}
+                      {...cursorTextHandlers}
                     />
                   </Field>
 
-                  <Field label="Religion" error={errors.religion} theme={theme}>
+                  <Field
+                    label="Religion"
+                    error={errors.religion}
+                    theme={theme}
+                    clearAction={renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, religion: "" }));
+                        clearError("religion");
+                      },
+                      !form.religion
+                    )}
+                  >
                     <InputBase
                       theme={theme}
                       type="text"
@@ -500,24 +911,45 @@ export default function BookingPage() {
                       onChange={set("religion")}
                       placeholder="Your religion"
                       error={errors.religion}
+                      {...cursorTextHandlers}
                     />
                   </Field>
 
-                  <Field label="Marital Status" theme={theme}>
+                  <Field
+                    label="Marital Status"
+                    theme={theme}
+                    error={errors.maritalStatus}
+                    clearAction={renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, maritalStatus: "" }));
+                        clearError("maritalStatus");
+                      },
+                      !form.maritalStatus
+                    )}
+                  >
                     <SelectBase
                       theme={theme}
                       value={form.maritalStatus}
                       onChange={set("maritalStatus")}
+                      {...cursorTextHandlers}
                     >
                       <option value="">Select…</option>
                       <option value="single">Single</option>
                       <option value="married">Married</option>
                       <option value="divorced">Divorced</option>
                       <option value="widowed">Widowed</option>
+                      <option value="celibate">Celibate</option>
                     </SelectBase>
                   </Field>
 
-                  <Field label="No. of Children" theme={theme}>
+                  <Field
+                    label="No. of Children"
+                    theme={theme}
+                    clearAction={renderClear(
+                      () => setForm((p) => ({ ...p, childrenCount: "" })),
+                      !String(form.childrenCount).trim()
+                    )}
+                  >
                     <InputBase
                       theme={theme}
                       type="number"
@@ -525,6 +957,7 @@ export default function BookingPage() {
                       value={form.childrenCount}
                       onChange={set("childrenCount")}
                       placeholder="0"
+                      {...cursorTextHandlers}
                     />
                   </Field>
                 </div>
@@ -532,22 +965,62 @@ export default function BookingPage() {
 
               {step === 2 && (
                 <div className="grid gap-8">
-                  <Field label="Taking any meds?" hint="Optional" theme={theme}>
-                    <InputBase
-                      theme={theme}
-                      type="text"
-                      value={form.meds}
-                      onChange={set("meds")}
-                      placeholder="If yes, please mention"
-                    />
+                  <Field label="Taking any meds?" theme={theme} error={errors.medsTaking}>
+                    <div className="grid sm:grid-cols-[180px_1fr] gap-4">
+                      <div className="space-y-2">
+                        <SelectBase
+                          theme={theme}
+                          value={form.medsTaking}
+                          title={form.medsTaking}
+                          onChange={setMedsTaking}
+                          {...cursorTextHandlers}
+                        >
+                          <option value="">Select…</option>
+                          <option value="no">No</option>
+                          <option value="yes">Yes</option>
+                        </SelectBase>
+                        {renderClear(
+                          () => setForm((p) => ({ ...p, medsTaking: "", meds: "" })),
+                          !form.medsTaking
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <InputBase
+                          theme={theme}
+                          type="text"
+                          value={form.meds}
+                          onChange={set("meds")}
+                          placeholder="If yes, please mention"
+                          disabled={form.medsTaking !== "yes"}
+                          {...cursorTextHandlers}
+                        />
+                        {renderClear(
+                          () => setForm((p) => ({ ...p, meds: "" })),
+                          !form.meds
+                        )}
+                      </div>
+                    </div>
                   </Field>
 
-                  <Field label="Any medical / health issues?" theme={theme}>
+                  <Field
+                    label="Any medical / health issues?"
+                    error={errors.healthIssues}
+                    theme={theme}
+                    clearAction={renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, healthIssues: "" }));
+                        clearError("healthIssues");
+                      },
+                      !form.healthIssues
+                    )}
+                  >
                     <TextAreaBase
                       theme={theme}
                       value={form.healthIssues}
                       onChange={set("healthIssues")}
-                      placeholder="If yes, please describe (optional)."
+                      placeholder="Please describe any medical / health issues"
+                      {...cursorTextHandlers}
                     />
                   </Field>
                 </div>
@@ -559,30 +1032,54 @@ export default function BookingPage() {
                     label="Have you been initiated prior to this?"
                     error={errors.initiatedBefore}
                     theme={theme}
+                    clearAction={renderClear(
+                      () => {
+                        setForm((p) => ({ ...p, initiatedBefore: "" }));
+                        clearError("initiatedBefore");
+                      },
+                      !form.initiatedBefore
+                    )}
                   >
                     <SelectBase
                       theme={theme}
                       value={form.initiatedBefore}
                       onChange={set("initiatedBefore")}
                       error={errors.initiatedBefore}
+                      {...cursorTextHandlers}
                     >
+                      <option value="">Select…</option>
                       <option value="no">No</option>
                       <option value="yes">Yes</option>
                     </SelectBase>
                   </Field>
 
-                  {form.initiatedBefore === "yes" && (
-                    <Field label="If yes, please share details of the lineage" theme={theme}>
-                      <TextAreaBase
+                    {form.initiatedBefore === "yes" && (
+                      <Field
+                        label="If yes, please share details of the lineage"
                         theme={theme}
-                        value={form.lineageDetails}
-                        onChange={set("lineageDetails")}
-                        placeholder="Lineage / Guru / tradition details…"
-                      />
-                    </Field>
-                  )}
+                        clearAction={renderClear(
+                          () => setForm((p) => ({ ...p, lineageDetails: "" })),
+                          !form.lineageDetails
+                        )}
+                      >
+                        <TextAreaBase
+                          theme={theme}
+                          value={form.lineageDetails}
+                          onChange={set("lineageDetails")}
+                          placeholder="Lineage / Guru / tradition details…"
+                          {...cursorTextHandlers}
+                        />
+                      </Field>
+                    )}
 
-                  <Field label="Get members-only club access + benefits" theme={theme}>
+                  <Field
+                    label="Get members-only club access + benefits"
+                    theme={theme}
+                    clearAction={renderClear(
+                      () => setForm((p) => ({ ...p, subscribe: false })),
+                      !form.subscribe
+                    )}
+                  >
                     <label className="flex items-center gap-3 select-none">
                       <input
                         type="checkbox"
@@ -622,12 +1119,26 @@ export default function BookingPage() {
                     Thank you. We will review your details and guide you on the next
                     steps.
                   </p>
-                  <button
-                    onClick={() => navigate("/")}
-                    className="mt-8 px-8 py-3 border text-sm tracking-wide transition-colors"
-                    style={{
-                      borderColor: theme.border,
-                      color: theme.textLight
+                    <button
+                      onClick={() => navigate("/")}
+                      className="mt-8 px-8 py-3 border text-sm tracking-wide transition-colors"
+                      style={{
+                        borderColor: isDark ? theme.borderStrong : theme.borderStrong,
+                        color: theme.text,
+                        backgroundColor: isDark ? theme.colors.bg.secondary : '#ffffff',
+                        boxShadow: isDark
+                          ? '0 0 0 1px rgba(255,255,255,0.06)'
+                          : '0 8px 20px rgba(0,0,0,0.08)'
+                      }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = isDark
+                        ? theme.colors.bg.card
+                        : theme.colors.bg.secondary;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = isDark
+                        ? theme.colors.bg.secondary
+                        : '#ffffff';
                     }}
                   >
                     Return Home
@@ -650,7 +1161,28 @@ export default function BookingPage() {
                     borderColor: step === 0 ? theme.borderLight : theme.border,
                     color: step === 0 ? theme.textMuted : theme.textLight,
                     cursor: step === 0 ? 'not-allowed' : 'pointer',
-                    backgroundColor: step === 0 ? theme.colors.bg.secondary : 'transparent'
+                    backgroundColor: step === 0
+                      ? theme.colors.bg.secondary
+                      : (isDark ? theme.colors.bg.secondary : '#ffffff'),
+                    boxShadow: step === 0
+                      ? 'none'
+                      : (isDark
+                        ? '0 0 0 1px rgba(255,255,255,0.06)'
+                        : '0 8px 20px rgba(0,0,0,0.08)')
+                  }}
+                  onMouseEnter={(e) => {
+                    if (step !== 0) {
+                      e.currentTarget.style.backgroundColor = isDark
+                        ? theme.colors.bg.card
+                        : theme.colors.bg.secondary;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (step !== 0) {
+                      e.currentTarget.style.backgroundColor = isDark
+                        ? theme.colors.bg.secondary
+                        : '#ffffff';
+                    }
                   }}
                 >
                   Back
@@ -663,20 +1195,35 @@ export default function BookingPage() {
                       disabled={!canNext()}
                       className="px-8 py-3 text-sm tracking-wide border transition-all inline-flex items-center gap-2"
                       style={{
-                        borderColor: canNext() ? theme.border : theme.borderLight,
-                        color: canNext() ? theme.textLight : theme.textMuted,
+                        borderColor: canNext()
+                          ? (isDark ? theme.borderStrong : theme.borderStrong)
+                          : theme.borderLight,
+                        color: canNext()
+                          ? theme.text
+                          : theme.textMuted,
                         cursor: canNext() ? 'pointer' : 'not-allowed',
-                        backgroundColor: canNext() ? 'transparent' : theme.colors.bg.secondary,
-                        opacity: canNext() ? 1 : 0.6
+                        backgroundColor: canNext()
+                          ? (isDark ? theme.colors.bg.secondary : '#ffffff')
+                          : theme.colors.bg.secondary,
+                        opacity: canNext() ? 1 : 0.6,
+                        boxShadow: canNext()
+                          ? (isDark
+                            ? '0 0 0 1px rgba(255,255,255,0.06)'
+                            : '0 8px 20px rgba(0,0,0,0.08)')
+                          : 'none'
                       }}
                       onMouseEnter={(e) => {
                         if (canNext()) {
-                          e.currentTarget.style.backgroundColor = theme.accent + '20';
+                          e.currentTarget.style.backgroundColor = isDark
+                            ? theme.colors.bg.card
+                            : '#ffffff';
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (canNext()) {
-                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.backgroundColor = isDark
+                            ? theme.colors.bg.secondary
+                            : '#ffffff';
                         }
                       }}
                     >
@@ -687,15 +1234,22 @@ export default function BookingPage() {
                       onClick={submit}
                       className="px-10 py-3 text-sm tracking-wide border transition-all"
                       style={{
-                        backgroundColor: theme.accent,
-                        borderColor: theme.accent,
-                        color: '#ffffff'
+                        backgroundColor: isDark ? theme.colors.bg.secondary : theme.accent,
+                        borderColor: isDark ? theme.borderStrong : theme.accent,
+                        color: isDark ? theme.text : '#ffffff',
+                        boxShadow: isDark
+                          ? '0 0 0 1px rgba(255,255,255,0.06)'
+                          : '0 8px 20px rgba(0,0,0,0.12)'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '0.9';
+                        e.currentTarget.style.backgroundColor = isDark
+                          ? theme.colors.bg.card
+                          : theme.accentHover;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '1';
+                        e.currentTarget.style.backgroundColor = isDark
+                          ? theme.colors.bg.secondary
+                          : theme.accent;
                       }}
                     >
                       Submit
@@ -713,8 +1267,22 @@ export default function BookingPage() {
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 px-6 py-3 border text-sm tracking-wide transition-colors"
             style={{
-              borderColor: theme.border,
-              color: theme.textLight
+              borderColor: theme.borderStrong,
+              color: theme.text,
+              backgroundColor: isDark ? theme.colors.bg.secondary : '#ffffff',
+              boxShadow: isDark
+                ? '0 0 0 1px rgba(255,255,255,0.06)'
+                : '0 8px 24px rgba(0,0,0,0.08)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDark
+                ? theme.colors.bg.card
+                : theme.colors.bg.secondary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isDark
+                ? theme.colors.bg.secondary
+                : '#ffffff';
             }}
           >
             <ArrowLeft size={16} />
@@ -732,6 +1300,16 @@ export default function BookingPage() {
         input::placeholder {
           color: ${theme.textMuted};
           opacity: 0.7;
+        }
+
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        input[type=number] {
+          -moz-appearance: textfield;
         }
         
         select {

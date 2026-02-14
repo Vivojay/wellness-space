@@ -63,7 +63,7 @@ export const faqs = [
 ];
 
 
-export default function FAQ({ theme }) {
+export default function FAQ({ theme, isDark }) {
   const [openIndex, setOpenIndex] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const sectionRef = useRef(null);
@@ -103,7 +103,7 @@ export default function FAQ({ theme }) {
     <section 
       id="faqs" 
       ref={sectionRef}
-      className="py-12 px-6 md:px-24 transition-colors duration-500 relative"
+      className="cv-auto py-12 px-6 md:px-24 transition-colors duration-500 relative"
       style={{ backgroundColor: theme.colors.bg.secondary }}
     >
       {/* Subtle RED accent overlay */}
@@ -118,11 +118,10 @@ export default function FAQ({ theme }) {
         <div className="text-center mb-12">
           <h2 className="text-6xl md:text-7xl font-light tracking-tight leading-tight mb-12 relative inline-block">
             <span 
+              className="gradient-text"
               style={{
                 background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
                 letterSpacing: '-0.02em'
@@ -146,8 +145,11 @@ export default function FAQ({ theme }) {
           {visibleFAQs.map((faq, index) => (
             <div
               key={index}
-              className="border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg"
-              style={{ borderColor: theme.border }}
+              className="border rounded-none overflow-hidden transition-all duration-300 hover:shadow-lg"
+              style={{
+                borderColor: theme.border,
+                backgroundColor: isDark ? '#000000' : theme.colors.bg.card
+              }}
             >
               <button
                 onClick={() => toggleFAQ(index)}
@@ -187,10 +189,17 @@ export default function FAQ({ theme }) {
           <div className="text-center mt-6" ref={expandButtonRef}>
             <button
               onClick={() => setShowAll(!showAll)}
-              className="px-6 py-3 rounded-lg font-medium transition-all duration-300 text-white"
+              className="px-6 py-3 rounded-none font-medium transition-all duration-300"
               style={{
-                backgroundColor: theme.accent,
+                backgroundColor: theme.accent + '40',
+                color: theme.text,
                 fontFamily: "'Source Sans 3', sans-serif"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme.accent + '55';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = theme.accent + '40';
               }}
             >
               {showAll ? "Show Less" : "Show More"}
