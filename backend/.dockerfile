@@ -12,6 +12,7 @@ RUN apt-get update && \
         g++ \
         curl \
         ffmpeg \
+        python3-setuptools \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip setuptools wheel
