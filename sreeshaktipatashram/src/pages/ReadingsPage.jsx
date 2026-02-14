@@ -778,7 +778,7 @@ function ReadingsPage({ isDark }) {
                         <span className={`font-medium ${theme.text}`}>~2-5 MB</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Pages:</span>
+                        <span>pages:</span>
                         <span className={`font-medium ${theme.text}`}>50-150</span>
                       </div>
                     </div>

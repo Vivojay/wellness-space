@@ -1,11 +1,11 @@
 import { Routes, Route } from "react-router-dom";
-import WellnessWebsite from "./Pages/WellnessWebsite";
-import ReadingsPage from "./Pages/ReadingsPage";
-import BlogIndex from "./Pages/BlogIndex";
-import BlogPost from "./Pages/BlogPost";
-import GalleryPage from "./Pages/GalleryPage";
-import BookingPage from "./Pages/BookingPage";
-import BlogEditor from "./Pages/BlogEditor";
+import WellnessWebsite from "./pages/WellnessWebsite";
+import ReadingsPage from "./pages/ReadingsPage";
+import BlogIndex from "./pages/BlogIndex";
+import BlogPost from "./pages/BlogPost";
+import GalleryPage from "./pages/GalleryPage";
+import BookingPage from "./pages/BookingPage";
+import BlogEditor from "./pages/BlogEditor";
 import AppShell from "./layouts/AppShell";
 
 function App() {
