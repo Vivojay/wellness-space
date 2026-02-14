@@ -23,13 +23,13 @@ COPY . .
 
 RUN mkdir -p logs downloads
 
-EXPOSE 5000
+EXPOSE 8000
 
 ENV PYTHONUNBUFFERED=1
-ENV PORT=5000
+ENV PORT=8000
 
 # We will use 4 workers total: 3 normal + 1 special "cron" worker
 # CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000", "--workers", "4"]
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--reload"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1"]
 
 # uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
