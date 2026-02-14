@@ -62,7 +62,7 @@ export default function DonatePage() {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: data.amount,
         currency: data.currency,
-        name: "Sreeshakti Patashram",
+        name: "Sreeshaktipat Ashram",
         description: "Donation",
         order_id: data.order_id,
         prefill: {

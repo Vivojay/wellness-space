@@ -517,7 +517,7 @@ export default function FloatingUI(props) {
                 className="text-2xl font-light tracking-[0.14em] mb-2"
                 style={{ color: theme.text }}
               >
-                Sree shakti
+                Sreeshaktipat
               </h2>
               <div 
                 className="w-12 h-[1px]"
@@ -577,7 +577,7 @@ export default function FloatingUI(props) {
               className="text-xs tracking-wide opacity-50"
               style={{ color: theme.textMuted }}
             >
-              © 2024 Patashram
+              © 2024 Sreeshaktipat Ashram
             </p>
           </div>
         </div>

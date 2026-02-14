@@ -19,7 +19,7 @@ export default function Footer({ theme }) {
         {/* Main content */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
           <div>
-            <h3 className="text-2xl font-light tracking-tight mb-2">Sreeshakti Patashram</h3>
+            <h3 className="text-2xl font-light tracking-tight mb-2">Sreeshaktipat Ashram</h3>
             <p className={`text-[10px] tracking-[0.3em] ${theme.textMuted}`}>Where Consciousness Expands</p>
           </div>
           

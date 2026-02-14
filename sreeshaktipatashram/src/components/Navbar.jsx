@@ -39,7 +39,7 @@ export default function Navbar({ isDark }) {
         className="text-lg sm:text-xl md:text-2xl font-evafiya tracking-[0.3em]"
         // style={{ fontFamily: "'Evafiya', serif" }}
       >
-        Sree Shaktipat Ashram
+        Sreeshaktipat Ashram
       </span>
     </div>
   );

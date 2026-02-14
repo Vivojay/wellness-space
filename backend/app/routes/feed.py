@@ -22,18 +22,22 @@ def create_feed(payload: FeedCreate):
 
 @router.get("")
 def list_feed(limit: int = 10):
+    fetch_limit = min(max(limit * 3, limit), 50)
     docs = (
         db.collection("feed")
-        .where("published", "==", True)
         .order_by("created_at", direction=firestore.Query.DESCENDING)
-        .limit(limit)
+        .limit(fetch_limit)
         .stream()
     )
     results = []
     for d in docs:
         data = d.to_dict()
+        if not data.get("published", False):
+            continue
         data["id"] = d.id
         results.append(data)
+        if len(results) >= limit:
+            break
     return results
 
 

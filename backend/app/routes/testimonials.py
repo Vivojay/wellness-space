@@ -22,18 +22,22 @@ def create_testimonial(payload: TestimonialCreate):
 
 @router.get("")
 def list_testimonials(limit: int = 10):
+    fetch_limit = min(max(limit * 3, limit), 50)
     docs = (
         db.collection("testimonials")
-        .where("published", "==", True)
         .order_by("created_at", direction=firestore.Query.DESCENDING)
-        .limit(limit)
+        .limit(fetch_limit)
         .stream()
     )
     results = []
     for d in docs:
         data = d.to_dict()
+        if not data.get("published", False):
+            continue
         data["id"] = d.id
         results.append(data)
+        if len(results) >= limit:
+            break
     return results
 
 

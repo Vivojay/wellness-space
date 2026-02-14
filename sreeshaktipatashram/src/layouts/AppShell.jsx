@@ -84,7 +84,7 @@ export default function AppShell() {
   const [rightFeedOpen, setRightFeedOpen] = useState(false);
   const [activeOverlay, setActiveOverlay] = useState(null);
   const [feedItems, setFeedItems] = useState([
-    { category: "NEWS", text: "Welcome to Sreeshakti – new blog posts coming soon." },
+    { category: "NEWS", text: "Welcome to Sreeshaktipat Ashram – new blog posts coming soon." },
   ]);
 
   const location = useLocation();

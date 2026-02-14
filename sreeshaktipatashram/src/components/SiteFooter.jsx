@@ -39,7 +39,7 @@ export default function SiteFooter({ theme }) {
                 fontFamily: "'Source Sans 3', sans-serif"
               }}
             >
-              Sreeshakti Patashram
+              Sreeshaktipat Ashram
             </h3>
             <p
               className="text-[10px] tracking-[0.3em]"

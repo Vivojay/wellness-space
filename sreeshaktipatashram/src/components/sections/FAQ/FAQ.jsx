@@ -137,7 +137,7 @@ export default function FAQ({ theme, isDark }) {
               fontFamily: "'Source Sans 3', sans-serif"
             }}
           >
-            Answers to common queries about Sreeshakti Patashram
+            Answers to common queries about Sreeshaktipat Ashram
           </p>
         </div>
 
