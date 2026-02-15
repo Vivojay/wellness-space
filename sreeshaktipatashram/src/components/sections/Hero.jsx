@@ -1,5 +1,7 @@
 import React from "react";
-import heroVideo from "@/assets/videos/hero-video_trim_rotated.mp4";
+
+const HERO_VIDEO_URL =
+  "https://res.cloudinary.com/sidehustle-01/video/upload/v1771168159/hero-video_trim_rotated_yiyvqa.mp4";
 
 const Hero = ({ scrollProgress, theme, isDark }) => {
   return (
@@ -7,7 +9,7 @@ const Hero = ({ scrollProgress, theme, isDark }) => {
       {/* Video Background */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
-        src={heroVideo}
+        src={HERO_VIDEO_URL}
         autoPlay
         muted
         loop
