@@ -2,7 +2,9 @@ export const galleryData = {
   instagram: [
     {
       type: "video", // was "image", but it is actually a video
-      media: ["/src/assets/videos/20231027_154553.mp4"], // must be an array
+      media: [
+        "https://res.cloudinary.com/sidehustle-01/video/upload/v1771168159/hero-video_trim_rotated_yiyvqa.mp4"
+      ], // must be an array
       caption: "FaInstagram caption",
       platform: "instagram",
       externalUrl: "https://instagram.com"
