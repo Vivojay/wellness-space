@@ -1,4 +1,5 @@
 import React from "react";
+import heroVideo from "@/assets/videos/hero-video_trim_rotated.mp4";
 
 const Hero = ({ scrollProgress, theme, isDark }) => {
   return (
@@ -6,7 +7,7 @@ const Hero = ({ scrollProgress, theme, isDark }) => {
       {/* Video Background */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
-        src="/src/assets/videos/hero-video_trim_rotated.mp4"
+        src={heroVideo}
         autoPlay
         muted
         loop
