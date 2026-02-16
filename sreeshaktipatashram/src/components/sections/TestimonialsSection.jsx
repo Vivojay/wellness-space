@@ -17,6 +17,8 @@ const QuoteMark = ({ className = "", fillColor }) => (
 
 
 const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
+  const topTestimonials = testimonials.filter((_, idx) => idx % 2 === 0);
+  const bottomTestimonials = testimonials.filter((_, idx) => idx % 2 === 1);
   return (
     <section 
       className="cv-auto py-28 overflow-hidden transition-colors duration-500"
@@ -51,18 +53,19 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
       </div>
 
       {/* Marquee */}
-      <div className="flex animate-marquee gap-8">
-        {[...testimonials, ...testimonials, ...testimonials].map((t, idx) => (
-          <div
-            key={idx}
-            onMouseEnter={() => setCursorVariant("hover")}
-            onMouseLeave={() => setCursorVariant("default")}
-            className="relative flex-shrink-0 w-[420px] px-10 pt-14 pb-10 flex flex-col min-h-[100px] border transition-colors duration-500"
-            style={{
-              backgroundColor: theme.colors.bg.card,
-              borderColor: theme.border
-            }}
-          >
+      <div className="space-y-10">
+        <div className="hidden md:flex animate-marquee gap-8">
+          {[...testimonials, ...testimonials, ...testimonials].map((t, idx) => (
+            <div
+              key={idx}
+              onMouseEnter={() => setCursorVariant("hover")}
+              onMouseLeave={() => setCursorVariant("default")}
+              className="relative flex-shrink-0 w-[420px] px-10 pt-14 pb-10 flex flex-col min-h-[100px] border transition-colors duration-500"
+              style={{
+                backgroundColor: theme.colors.bg.card,
+                borderColor: theme.border
+              }}
+            >
             {/* Decorative quote mark */}
             <QuoteMark
               className="
@@ -113,8 +116,131 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
               />
             </div>
 
-          </div>
-        ))}
+            </div>
+          ))}
+        </div>
+        <div className="flex md:hidden animate-marquee gap-8">
+          {[...topTestimonials, ...topTestimonials, ...topTestimonials].map((t, idx) => (
+            <div
+              key={`mobile-top-${idx}`}
+              onMouseEnter={() => setCursorVariant("hover")}
+              onMouseLeave={() => setCursorVariant("default")}
+              className="relative flex-shrink-0 w-[420px] px-6 pt-10 pb-8 md:px-10 md:pt-14 md:pb-10 flex flex-col min-h-[200px] md:min-h-[100px] border transition-colors duration-500"
+              style={{
+                backgroundColor: theme.colors.bg.card,
+                borderColor: theme.border
+              }}
+            >
+              <QuoteMark
+                className="
+                  absolute -top-3 -left-5
+                  w-14
+                  opacity-45
+                  rotate-[6deg]
+                  blur-[0.3px]
+                  pointer-events-none
+                "
+                fillColor={theme.textMuted}
+              />
+
+              <p
+                className="text-[15px] font-light leading-[1.8] mb-10"
+                style={{
+                  color: theme.text,
+                  fontFamily: "'Source Sans 3', sans-serif"
+                }}
+              >
+                {t.text}
+              </p>
+
+              <div className="mt-auto flex items-center justify-between">
+                <div>
+                  <p 
+                    className="text-sm font-medium tracking-wide"
+                    style={{ 
+                      color: theme.text,
+                      fontFamily: "'Source Sans 3', sans-serif"
+                    }}
+                  >
+                    {t.author}
+                  </p>
+                  <p 
+                    className="text-xs mt-1"
+                    style={{ color: theme.textMuted }}
+                  >
+                    {t.role}
+                  </p>
+                </div>
+
+                <div 
+                  className="w-12 h-px"
+                  style={{ backgroundColor: theme.border }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex md:hidden animate-marquee-reverse gap-8">
+          {[...bottomTestimonials, ...bottomTestimonials, ...bottomTestimonials].map((t, idx) => (
+            <div
+              key={`reverse-${idx}`}
+              onMouseEnter={() => setCursorVariant("hover")}
+              onMouseLeave={() => setCursorVariant("default")}
+              className="relative flex-shrink-0 w-[420px] px-6 pt-10 pb-8 md:px-10 md:pt-14 md:pb-10 flex flex-col min-h-[200px] md:min-h-[100px] border transition-colors duration-500"
+              style={{
+                backgroundColor: theme.colors.bg.card,
+                borderColor: theme.border
+              }}
+            >
+              <QuoteMark
+                className="
+                  absolute -top-3 -left-5
+                  w-14
+                  opacity-45
+                  rotate-[6deg]
+                  blur-[0.3px]
+                  pointer-events-none
+                "
+                fillColor={theme.textMuted}
+              />
+
+              <p
+                className="text-[15px] font-light leading-[1.8] mb-10"
+                style={{
+                  color: theme.text,
+                  fontFamily: "'Source Sans 3', sans-serif"
+                }}
+              >
+                {t.text}
+              </p>
+
+              <div className="mt-auto flex items-center justify-between">
+                <div>
+                  <p 
+                    className="text-sm font-medium tracking-wide"
+                    style={{ 
+                      color: theme.text,
+                      fontFamily: "'Source Sans 3', sans-serif"
+                    }}
+                  >
+                    {t.author}
+                  </p>
+                  <p 
+                    className="text-xs mt-1"
+                    style={{ color: theme.textMuted }}
+                  >
+                    {t.role}
+                  </p>
+                </div>
+
+                <div 
+                  className="w-12 h-px"
+                  style={{ backgroundColor: theme.border }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

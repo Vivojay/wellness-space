@@ -14,10 +14,9 @@ import FAQ from "../components/sections/FAQ/FAQ";
 import { useOutletContext } from "react-router-dom";
 
 const WellnessWebsite = () => {
-  const { isDark, theme } = useOutletContext();
+  const { isDark, theme, scrollProgress = 0 } = useOutletContext();
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   const [testimonials, setTestimonials] = useState([]);
   const fallbackTestimonials = [
@@ -29,30 +28,6 @@ const WellnessWebsite = () => {
     { author: 'Arjun P.', text: 'A space where healing happens naturally and beautifully.', role: 'Explorer' }
   ];
 
-
-  useEffect(() => {
-    const wrapper = document.getElementById("app-scroll");
-    const target = wrapper || window;
-
-    const handleScroll = () => {
-      if (wrapper) {
-        const max = Math.max(1, wrapper.scrollHeight - wrapper.clientHeight);
-        const progress = wrapper.scrollTop / max;
-        setScrollProgress(progress);
-        return;
-      }
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      const progress = window.scrollY / max;
-      setScrollProgress(progress);
-    };
-
-    handleScroll();
-    target.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      target.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -92,7 +67,7 @@ const WellnessWebsite = () => {
       <div
         className="fixed bottom-16 right-16 ml-auto mr-16
                   flex flex-col items-center gap-3
-                  w-fit z-40 hidden md:flex"
+                  w-fit z-40 hidden md:flex pointer-events-none"
         style={{ opacity: 1 - scrollProgress * 6 }}
       >
         <div 
@@ -130,7 +105,7 @@ const WellnessWebsite = () => {
       {/* Testimonials */}
       <TestimonialsSection 
         theme={theme} 
-        testimonials={testimonials} 
+        testimonials={testimonials}
         setCursorVariant={setCursorVariant} 
       />
 
@@ -177,10 +152,20 @@ const WellnessWebsite = () => {
           0% { transform: translateX(0); }
           100% { transform: translateX(calc(-400px * ${testimonials.length} - 24px * ${testimonials.length})); }
         }
+        @keyframes marqueeReverse {
+          0% { transform: translateX(calc(-400px * ${testimonials.length} - 24px * ${testimonials.length})); }
+          100% { transform: translateX(0); }
+        }
         .animate-marquee {
           animation: marquee 50s linear infinite;
         }
         .animate-marquee:hover {
+          animation-play-state: paused;
+        }
+        .animate-marquee-reverse {
+          animation: marqueeReverse 55s linear infinite;
+        }
+        .animate-marquee-reverse:hover {
           animation-play-state: paused;
         }
         @media (pointer: coarse) {

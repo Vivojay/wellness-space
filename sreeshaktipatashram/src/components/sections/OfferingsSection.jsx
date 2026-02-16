@@ -76,7 +76,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
                 <img
                   src={`https://images.unsplash.com/${item.img}?w=600&h=800&fit=crop&q=80`}
                   alt={item.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover hover-zoom"
                   style={{ filter: 'contrast(0.95) saturate(0.9)' }}
                   loading="lazy"
                   decoding="async"
@@ -111,8 +111,8 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
                     {item.desc}
                   </p>
 
-                  <div 
-                    className="mt-5 w-0 h-[1px] group-hover:w-24 transition-all duration-500"
+                  <div
+                    className="mt-5 h-[2px] hover-underline"
                     style={{ backgroundColor: '#ef4444' }}
                   />
                 </div>

@@ -57,7 +57,7 @@ const LineageSection = ({ theme }) => {
               <img
                 src={`https://sreeshaktipatashram.com/upload/${item.img}`}
                 alt={item.name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="absolute inset-0 w-full h-full object-cover hover-zoom"
                 loading="lazy"
                 decoding="async"
               />
@@ -77,8 +77,8 @@ const LineageSection = ({ theme }) => {
                 >
                   {item.name}
                 </p>
-                <div 
-                  className="mt-2 w-0 h-[1px] group-hover:w-16 transition-all duration-500"
+                <div
+                  className="mt-2 h-[2px] hover-underline"
                   style={{ backgroundColor: theme.accent }}
                 />
               </div>

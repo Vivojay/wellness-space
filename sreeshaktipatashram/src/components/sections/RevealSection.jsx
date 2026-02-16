@@ -61,13 +61,13 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
 
         <div className="space-y-12">
           {guruCards.map((g, idx) => (
-            <div key={idx} className="grid lg:grid-cols-2 gap-10 lg:gap-0 items-stretch">
+            <div key={idx} className="grid lg:grid-cols-2 gap-0 items-stretch">
               {/* IMAGE */}
-              <div className="relative w-full overflow-hidden min-h-[520px]">
+              <div className="relative w-full overflow-hidden min-h-[360px] sm:min-h-[420px] lg:min-h-[520px] group">
                 <img
                   src={g.img}
                   alt=""
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover hover-zoom"
                   loading="lazy"
                   decoding="async"
                 />
@@ -79,9 +79,9 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
 
               {/* CARD */}
               <div className="relative">
-                <div className="-mt-[460px] sm:-mt-[440px] lg:mt-0">
+                <div className="mt-0 lg:mt-0 lg:-mt-[460px]">
                   <div
-                    className="p-10 backdrop-blur-xl lg:min-h-[520px] flex flex-col justify-center shadow-2xl border transition-colors duration-500"
+                    className="p-8 sm:p-10 backdrop-blur-0 md:backdrop-blur-sm lg:backdrop-blur-xl lg:min-h-[520px] flex flex-col justify-center shadow-2xl border transition-colors duration-500"
                     style={{
                       background: theme.colors.bg.card,
                       borderColor: theme.border,

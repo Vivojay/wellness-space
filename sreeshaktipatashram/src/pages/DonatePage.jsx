@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Heart } from "lucide-react";
+import { DodoPayments } from "dodopayments-checkout";
 
-const RAZORPAY_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
+const DODO_MODE = (import.meta.env.VITE_DODO_MODE || "test").toLowerCase();
 
 export default function DonatePage() {
   const { isDark, theme } = useOutletContext();
@@ -14,18 +15,47 @@ export default function DonatePage() {
   const [phone, setPhone] = useState("");
   const [currency, setCurrency] = useState("INR");
   const [invoice, setInvoice] = useState(null);
+  const [sessionId, setSessionId] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const sessionRef = useRef("");
+  const nameRef = useRef("");
+  const emailRef = useRef("");
+  const phoneRef = useRef("");
 
   useEffect(() => {
-    if (document.querySelector(`script[src='${RAZORPAY_SCRIPT}']`)) {
+    nameRef.current = name;
+    emailRef.current = email;
+    phoneRef.current = phone;
+  }, [name, email, phone]);
+
+  useEffect(() => {
+    try {
+      DodoPayments.Initialize({
+        mode: DODO_MODE === "live" ? "live" : "test",
+        displayType: "overlay",
+        onEvent: (event) => {
+          if (event.event_type === "checkout.opened") {
+            setLoading(false);
+          }
+          if (event.event_type === "checkout.error") {
+            setLoading(false);
+            setStatusMessage("Payment error. Please try again.");
+          }
+          if (event.event_type === "checkout.status") {
+            const status = event.data?.message?.status;
+            if (status === "succeeded" && sessionRef.current) {
+              fetchSessionStatus(sessionRef.current);
+            }
+            if (status === "failed") {
+              setStatusMessage("Payment failed. Please try again.");
+            }
+          }
+        },
+      });
       setReady(true);
-      return;
+    } catch (e) {
+      setReady(false);
     }
-    const script = document.createElement("script");
-    script.src = RAZORPAY_SCRIPT;
-    script.async = true;
-    script.onload = () => setReady(true);
-    script.onerror = () => setReady(false);
-    document.body.appendChild(script);
   }, []);
 
   const parsedAmount = useMemo(() => Number(amount), [amount]);
@@ -36,14 +66,39 @@ export default function DonatePage() {
     return parsedAmount.toLocaleString();
   }, [parsedAmount]);
 
+  const fetchSessionStatus = async (activeSessionId) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/payments/dodo/session/${activeSessionId}`);
+      if (!res.ok) throw new Error("Failed to fetch session status");
+      const data = await res.json();
+      if (data.payment_status === "succeeded") {
+        setInvoice({
+          sessionId: data.session_id,
+          paymentId: data.payment_id,
+          amount: data.amount,
+          currency: data.currency || currency,
+          name: data.customer_name || nameRef.current,
+          email: data.customer_email || emailRef.current,
+          phone: phoneRef.current,
+          invoiceUrl: data.invoice_url,
+          issuedAt: new Date().toISOString()
+        });
+        setStatusMessage("Payment received successfully.");
+      }
+    } catch (e) {
+      setStatusMessage("Payment received. Fetching receipt failed.");
+    }
+  };
+
   const startPayment = async () => {
     if (!isAmountValid) return;
     if (!ready) return;
 
     setLoading(true);
     setInvoice(null);
+    setStatusMessage("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/payments/razorpay/order`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/payments/dodo/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -55,58 +110,21 @@ export default function DonatePage() {
         })
       });
 
-      if (!res.ok) throw new Error("Order creation failed");
+      if (!res.ok) throw new Error("Checkout creation failed");
       const data = await res.json();
+      if (!data.checkout_url) throw new Error("Checkout URL missing");
+      setSessionId(data.session_id);
+      sessionRef.current = data.session_id;
 
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: data.amount,
-        currency: data.currency,
-        name: "Sreeshaktipat Ashram",
-        description: "Donation",
-        order_id: data.order_id,
-        prefill: {
-          name,
-          email,
-          contact: phone
+      await DodoPayments.Checkout.open({
+        checkoutUrl: data.checkout_url,
+        options: {
+          manualRedirect: true,
         },
-        theme: { color: "#b91c1c" },
-        handler: async (response) => {
-          const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/payments/razorpay/verify`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              order_id: response.razorpay_order_id,
-              payment_id: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-              amount: data.amount,
-              currency: data.currency,
-              name,
-              email,
-              phone
-            })
-          });
-
-          if (verifyRes.ok) {
-            setInvoice({
-              orderId: response.razorpay_order_id,
-              paymentId: response.razorpay_payment_id,
-              amount: data.amount,
-              currency: data.currency,
-              name,
-              email,
-              phone,
-              issuedAt: new Date().toISOString()
-            });
-          }
-        }
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
+      });
     } catch (e) {
       console.error(e);
-      alert("Unable to start payment. Please try again.");
+      setStatusMessage("Unable to start payment. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -114,10 +132,16 @@ export default function DonatePage() {
 
   return (
     <section
-      className="min-h-screen px-6 md:px-24 pt-32 pb-24"
+      className="min-h-screen px-6 md:px-24 pt-32 pb-24 relative overflow-hidden"
       style={{ backgroundColor: theme.colors.bg.primary, color: theme.text }}
     >
-      <div className="max-w-5xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12">
+      <div
+        className="absolute -left-20 top-24 w-[140%] h-16 rotate-[-10deg] z-0"
+        style={{
+          background: `linear-gradient(90deg, ${theme.accent}20, ${theme.accent}66, ${theme.accent}20)`
+        }}
+      />
+      <div className="relative z-10 max-w-5xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12">
         <div>
           <p
             className="text-[11px] tracking-[0.4em] uppercase"
@@ -183,7 +207,7 @@ export default function DonatePage() {
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 flex items-center justify-center border"
-              style={{ borderColor: "#b91c1c", color: "#b91c1c" }}
+              style={{ borderColor: theme.accent, color: theme.accent }}
             >
               <Heart className="w-5 h-5" />
             </div>
@@ -192,7 +216,7 @@ export default function DonatePage() {
                 Secure Payment
               </p>
               <p className="text-lg" style={{ color: theme.text }}>
-                Razorpay Checkout
+                Dodo Payments Checkout
               </p>
             </div>
           </div>
@@ -258,7 +282,9 @@ export default function DonatePage() {
                 style={{
                   color: "#b91c1c",
                   borderRadius: "0px",
-                  transition: "all 200ms ease"
+                  transition: "all 200ms ease",
+                  textDecoration: "underline",
+                  textDecorationColor: "#b91c1c"
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = "#b91c1c";
@@ -278,14 +304,14 @@ export default function DonatePage() {
             onClick={startPayment}
             className="mt-8 w-full py-3 border text-sm tracking-wide transition-colors"
             style={{
-              borderColor: !ready || loading || !isAmountValid ? "rgba(107, 114, 128, 0.6)" : "#b91c1c",
-              color: !ready || loading || !isAmountValid ? "#9ca3af" : "#b91c1c",
+              borderColor: !ready || loading || !isAmountValid ? "rgba(107, 114, 128, 0.6)" : theme.accent,
+              color: !ready || loading || !isAmountValid ? "#9ca3af" : theme.accent,
               backgroundColor: "transparent",
               opacity: !ready || loading || !isAmountValid ? 0.6 : 1
             }}
             onMouseEnter={(e) => {
               if (!ready || loading || !isAmountValid) return;
-              e.currentTarget.style.backgroundColor = "rgba(185, 28, 28, 0.12)";
+              e.currentTarget.style.backgroundColor = `${theme.accent}1f`;
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = "transparent";
@@ -297,6 +323,12 @@ export default function DonatePage() {
           {!ready && (
             <p className="mt-4 text-xs" style={{ color: theme.textMuted }}>
               Loading payment gateway…
+            </p>
+          )}
+
+          {statusMessage && (
+            <p className="mt-4 text-xs" style={{ color: theme.textMuted }}>
+              {statusMessage}
             </p>
           )}
 
@@ -326,8 +358,8 @@ export default function DonatePage() {
               </div>
               <div className="mt-4 space-y-2 text-sm" style={{ color: theme.textSecondary }}>
                 <p>Invoice Date: {new Date(invoice.issuedAt).toLocaleString()}</p>
-                <p>Order ID: {invoice.orderId}</p>
-                <p>Payment ID: {invoice.paymentId}</p>
+                {invoice.sessionId && <p>Session ID: {invoice.sessionId}</p>}
+                {invoice.paymentId && <p>Payment ID: {invoice.paymentId}</p>}
                 <p>
                   Amount: {invoice.currency} {(invoice.amount / 100).toLocaleString()}
                 </p>
@@ -335,6 +367,17 @@ export default function DonatePage() {
                 {invoice.email && <p>Email: {invoice.email}</p>}
                 {invoice.phone && <p>Phone: {invoice.phone}</p>}
               </div>
+              {invoice.invoiceUrl && (
+                <a
+                  href={invoice.invoiceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex mt-4 text-xs underline"
+                  style={{ color: theme.accent }}
+                >
+                  Download invoice PDF
+                </a>
+              )}
               <p className="mt-4 text-xs" style={{ color: theme.textMuted }}>
                 This is a system-generated receipt for your records.
               </p>

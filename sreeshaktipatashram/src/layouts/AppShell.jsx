@@ -57,6 +57,8 @@ export default function AppShell() {
   const [cursorVariant, setCursorVariant] = useState("default");
 
   const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollContainerRef = useRef(null);
+  const [scrollTarget, setScrollTarget] = useState(null);
 
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
@@ -102,18 +104,34 @@ export default function AppShell() {
 
   // Scroll progress
   useEffect(() => {
-    const onScroll = () => {
+    const getProgress = () => {
+      const target = scrollTarget;
+      if (target) {
+        const max = Math.max(1, target.scrollHeight - target.clientHeight);
+        return target.scrollTop / max;
+      }
       const doc = document.documentElement;
       const scrollTop = doc.scrollTop || document.body.scrollTop;
       const scrollHeight = doc.scrollHeight || document.body.scrollHeight;
       const clientHeight = doc.clientHeight || window.innerHeight;
       const denom = Math.max(1, scrollHeight - clientHeight);
-      setScrollProgress(scrollTop / denom);
+      return scrollTop / denom;
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
+
+    const onScroll = () => {
+      setScrollProgress(getProgress());
+    };
+
+    const listenerTarget = scrollTarget || window;
+    listenerTarget.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      listenerTarget.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [pathname, scrollTarget]);
 
   useEffect(() => {
     const targetId = location.state?.scrollTo;
@@ -266,15 +284,19 @@ export default function AppShell() {
       />
 
       {/* Content outlet */}
-      <div
-        id="app-scroll"
-        className={`
+        <div
+          id="app-scroll"
+          ref={(node) => {
+            scrollContainerRef.current = node;
+            if (node) setScrollTarget(node);
+          }}
+          className={`
         ${isHome ? '' : 'pt-[110px]'} 
         flex-1 overflow-y-auto flex flex-col
       `}
-      >
-        <div className="flex-1">
-          <Outlet context={{ isDark, theme, setCursorVariant }} />
+        >
+          <div className="flex-1">
+            <Outlet context={{ isDark, theme, setCursorVariant, scrollProgress }} />
         </div>
         <SiteFooter theme={theme} />
       </div>

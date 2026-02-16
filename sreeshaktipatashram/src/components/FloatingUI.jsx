@@ -148,6 +148,12 @@ export default function FloatingUI(props) {
   const location = useLocation();
   const navigate = useNavigate();
   const isDonatePage = location.pathname === "/donate";
+  const goHomeTop = () => {
+    navigate("/");
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    });
+  };
 
   const goToSection = async (id) => {
     if (location.pathname !== "/") {
@@ -513,12 +519,14 @@ export default function FloatingUI(props) {
           ${sidebarExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>
           <div>
             <div className="mb-16">
-              <h2 
-                className="text-2xl font-light tracking-[0.14em] mb-2"
+              <button
+                type="button"
+                onClick={goHomeTop}
+                className="text-2xl font-light tracking-[0.14em] mb-2 text-left transition-transform duration-300 hover:translate-x-1"
                 style={{ color: theme.text }}
               >
                 Sreeshaktipat
-              </h2>
+              </button>
               <div 
                 className="w-12 h-[1px]"
                 style={{ backgroundColor: theme.accent }}
@@ -527,7 +535,7 @@ export default function FloatingUI(props) {
             
             <nav className="space-y-5">
               {[
-                { name: 'Home', onClick: () => navigate("/") },
+                { name: 'Home', onClick: goHomeTop },
                 { name: 'Readings', onClick: () => navigate("/readings") },
                 { name: 'Gallery', onClick: () => navigate("/gallery") },
                 { name: 'Donate', onClick: () => navigate("/donate"), isDonate: true },
@@ -551,8 +559,8 @@ export default function FloatingUI(props) {
                   >
                     {item.name}
                   </span>
-                  <div 
-                    className="absolute bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full"
+                  <div
+                    className="absolute bottom-0 left-0 h-[2px] nav-underline"
                     style={{ backgroundColor: item.isDonate ? "#b91c1c" : theme.accent }}
                   />
                 </button>
@@ -609,7 +617,8 @@ export default function FloatingUI(props) {
             backgroundColor: theme.cardBg,
             borderColor: "#b91c1c",
             color: "#b91c1c",
-            boxShadow: "0 12px 30px rgba(185, 28, 28, 0.18)"
+            boxShadow: "0 12px 30px rgba(185, 28, 28, 0.18)",
+            left: sidebarExpanded ? "320px" : "32px"
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "rgba(185, 28, 28, 0.12)";

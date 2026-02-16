@@ -81,3 +81,34 @@ body {
   background-repeat: no-repeat !important;
   background-size: 100% 100% !important;
 }
+
+.hover-zoom {
+  transition: transform 0.7s ease;
+  transform: scale(1);
+}
+
+.group:hover .hover-zoom {
+  transform: scale(1.05);
+}
+
+.hover-underline {
+  width: 0;
+  opacity: 0;
+  transition: width 0.5s ease, opacity 0.5s ease;
+}
+
+.group:hover .hover-underline {
+  width: 6rem;
+  opacity: 1;
+}
+
+.nav-underline {
+  width: 0;
+  opacity: 0;
+  transition: width 0.35s ease, opacity 0.35s ease;
+}
+
+.group:hover .nav-underline {
+  width: 100%;
+  opacity: 1;
+}

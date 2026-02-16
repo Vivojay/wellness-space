@@ -30,8 +30,8 @@ export default function SiteFooter({ theme }) {
       }}
     >
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-          <div>
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-center gap-10">
+          <div className="text-center md:text-left">
             <h3
               className="text-2xl font-light tracking-tight mb-2"
               style={{
