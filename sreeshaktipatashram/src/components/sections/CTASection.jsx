@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 
-const CTASection = ({ theme, setCursorVariant }) => {
+const CTASection = ({ theme, setCursorVariant, isDark }) => {
   const enterEase = "cubic-bezier(0.6, 0.05, 0.2, 0.95)";
   const exitEase  = "cubic-bezier(0.8, 0, 0.3, 1)";
   const [hovered, setHovered] = useState(false);
@@ -70,7 +70,7 @@ const CTASection = ({ theme, setCursorVariant }) => {
               width="100"
               height="40"
               fill="none"
-              stroke={theme.accentSecondary}
+              stroke={isDark ? theme.accentSecondary : "#4a2c1f"}
               strokeWidth="2"
               pathLength="1"
               strokeDasharray="1"

@@ -217,7 +217,7 @@ export default function BlogIndex() {
                 key={b.slug}
                 className="relative group border rounded-none p-7 transition-all hover:shadow-lg"
                 style={{
-                  backgroundColor: theme.colors.bg.card,
+                  backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : theme.colors.bg.card,
                   borderColor: theme.border
                 }}
               >
@@ -227,7 +227,7 @@ export default function BlogIndex() {
                     to={`/blog/edit/${b.slug}`}
                     className="w-10 h-10 rounded-none border flex items-center justify-center transition-all"
                     style={{
-                      backgroundColor: theme.colors.bg.card,
+                      backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : theme.colors.bg.card,
                       borderColor: theme.border
                     }}
                     title="Edit"
@@ -239,7 +239,7 @@ export default function BlogIndex() {
                   <button
                     className="w-10 h-10 rounded-none border flex items-center justify-center transition-all"
                     style={{
-                      backgroundColor: theme.colors.bg.card,
+                      backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : theme.colors.bg.card,
                       borderColor: theme.border
                     }}
                     title="Delete"

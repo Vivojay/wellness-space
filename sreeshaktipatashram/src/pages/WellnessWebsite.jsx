@@ -93,6 +93,85 @@ const WellnessWebsite = () => {
         />
       </div>
 
+      {/* About Me */}
+      <section
+        className="px-6 md:px-24 py-20"
+        style={{ backgroundColor: theme.colors.bg.secondary }}
+      >
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
+          <div>
+            <p
+              className="text-[11px] tracking-[0.4em] uppercase"
+              style={{ color: theme.textMuted }}
+            >
+              About Me
+            </p>
+            <h2
+              className="text-3xl md:text-4xl font-light tracking-tight mt-4"
+              style={{ color: theme.text }}
+            >
+              A Lineage of Living Transmission
+            </h2>
+            <div className="mt-6 space-y-5 text-base leading-relaxed" style={{ color: theme.textSecondary }}>
+              <p>
+                Siddha Mahayoga is a path of inner transformational journey which begins when a
+                Siddha Guru meets a deserving disciple. As an authorised Siddha Guru, the spiritual
+                head of the Siddha Maha Yoga path, Goddess Vartika, initiates deserving disciples
+                onto the grand Yoga path - Siddha Maha Yoga.
+              </p>
+              <p>
+                Every religious and spiritual journey gradually leads a seeker towards Kundalini
+                Awakening. At this point the actual journey begins, prior to this everything done
+                so far is a mere preparation of the mind and body.
+              </p>
+              <p>
+                The safest and easiest method for attaining this state of awakened Kundalini is
+                through Kundalini Shaktipat, this is achieved through the blessings and Sankalp of
+                a Siddha Guru. Once the energy is awakened within a deserving disciple, (s)he is
+                able to experience and live in the awareness of the Self.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative" style={{ isolation: "isolate" }}>
+            <div className="relative h-[420px] md:h-[520px] w-full overflow-visible">
+              <img
+                src="https://res.cloudinary.com/sidehustle-01/image/upload/v1771247171/face-removebg-preview_rgua2i.png"
+                alt="Vartika Shukla"
+                className="absolute inset-0 w-full h-full object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-center px-6 pointer-events-none mix-blend-difference">
+              <p
+                className="text-[3rem] md:text-[4rem] tracking-[0.1em] font-modernsanslight whitespace-nowrap"
+                style={{
+                  color: "#ffffff",
+                  transform: "rotate(-1.5deg)",
+                  fontWeight: 700,
+                  textShadow: "0 0 0 currentColor, 0.7px 0 currentColor, -0.7px 0 currentColor, 0 0.7px currentColor, 0 -0.7px currentColor, 0.7px 0.7px currentColor, -0.7px -0.7px currentColor"
+                }}
+              >
+                VARTIKA SHUKLA
+              </p>
+              <div
+                className="mt-2 h-px w-24 mx-auto"
+                style={{ backgroundColor: "#ffffff" }}
+              />
+              <p
+                className="mt-3 text-[14px] tracking-[0.35em] uppercase font-semibold"
+                style={{
+                  color: "#ffffff"
+                }}
+              >
+                Siddha Maha Yoga
+              </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Reveal Section - Notable Gurus */}
       <RevealSection theme={theme} setCursorVariant={setCursorVariant} />
 
@@ -110,7 +189,7 @@ const WellnessWebsite = () => {
       />
 
       {/* CTA */}
-      <CTASection theme={theme} setCursorVariant={setCursorVariant} />
+      <CTASection theme={theme} setCursorVariant={setCursorVariant} isDark={isDark} />
 
       {/* FAQs - with RED accent */}
       <FAQ theme={theme} isDark={isDark} />

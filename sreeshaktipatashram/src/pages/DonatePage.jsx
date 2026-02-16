@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useOutletContext } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { ArrowLeft, Heart } from "lucide-react";
 import { DodoPayments } from "dodopayments-checkout";
 
 const DODO_MODE = (import.meta.env.VITE_DODO_MODE || "test").toLowerCase();
 
 export default function DonatePage() {
   const { isDark, theme } = useOutletContext();
+  const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("1000");
@@ -135,6 +136,103 @@ export default function DonatePage() {
       className="min-h-screen px-6 md:px-24 pt-32 pb-24 relative overflow-hidden"
       style={{ backgroundColor: theme.colors.bg.primary, color: theme.text }}
     >
+      <div
+        className="fixed top-0 bottom-0 right-0 z-[40]"
+        style={{
+          left: "var(--sidebar-width, 0px)",
+          width: "calc(100% - var(--sidebar-width, 0px))"
+        }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundColor: isDark ? "rgba(20, 20, 20, 0.90)" : "rgba(240, 240, 240, 0.32)",
+            backdropFilter: "blur(15px)",
+            WebkitMaskImage:
+              "linear-gradient(-10deg, #000 0%, #000 47%, transparent 47%, transparent 55%, #000 55%, #000 100%)",
+            maskImage:
+              "linear-gradient(-10deg, #000 0%, #000 47%, transparent 47%, transparent 55%, #000 55%, #000 100%)",
+            WebkitMaskSize: "140% 140%",
+            maskSize: "140% 140%",
+            WebkitMaskPosition: "15% -15%",
+            maskPosition: "15% -15%"
+          }}
+        />
+
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center px-6 -translate-y-6">
+            <p
+              className="text-[11px] tracking-[0.5em] uppercase"
+              style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.65)" }}
+            >
+              Coming Soon
+            </p>
+            <h2
+              className="mt-4 text-4xl md:text-6xl font-semibold tracking-[0.08em]"
+              style={{ color: isDark ? "#ffffff" : "#111111" }}
+            >
+              Donations Coming Shortly
+            </h2>
+            <p className="mt-4 text-sm font-semibold" style={{ color: "#f59e0b" }}>
+              For donations, please{' '}
+              <a
+                href="https://wa.me/919819962635"
+                target="_blank"
+                rel="noreferrer"
+                className="px-1"
+                style={{
+                  color: "#b91c1c",
+                  borderRadius: "0px",
+                  transition: "all 200ms ease",
+                  textDecoration: "underline",
+                  textDecorationColor: "#b91c1c"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#b91c1c";
+                  e.currentTarget.style.color = "#ffffff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "#b91c1c";
+                }}
+              >
+                Whatsapp Siddhamayoga
+              </a>
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="mt-6 inline-flex items-center gap-2 px-8 py-3 border text-sm tracking-wide transition-colors"
+              style={{
+                borderColor: isDark ? theme.borderStrong : theme.borderStrong,
+                color: isDark ? '#ffffff' : '#111111',
+                backgroundColor: isDark ? theme.colors.bg.secondary : '#ffffff',
+                boxShadow: isDark
+                  ? '0 0 0 1px rgba(255,255,255,0.06)'
+                  : '0 8px 20px rgba(0,0,0,0.08)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = isDark
+                  ? theme.colors.bg.card
+                  : theme.colors.bg.secondary;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = isDark
+                  ? theme.colors.bg.secondary
+                  : '#ffffff';
+              }}
+            >
+              <ArrowLeft size={16} />
+              Return Home
+            </button>
+            <div className="mt-6 mx-auto h-[2px] w-28" style={{ backgroundColor: theme.accent }} />
+            <div
+              className="mt-8 mx-auto h-10 w-10 border"
+              style={{ borderColor: theme.accent, transform: "rotate(12deg)" }}
+            />
+          </div>
+        </div>
+      </div>
       <div
         className="absolute -left-20 top-24 w-[140%] h-16 rotate-[-10deg] z-0"
         style={{

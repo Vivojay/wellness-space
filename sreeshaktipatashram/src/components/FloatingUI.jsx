@@ -141,6 +141,8 @@ export default function FloatingUI(props) {
   const sidebarRef = useRef(null);
   const hamburgerBtnRef = useRef(null);
   const [showCursor, setShowCursor] = useState(true);
+  const [hideCursor, setHideCursor] = useState(false);
+  const hideCursorRef = useRef(false);
   const cursorRef = useRef(null);
   const lastPos = useRef({ x: 0, y: 0 });
   const rafRef = useRef(null);
@@ -149,10 +151,17 @@ export default function FloatingUI(props) {
   const navigate = useNavigate();
   const isDonatePage = location.pathname === "/donate";
   const goHomeTop = () => {
-    navigate("/");
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    });
+    if (location.pathname === "/") {
+      const scrollContainer = document.getElementById("app-scroll");
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
+    navigate("/", { state: { scrollTo: "top" } });
   };
 
   const goToSection = async (id) => {
@@ -210,6 +219,16 @@ export default function FloatingUI(props) {
     if (!showCursor) return;
 
     const handleMove = (e) => {
+      const target = e.target instanceof Element ? e.target : null;
+      const disabledTarget = target?.closest?.('[disabled], [aria-disabled="true"]');
+      const cursorStyle = target ? window.getComputedStyle(target).cursor : "";
+      const shouldHide = Boolean(disabledTarget) || cursorStyle === "not-allowed";
+
+      if (hideCursorRef.current !== shouldHide) {
+        hideCursorRef.current = shouldHide;
+        setHideCursor(shouldHide);
+      }
+
       lastPos.current = { x: e.clientX, y: e.clientY };
       if (rafRef.current) return;
       rafRef.current = requestAnimationFrame(() => {
@@ -229,10 +248,15 @@ export default function FloatingUI(props) {
     };
   }, [showCursor]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--sidebar-width", sidebarExpanded ? "280px" : "0px");
+  }, [sidebarExpanded]);
+
   return (
     <>
       {/* Custom Cursor */}
-      {showCursor && (
+      {showCursor && !hideCursor && (
         <div
           className="fixed pointer-events-none z-[9999]"
           ref={cursorRef}

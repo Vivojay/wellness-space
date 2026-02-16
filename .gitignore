@@ -83,6 +83,7 @@ backend/.env.*.local
 .env
 .env.local
 .env.*.local
+sreeshaktipatashram/.env
 sreeshaktipatahshram/.env
 sreeshaktipatahshram/.env.local
 sreeshaktipatahshram/.env.*.local
@@ -111,4 +112,9 @@ test_db.db
 # Secrets / config
 # ----------------------------
 backend/serviceAccountKey.json
+
+# ----------------------------
+# Local caches
+# ----------------------------
+backend/.cache/
 

@@ -52,7 +52,16 @@ function HamburgerIcon({ open }) {
 
 export default function AppShell() {
   // Core UI state
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      const stored = localStorage.getItem("ssa_theme");
+      if (stored === "dark") return true;
+      if (stored === "light") return false;
+    } catch (e) {
+      // ignore storage errors
+    }
+    return false;
+  });
 
   const [cursorVariant, setCursorVariant] = useState("default");
 
@@ -101,6 +110,24 @@ export default function AppShell() {
   const theme = useMemo(() => getTheme(isDark), [isDark]);
   const themeCSSVars = useMemo(() => getThemeCSSVars(isDark), [isDark]);
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("ssa_theme");
+      if (stored === "dark") setIsDark(true);
+      if (stored === "light") setIsDark(false);
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("ssa_theme", isDark ? "dark" : "light");
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [isDark]);
+
 
   // Scroll progress
   useEffect(() => {
@@ -139,6 +166,17 @@ export default function AppShell() {
 
     let attempts = 0;
     const tryScroll = () => {
+      if (targetId === "top") {
+        const scrollContainer = document.getElementById("app-scroll");
+        if (scrollContainer) {
+          scrollContainer.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+        } else {
+          window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+        }
+        navigate(location.pathname, { replace: true, state: {} });
+        return;
+      }
+
       const el = document.getElementById(targetId);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -298,7 +336,7 @@ export default function AppShell() {
           <div className="flex-1">
             <Outlet context={{ isDark, theme, setCursorVariant, scrollProgress }} />
         </div>
-        <SiteFooter theme={theme} />
+        <SiteFooter theme={theme} zIndex={pathname === "/readings" ? -1 : 20} />
       </div>
     </div>
   );

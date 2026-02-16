@@ -9,6 +9,7 @@ from app.routes.booking import router as booking_router
 from app.routes.testimonials import router as testimonials_router
 from app.routes.feed import router as feed_router
 from app.routes.payments import router as payments_router
+from app.routes.thumbnails import router as thumbnails_router
 
 load_dotenv()  # reads backend/.env
 
@@ -34,3 +35,4 @@ app.include_router(booking_router, prefix="/api")
 app.include_router(testimonials_router, prefix="/api")
 app.include_router(feed_router, prefix="/api")
 app.include_router(payments_router, prefix="/api")
+app.include_router(thumbnails_router, prefix="/api")

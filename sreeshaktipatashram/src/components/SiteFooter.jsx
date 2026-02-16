@@ -1,32 +1,37 @@
 import { useEffect, useState } from "react";
 import { FaInstagram, FaFacebook, FaYoutube } from "react-icons/fa";
 
-export default function SiteFooter({ theme }) {
-  const [uniqueVisitCount, setUniqueVisitCount] = useState(null);
+export default function SiteFooter({ theme, zIndex = 20 }) {
+  const [visitCount, setVisitCount] = useState(null);
 
   useEffect(() => {
-    const key = "ssa_unique_visited_v1";
-    const countKey = "ssa_unique_counter_v1";
+    const counterUrl = import.meta.env.VITE_COUNTER_URL;
+    if (!counterUrl || typeof window === "undefined") return;
 
-    const already = localStorage.getItem(key);
-    let count = Number(localStorage.getItem(countKey) || "0");
+    const host = window.location.hostname;
+    const controller = new AbortController();
 
-    if (!already) {
-      localStorage.setItem(key, "1");
-      count += 1;
-      localStorage.setItem(countKey, String(count));
-    }
-    setUniqueVisitCount(count);
+    fetch(`${counterUrl}/count?host=${encodeURIComponent(host)}`, {
+      signal: controller.signal,
+      cache: "no-store"
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return;
+        setVisitCount(data.total ?? data.count ?? null);
+      })
+      .catch(() => {});
+
+    return () => controller.abort();
   }, []);
 
   return (
     <footer
-      className="border-t py-20 px-8 md:px-24 transition-colors duration-500"
+      className="py-20 px-8 md:px-24 transition-colors duration-500"
       style={{
-        borderColor: theme.border,
         backgroundColor: theme.colors.bg.primary,
         position: 'relative',
-        zIndex: 20
+        zIndex
       }}
     >
       <div className="max-w-6xl mx-auto">
@@ -103,7 +108,7 @@ export default function SiteFooter({ theme }) {
                 fontFamily: "'Source Sans 3', sans-serif"
               }}
             >
-              Unique visits (this device): {uniqueVisitCount ?? "—"}
+              Total visits: {visitCount ?? "—"}
             </p>
           </div>
         </div>

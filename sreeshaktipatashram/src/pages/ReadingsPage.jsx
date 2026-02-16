@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { useOutletContext } from "react-router-dom";
-import { FileText, BookOpen, ChevronLeft, ChevronRight, MousePointerClick } from "lucide-react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { ArrowLeft, FileText, BookOpen, ChevronLeft, ChevronRight, MousePointerClick } from "lucide-react";
 
 const pdfs = [
   {
@@ -171,6 +171,7 @@ const pdfs = [
 
 function ReadingsPage() {
   const { isDark } = useOutletContext();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -182,6 +183,8 @@ function ReadingsPage() {
   const pdfViewerRef = useRef(null);
   const sidebarWidth = 320;
   const entryWidth = 48;
+  const [thumbStatus, setThumbStatus] = useState({});
+  const thumbStatusRef = useRef({});
 
   const theme = {
     bg: isDark ? 'bg-neutral-900' : 'bg-neutral-50',
@@ -189,14 +192,29 @@ function ReadingsPage() {
     textSecondary: isDark ? 'text-neutral-400' : 'text-neutral-600',
     cardBg: isDark ? 'bg-neutral-800/95' : 'bg-white',
     border: isDark ? 'border-neutral-700' : 'border-neutral-200',
+    borderStrong: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
     shadow: isDark ? 'shadow-lg shadow-black/20' : 'shadow-md shadow-black/5',
+    accent: isDark ? '#2dd4bf' : '#15616c',
+    pageBg: isDark ? '#0b1013' : '#faf8f5',
+    colors: {
+      bg: {
+        secondary: isDark ? 'rgba(18, 24, 28, 0.9)' : '#ebe7e0',
+        card: isDark ? 'rgba(18, 24, 28, 0.95)' : '#ffffff'
+      }
+    }
   };
 
   const total = pdfs.length;
   const searchInputRef = useRef(null);
+  const thumbnailBase = `${import.meta.env.VITE_API_URL}/thumbnails/pdf?url=`;
   const filtered = useMemo(() => {
     return pdfs.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
   }, [query]);
+
+  const getThumbnailUrl = useCallback(
+    (url) => `${thumbnailBase}${encodeURIComponent(url)}`,
+    [thumbnailBase]
+  );
 
   const filteredTotal = filtered.length;
 
@@ -425,6 +443,26 @@ function ReadingsPage() {
     return result;
   }, [currentIndex, filtered, filteredTotal]);
 
+  useEffect(() => {
+    visiblePdfs.forEach(({ pdf }) => {
+      const link = pdf?.link;
+      if (!link || thumbStatusRef.current[link]) return;
+      thumbStatusRef.current[link] = "loading";
+
+      const img = new Image();
+      img.onload = () => {
+        thumbStatusRef.current[link] = "loaded";
+        setThumbStatus((prev) => ({ ...prev, [link]: "loaded" }));
+      };
+      img.onerror = () => {
+        thumbStatusRef.current[link] = "error";
+        setThumbStatus((prev) => ({ ...prev, [link]: "error" }));
+      };
+      img.src = getThumbnailUrl(link);
+    });
+  }, [visiblePdfs, getThumbnailUrl]);
+
+
 
   const handleTileClick = useCallback((clickedOffset) => {
     if (animationRef.current || filteredTotal === 0) return;
@@ -447,7 +485,14 @@ function ReadingsPage() {
 
   return (
     // <div className={`min-h-screen ${theme.bg} ${theme.text} px-12 pt-32`}>
-    <div className={`relative min-h-screen ${theme.text} px-12 pt-32 overflow-x-hidden`}>
+    <div
+      className={`relative min-h-screen ${theme.text} px-12 pt-32 overflow-x-hidden`}
+      style={{
+        backgroundColor: theme.pageBg,
+        touchAction: "pan-y",
+        WebkitOverflowScrolling: "touch"
+      }}
+    >
       <div className="fixed inset-0 z-0 pointer-events-none">
         <svg
           className="fixed inset-0 w-full h-screen pointer-events-none"
@@ -471,7 +516,7 @@ function ReadingsPage() {
           </defs>
 
           <image
-            href="https://dhunwellness.com/cdn/shop/files/Sound_healing_room.jpg?v=1751348144&width=1920"
+            href="https://images.pexels.com/photos/16263863/pexels-photo-16263863.jpeg?_gl=1*1j98u23*_ga*MTYwMzgwODk3My4xNzcxMjQwOTg2*_ga_8JE65Q40S6*czE3NzEyNDA5ODYkbzEkZzEkdDE3NzEyNDEwMzgkajgkbDAkaDA"
             x="0"
             y="0"
             width="100"
@@ -483,15 +528,11 @@ function ReadingsPage() {
         
       </div>
 
-      <div className="absolute inset-0 z-[1] pointer-events-none" style={{
-        backgroundColor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.2)'
-      }} />
-
       <div className="relative z-10 h-full flex flex-col">
 
       {/* ENHANCED SEARCH + Results counter */}
       <div className="w-3xl mx-auto mb-12">
-        <div className={`relative flex items-center gap-4 border-2 ${theme.border} py-5 px-8 ${theme.cardBg} shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md`}>
+        <div className={`relative flex items-center gap-4 border ${theme.border} py-5 px-8 ${theme.cardBg} shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md`}>
           <FileText className="w-6 h-6 flex-shrink-0" />
           <input
             ref={searchInputRef}   // keep this for Ctrl+K focus
@@ -504,15 +545,16 @@ function ReadingsPage() {
               }
             }}
             placeholder="Type to search..."
-            className="bg-transparent outline-none flex-1 text-xl font-medium placeholder:text-neutral-500 transition-colors duration-200 pr-12"
+            className={`bg-transparent outline-none flex-1 text-xl font-medium ${isDark ? 'placeholder:text-neutral-300' : 'placeholder:text-neutral-500'} transition-colors duration-200 pr-12`}
           />
           
           {/* Add the Ctrl+K indicator pill */}
           <div
-            className="absolute right-12 top-1/2 -translate-y-1/2 text-xs px-3 py-2 font-mono select-none pointer-events-none"
+            className="absolute right-12 top-1/2 -translate-y-1/2 text-xs px-3 py-2 font-mono select-none pointer-events-none backdrop-blur-lg"
             style={{
-              backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
-              color: isDark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.65)'
+              backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+              color: isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.6)',
+              border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.07)'
             }}
           >
             Ctrl + K
@@ -540,7 +582,7 @@ function ReadingsPage() {
             <p className={`${theme.textSecondary} text-sm font-medium tracking-wide`}>
               Showing <span className={`${theme.text} font-semibold`}>{filteredTotal}</span> 
               {filteredTotal === 1 ? ' result' : ' results'} for 
-              <span className={`${theme.text} font-semibold mx-1 px-1 bg-gradient-to-r from-neutral-300 to-neutral-200 bg-opacity-20`}>“{query}”</span>
+              <span className={`${theme.text} font-semibold mx-1 px-1`} style={{ backgroundColor: isDark ? 'rgba(45, 212, 191, 0.18)' : 'rgba(21, 97, 108, 0.12)' }}>“{query}”</span>
             </p>
           </div>
         )}
@@ -580,12 +622,7 @@ function ReadingsPage() {
 
 
       {/* ENHANCED LIBRARY */}
-      <div
-        className="relative mt-6 py-8"
-        style={{
-          backgroundColor: isDark ? 'rgba(10, 14, 16, 0.35)' : 'rgba(255, 255, 255, 0.5)'
-        }}
-      >
+      <div className="relative mt-6 py-8">
         <div className="relative mx-auto" style={{ 
           width: `${tileSize + (visibleCount-1) * peekOffset}px`,
           height: `${tileSize + 80}px`
@@ -618,28 +655,42 @@ function ReadingsPage() {
                   `}
                   onClick={() => handleTileClick(offset)}
                 >
-                  {/* Enhanced background with glow */}
-                  <div 
-                    className="absolute inset-0 border-inset group-hover:bg-gradient-to-br group-hover:from-neutral-100/20 group-hover:to-neutral-200/10 transition-all duration-300"
-                    style={{ 
-                      backgroundColor: isDark 
-                        ? `rgba(30,30,30,${bgOpacity})`
-                        : `rgba(245,245,245,${bgOpacity})`,
-                      backdropFilter: `blur(${blurValue}px)`
-                    }}
-                  />
+                   {/* PDF thumbnail background */}
+                   <div className="absolute inset-0">
+                     <div
+                       className="absolute inset-0 transition-transform duration-500"
+                       style={{
+                         backgroundImage:
+                           thumbStatus[pdf.link] === "loaded"
+                             ? `url(${getThumbnailUrl(pdf.link)})`
+                             : "none",
+                         backgroundColor: isDark
+                           ? "rgba(18, 22, 26, 0.85)"
+                           : "rgba(255, 255, 255, 0.92)",
+                         backgroundSize: "contain",
+                         backgroundRepeat: "no-repeat",
+                         backgroundPosition: "center",
+                         transform: "scale(1)",
+                         filter: "none",
+                         backdropFilter: `blur(${blurValue}px)`
+                       }}
+                     />
+                   </div>
 
                   {/* Icon */}
-                  <div className="flex-1 flex items-center justify-center z-20 pointer-events-none p-6">
-                    <FileText 
-                      className={`w-28 h-36 transition-all duration-300 group-hover:scale-110 ${isCenter ? 'w-36 h-44 scale-90 drop-shadow-2xl' : ''}`}
-                      style={{ opacity: textOpacity, color: 'hsl(0 0% 55%)' }}
-                    />
-                  </div>
+                   <div className="flex-1 flex items-center justify-center z-20 pointer-events-none p-6">
+                     {thumbStatus[pdf.link] !== "loaded" && (
+                       <FileText 
+                         className={`w-28 h-36 transition-all duration-300 group-hover:scale-110 ${isCenter ? 'w-36 h-44 scale-90 drop-shadow-2xl' : ''}`}
+                         style={{ opacity: textOpacity * 0.4, color: 'hsl(0 0% 55%)' }}
+                       />
+                     )}
+                   </div>
 
                   {/* NEW: Click indicator for center */}
                   {isCenter && (
-                    <div className="absolute bottom-30 right-3 w-8 h-8 bg-teal-600 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300 z-30">
+                    <div className="absolute bottom-30 right-3 w-8 h-8 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300 z-30"
+                      style={{ backgroundColor: theme.accent }}>
                       <MousePointerClick className="w-4 h-4 text-white" />
                     </div>
                   )}
@@ -647,7 +698,13 @@ function ReadingsPage() {
                   {/* Enhanced title + description */}
                   {(isCenter || filteredTotal <= 3) && (
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[100%] z-20 px-0 pb-0 pt-0">
-                      <div className="bg-neutral-300/20 backdrop-blur-md px-4 py-13 border-neutral-500">
+                      <div
+                        className="px-4 py-13"
+                        style={{
+                          backgroundColor: isDark ? 'rgba(12, 16, 20, 0.92)' : 'rgba(255, 255, 255, 0.96)',
+                          border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)'
+                        }}
+                      >
                         <p
                           className="text-xs font-semibold leading-tight tracking-wide mb-1 line-clamp-2"
                           style={{ color: isDark ? '#ffffff' : 'rgba(0,0,0,0.95)' }}
@@ -691,10 +748,10 @@ function ReadingsPage() {
 
         <div className="mt-6 flex justify-center">
           <div
-            className="backdrop-blur-md px-4 py-2 border text-xs font-mono"
+            className="backdrop-blur-xl px-4 py-2 text-xs font-mono"
             style={{
-              backgroundColor: isDark ? 'rgba(15, 18, 22, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-              borderColor: theme.border,
+              backgroundColor: isDark ? 'rgba(20, 24, 28, 0.68)' : 'rgba(255, 255, 255, 0.9)',
+              border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.08)',
               color: theme.text
             }}
           >
@@ -709,10 +766,10 @@ function ReadingsPage() {
         {filteredTotal > 0 && (
           <div className="mt-3 flex justify-center">
             <div
-              className="backdrop-blur-md px-6 py-3 border shadow-2xl"
+              className="backdrop-blur-xl px-6 py-3 shadow-2xl"
               style={{
-                backgroundColor: isDark ? 'rgba(10, 12, 16, 0.85)' : 'rgba(255, 255, 255, 0.9)',
-                borderColor: theme.border,
+                backgroundColor: isDark ? 'rgba(16, 20, 24, 0.7)' : 'rgba(255, 255, 255, 0.92)',
+                border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.08)',
                 color: theme.text
               }}
             >
@@ -722,6 +779,34 @@ function ReadingsPage() {
             </div>
           </div>
         )}
+
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => navigate("/")}
+            className="inline-flex items-center gap-2 mt-8 px-8 py-3 border text-sm tracking-wide transition-colors whitespace-nowrap"
+            style={{
+              borderColor: isDark ? theme.borderStrong : theme.borderStrong,
+              color: theme.text,
+              backgroundColor: isDark ? theme.colors.bg.secondary : '#ffffff',
+              boxShadow: isDark
+                ? '0 0 0 1px rgba(255,255,255,0.06)'
+                : '0 8px 20px rgba(0,0,0,0.08)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDark
+                ? theme.colors.bg.card
+                : theme.colors.bg.secondary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isDark
+                ? theme.colors.bg.secondary
+                : '#ffffff';
+            }}
+          >
+            <ArrowLeft size={16} />
+            Return Home
+          </button>
+        </div>
       </div>
 
       {/* PDF OVERLAY - enhanced */}
