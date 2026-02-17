@@ -104,8 +104,8 @@ const WellnessWebsite = () => {
         style={{
           backgroundColor: getSectionBg(0),
           backgroundImage: isDark
-            ? "linear-gradient(rgba(10, 14, 18, 0.55), rgba(10, 14, 18, 0.55)), linear-gradient(120deg, rgba(40, 86, 64, 0.35) 0%, rgba(123, 88, 60, 0.3) 45%, rgba(46, 94, 98, 0.35) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(/src/assets/images/extended_bg_about_me.jpeg)"
-            : "linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), linear-gradient(120deg, rgba(114, 186, 150, 0.45) 0%, rgba(210, 165, 120, 0.4) 45%, rgba(112, 186, 196, 0.45) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(/src/assets/images/extended_bg_about_me.jpeg)",
+            ? "linear-gradient(rgba(10, 14, 18, 0.55), rgba(10, 14, 18, 0.55)), linear-gradient(120deg, rgba(40, 86, 64, 0.35) 0%, rgba(123, 88, 60, 0.3) 45%, rgba(46, 94, 98, 0.35) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(https://res.cloudinary.com/sidehustle-01/image/upload/v1771367921/extended_bg_about_me_j7yco8.jpg)"
+            : "linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), linear-gradient(120deg, rgba(114, 186, 150, 0.45) 0%, rgba(210, 165, 120, 0.4) 45%, rgba(112, 186, 196, 0.45) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(https://res.cloudinary.com/sidehustle-01/image/upload/v1771367921/extended_bg_about_me_j7yco8.jpg)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -117,7 +117,7 @@ const WellnessWebsite = () => {
           className="absolute inset-0 pointer-events-none"
           style={{
             opacity: 1,
-            backgroundImage: "url(/src/assets/images/extended_bg_about_me.jpeg)",
+            backgroundImage: "url(https://res.cloudinary.com/sidehustle-01/image/upload/v1771367921/extended_bg_about_me_j7yco8.jpg)",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -211,7 +211,7 @@ const WellnessWebsite = () => {
                 }}
               >
                 <img
-                  src="/src/assets/images/IMG_20250512_143414.jpg"
+                  src="https://res.cloudinary.com/sidehustle-01/image/upload/v1771367922/IMG_20250512_143414_lxpoga.jpg"
                   alt="Vartika Shukla"
                   className="block w-full h-full object-contain"
                   style={{
