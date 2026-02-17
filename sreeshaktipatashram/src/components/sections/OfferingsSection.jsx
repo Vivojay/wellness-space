@@ -1,6 +1,6 @@
 import React from "react";
 
-const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
+const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
   const offerings = [
     { 
       title: 'Read', 
@@ -23,7 +23,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant }) => {
     <section 
       id="offerings" 
       className="cv-auto py-40 px-8 md:px-24 transition-colors duration-500 relative"
-      style={{ backgroundColor: theme.colors.bg.primary }}
+      style={{ backgroundColor: bgColor ?? theme.colors.bg.primary }}
     >
       {/* Subtle RED accent overlay for this section */}
       <div 

@@ -1,6 +1,6 @@
 import React from "react";
 
-const LineageSection = ({ theme }) => {
+const LineageSection = ({ theme, bgColor }) => {
   const lineage = [
     { img: 'SWAMI_GANGADHAR_TIRTHA.png', name: 'Swami Gangadhar Tirtha' },
     { img: 'SWAMI_NARAYANDEV_TIRTHA.png', name: 'Swami Narayandev Tirtha' },
@@ -16,7 +16,7 @@ const LineageSection = ({ theme }) => {
     <section 
       id="lineage" 
       className="cv-auto relative py-40 px-8 md:px-24 transition-colors duration-500"
-      style={{ backgroundColor: theme.colors.bg.secondary }}
+      style={{ backgroundColor: bgColor ?? theme.colors.bg.secondary }}
     >
       <div className="max-w-6xl mx-auto">
         <div className="mb-20">

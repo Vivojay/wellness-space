@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function RevealSection({ theme, setCursorVariant }) {
+export default function RevealSection({ theme, setCursorVariant, bgColor }) {
   const guruCards = [
     {
       img: "https://images.weserv.nl/?url=https://drive.google.com/uc?id=16RqiNKrawYBaQyWis9IQbg75Cseqq4oq&w=1200&q=85",
@@ -32,7 +32,7 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
   return (
     <section 
       className="cv-auto relative py-40 px-8 md:px-24 transition-colors duration-500"
-      style={{ backgroundColor: theme.colors.bg.primary }}
+      style={{ backgroundColor: bgColor ?? theme.colors.bg.primary }}
     >
       <div className="max-w-6xl mx-auto">
         {/* Two-toned diagonal title */}

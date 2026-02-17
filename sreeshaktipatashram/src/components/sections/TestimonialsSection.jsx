@@ -16,13 +16,13 @@ const QuoteMark = ({ className = "", fillColor }) => (
 );
 
 
-const TestimonialsSection = ({ theme, testimonials, setCursorVariant }) => {
+const TestimonialsSection = ({ theme, testimonials, setCursorVariant, bgColor }) => {
   const topTestimonials = testimonials.filter((_, idx) => idx % 2 === 0);
   const bottomTestimonials = testimonials.filter((_, idx) => idx % 2 === 1);
   return (
     <section 
       className="cv-auto py-28 overflow-hidden transition-colors duration-500"
-      style={{ backgroundColor: theme.colors.bg.secondary }}
+      style={{ backgroundColor: bgColor ?? theme.colors.bg.secondary }}
     >
       {/* Header */}
       <div className="text-center mb-24">

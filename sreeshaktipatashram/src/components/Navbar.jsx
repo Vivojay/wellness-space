@@ -33,11 +33,12 @@ export default function Navbar({ isDark }) {
                   backdrop-blur-3xl border-b-4 transition-all duration-500
                   z-[19] shadow-[0_10px_30px_rgba(0,0,0,0.12)]`}
       style={{ backgroundColor: bgColor, borderColor, color: textColor }}
+      data-navbar
     >
       {/* ✅ Consistent font family across all pages */}
       <span 
-        className="text-lg sm:text-xl md:text-2xl font-evafiya tracking-[0.3em]"
-        // style={{ fontFamily: "'Evafiya', serif" }}
+        className="text-lg sm:text-xl md:text-2xl tracking-[0.3em]"
+        style={{ fontFamily: "'Noto Sans', sans-serif" }}
       >
         Sreeshaktipat Ashram
       </span>

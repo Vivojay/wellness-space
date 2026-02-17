@@ -6,6 +6,7 @@ import RightFeed from "@/components/RightFeed";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
 import { getTheme, getThemeCSSVars } from "@/config/themeConfig";
+import { fetchFeed } from "@/api/feedApi";
 
 import {
   Sun,
@@ -165,6 +166,24 @@ export default function AppShell() {
     if (!targetId || !isHome) return;
 
     let attempts = 0;
+    const getOffset = () => {
+      const nav = document.querySelector("[data-navbar]");
+      const navHeight = nav?.getBoundingClientRect().height || 110;
+      return navHeight + 12;
+    };
+    const scrollToEl = (el) => {
+      const scrollContainer = document.getElementById("app-scroll");
+      const offset = getOffset();
+      if (scrollContainer) {
+        const elRect = el.getBoundingClientRect();
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const targetTop = scrollContainer.scrollTop + (elRect.top - containerRect.top) - offset;
+        scrollContainer.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
+      } else {
+        const targetTop = window.scrollY + el.getBoundingClientRect().top - offset;
+        window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
+      }
+    };
     const tryScroll = () => {
       if (targetId === "top") {
         const scrollContainer = document.getElementById("app-scroll");
@@ -179,7 +198,7 @@ export default function AppShell() {
 
       const el = document.getElementById(targetId);
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollToEl(el);
         navigate(location.pathname, { replace: true, state: {} });
         return;
       }
@@ -202,14 +221,16 @@ export default function AppShell() {
 
   useEffect(() => {
     let isMounted = true;
+    let intervalId = null;
 
-    const loadFeed = async () => {
+    const loadFeed = async ({ force = false } = {}) => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/feed?limit=10`);
-        if (!res.ok) throw new Error("Failed to load feed");
-        const data = await res.json();
-        if (isMounted && Array.isArray(data) && data.length) {
-          setFeedItems(data);
+        const data = await fetchFeed({ limit: 10, force });
+        const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        if (isMounted) {
+          if (items.length) {
+            setFeedItems(items);
+          }
         }
       } catch (e) {
         if (isMounted) {
@@ -218,9 +239,14 @@ export default function AppShell() {
       }
     };
 
-    loadFeed();
+    loadFeed({ force: true });
+    intervalId = setInterval(() => {
+      loadFeed({ force: true });
+    }, 60000);
+
     return () => {
       isMounted = false;
+      if (intervalId) clearInterval(intervalId);
     };
   }, []);
 
@@ -336,7 +362,10 @@ export default function AppShell() {
           <div className="flex-1">
             <Outlet context={{ isDark, theme, setCursorVariant, scrollProgress }} />
         </div>
-        <SiteFooter theme={theme} zIndex={pathname === "/readings" ? -1 : 20} />
+        <SiteFooter
+          theme={theme}
+          zIndex={pathname === "/readings" ? -1 : pathname === "/donate" ? 80 : 20}
+        />
       </div>
     </div>
   );

@@ -71,13 +71,42 @@ export default function BlogPost() {
         <link rel="canonical" href={`${window.location.origin}/blog/${slug}`} />
       </Helmet>
 
-      <article 
-        className="max-w-4xl mx-auto rounded-none p-12 shadow-sm"
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-6">
+          <button
+            onClick={() => window.history.back()}
+            className="inline-flex items-center gap-2 px-4 py-2 border transition-colors rounded-none"
+            style={{
+              borderColor: theme.accentTertiary + "40",
+              backgroundColor: theme.accentTertiary + "15",
+              color: theme.accent
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.accentTertiary + "25";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = theme.accentTertiary + "15";
+            }}
+          >
+            Back to blogs
+          </button>
+        </div>
+
+        <article 
+          className="rounded-none p-12 shadow-sm"
         style={{ 
           backgroundColor: theme.colors.bg.card,
           borderColor: theme.border
         }}
       >
+        {blog.image_url && (
+          <img
+            src={blog.image_url}
+            alt={blog.title}
+            className="w-full h-auto mb-8"
+            loading="lazy"
+          />
+        )}
         <h1 
           className="text-5xl md:text-6xl font-light leading-tight mb-4"
           style={{ color: theme.text }}
@@ -119,7 +148,7 @@ export default function BlogPost() {
               p: ({node, ...props}) => (
                 <p 
                   className="mb-4" 
-                  style={{ color: theme.textSecondary }}
+                  style={{ color: isDark ? "#ffffff" : theme.textSecondary }}
                   {...props} 
                 />
               ),
@@ -133,14 +162,14 @@ export default function BlogPost() {
               ul: ({node, ...props}) => (
                 <ul 
                   className="list-disc pl-6 mb-4" 
-                  style={{ color: theme.textSecondary }}
+                  style={{ color: isDark ? "#ffffff" : theme.textSecondary }}
                   {...props} 
                 />
               ),
               ol: ({node, ...props}) => (
                 <ol 
                   className="list-decimal pl-6 mb-4" 
-                  style={{ color: theme.textSecondary }}
+                  style={{ color: isDark ? "#ffffff" : theme.textSecondary }}
                   {...props} 
                 />
               ),
@@ -180,7 +209,8 @@ export default function BlogPost() {
           </ReactMarkdown>
         </div>
 
-      </article>
+        </article>
+      </div>
     </section>
   );
 }

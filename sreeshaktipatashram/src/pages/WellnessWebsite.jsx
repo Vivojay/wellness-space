@@ -28,6 +28,11 @@ const WellnessWebsite = () => {
     { author: 'Arjun P.', text: 'A space where healing happens naturally and beautifully.', role: 'Explorer' }
   ];
 
+  const sectionPalette = isDark
+    ? ["#1a241f", "#28211b", "#16242a"]
+    : ["#e6efe6", "#eadfd3", "#ddeef2"];
+  const getSectionBg = (index) => sectionPalette[index % sectionPalette.length];
+
 
   useEffect(() => {
     let isMounted = true;
@@ -95,107 +100,221 @@ const WellnessWebsite = () => {
 
       {/* About Me */}
       <section
-        className="px-6 md:px-24 py-20"
-        style={{ backgroundColor: theme.colors.bg.secondary }}
+        className="px-6 md:px-24 pt-24 pb-0 relative"
+        style={{
+          backgroundColor: getSectionBg(0),
+          backgroundImage: isDark
+            ? "linear-gradient(rgba(10, 14, 18, 0.55), rgba(10, 14, 18, 0.55)), linear-gradient(120deg, rgba(40, 86, 64, 0.35) 0%, rgba(123, 88, 60, 0.3) 45%, rgba(46, 94, 98, 0.35) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(/src/assets/images/extended_bg_about_me.jpeg)"
+            : "linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), linear-gradient(120deg, rgba(114, 186, 150, 0.45) 0%, rgba(210, 165, 120, 0.4) 45%, rgba(112, 186, 196, 0.45) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(/src/assets/images/extended_bg_about_me.jpeg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          height: "90vh",
+          minHeight: "680px"
+        }}
       >
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
-          <div>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: 1,
+            backgroundImage: "url(/src/assets/images/extended_bg_about_me.jpeg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            // filter: "blur(2px)",
+            WebkitMaskImage:
+              "radial-gradient(circle at 52% 76%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 12%, rgba(0, 0, 0, 0.3) 24%, rgba(0, 0, 0, 0) 34%)",
+            maskImage:
+              "radial-gradient(circle at 52% 76%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 12%, rgba(0, 0, 0, 0.3) 24%, rgba(0, 0, 0, 0) 34%)"
+          }}
+        />
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12 relative h-full">
+          <div className="flex flex-col h-full relative">
             <p
               className="text-[11px] tracking-[0.4em] uppercase"
-              style={{ color: theme.textMuted }}
+              style={{ color: isDark ? theme.textMuted : "#121417" }}
             >
               About Me
             </p>
-            <h2
-              className="text-3xl md:text-4xl font-light tracking-tight mt-4"
-              style={{ color: theme.text }}
-            >
-              A Lineage of Living Transmission
-            </h2>
-            <div className="mt-6 space-y-5 text-base leading-relaxed" style={{ color: theme.textSecondary }}>
-              <p>
-                Siddha Mahayoga is a path of inner transformational journey which begins when a
-                Siddha Guru meets a deserving disciple. As an authorised Siddha Guru, the spiritual
-                head of the Siddha Maha Yoga path, Goddess Vartika, initiates deserving disciples
-                onto the grand Yoga path - Siddha Maha Yoga.
-              </p>
-              <p>
-                Every religious and spiritual journey gradually leads a seeker towards Kundalini
-                Awakening. At this point the actual journey begins, prior to this everything done
-                so far is a mere preparation of the mind and body.
-              </p>
-              <p>
-                The safest and easiest method for attaining this state of awakened Kundalini is
-                through Kundalini Shaktipat, this is achieved through the blessings and Sankalp of
-                a Siddha Guru. Once the energy is awakened within a deserving disciple, (s)he is
-                able to experience and live in the awareness of the Self.
-              </p>
-            </div>
           </div>
 
-          <div className="relative" style={{ isolation: "isolate" }}>
-            <div className="relative h-[420px] md:h-[520px] w-full overflow-visible">
-              <img
-                src="https://res.cloudinary.com/sidehustle-01/image/upload/v1771247171/face-removebg-preview_rgua2i.png"
-                alt="Vartika Shukla"
-                className="absolute inset-0 w-full h-full object-contain"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-center px-6 pointer-events-none mix-blend-difference">
-              <p
-                className="text-[3rem] md:text-[4rem] tracking-[0.1em] font-modernsanslight whitespace-nowrap"
-                style={{
-                  color: "#ffffff",
-                  transform: "rotate(-1.5deg)",
-                  fontWeight: 700,
-                  textShadow: "0 0 0 currentColor, 0.7px 0 currentColor, -0.7px 0 currentColor, 0 0.7px currentColor, 0 -0.7px currentColor, 0.7px 0.7px currentColor, -0.7px -0.7px currentColor"
-                }}
-              >
-                VARTIKA SHUKLA
-              </p>
+        </div>
+
+        <div
+          className="absolute left-6 md:left-24 top-1/2 text-[10px]"
+          style={{
+            color: theme.textMuted,
+            width: "calc((100% - 6rem) * 0.55)",
+            transform: "translateY(-50%)"
+          }}
+        >
+          <div
+            className="inline-flex flex-col justify-start px-3 py-4 space-y-2"
+            style={{
+              height: "45vh",
+              minHeight: "320px",
+              // backgroundColor: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.65)",
+              backgroundColor: isDark ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0)",
+              color: isDark ? "#ffffff" : "rgba(12, 14, 18, 0.95)",
+              fontFamily: "'Outfit', sans-serif"
+            }}
+          >
+            <p>Guiding seekers toward inner steadiness and self-awareness.</p>
+            <p>Rooted in Siddha Maha Yoga, centered on lived transformation.</p>
+          </div>
+        </div>
+
+        <div
+          className="absolute left-6 md:left-24 right-6 md:right-24 bottom-0"
+          style={{
+            fontFamily: "'Source Sans 3', sans-serif",
+            color: theme.text
+          }}
+        >
+          <div
+            className="relative"
+            style={{
+              "--portrait-width": "clamp(120px, 14vw, 220px)",
+              "--portrait-height": "clamp(180px, 22vw, 340px)",
+              "--portrait-bottom": "3%"
+            }}
+          >
+            <div
+              className="absolute left-1/2 bottom-[3%] z-0"
+              style={{
+                width: "calc(var(--portrait-width) + 32px)",
+                height: "calc(var(--portrait-height) + 32px)",
+                bottom: "var(--portrait-bottom)",
+                transform: "translateX(-50%)",
+                padding: "16px",
+                backgroundColor: isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.45)",
+                border: isDark
+                  ? "1px solid rgba(255, 255, 255, 0.2)"
+                  : "1px solid rgba(0, 0, 0, 0.45)",
+                boxShadow: isDark
+                  ? "0 30px 70px rgba(0, 0, 0, 0.35)"
+                  : "0 30px 70px rgba(0, 0, 0, 0.35)",
+                borderRadius: "3px"
+              }}
+            >
               <div
-                className="mt-2 h-px w-24 mx-auto"
-                style={{ backgroundColor: "#ffffff" }}
-              />
-              <p
-                className="mt-3 text-[14px] tracking-[0.35em] uppercase font-semibold"
+                className="w-full h-full overflow-hidden"
                 style={{
-                  color: "#ffffff"
+                  backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.2)",
+                  border: isDark
+                    ? "1px solid rgba(255, 255, 255, 0.12)"
+                    : "1px solid rgba(0, 0, 0, 0.3)",
+                  boxShadow: isDark
+                    ? "0 25px 60px rgba(0, 0, 0, 0.35)"
+                    : "0 25px 60px rgba(0, 0, 0, 0.2)",
+                  borderRadius: "2px"
                 }}
               >
-                Siddha Maha Yoga
-              </p>
+                <img
+                  src="/src/assets/images/IMG_20250512_143414.jpg"
+                  alt="Vartika Shukla"
+                  className="block w-full h-full object-contain"
+                  style={{
+                    filter: "grayscale(1) saturate(0.5) contrast(1.45) brightness(0.82)"
+                  }}
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
+            </div>
+            <div
+              className="relative z-10 w-full whitespace-nowrap leading-[0.85] tracking-[0.05em] text-center overflow-hidden"
+              style={{
+                fontSize: "clamp(2.75rem, 10.5vw, 12rem)",
+                fontWeight: 600,
+                fontFamily: "'Outfit', sans-serif",
+                color: isDark ? theme.text : "#04070b"
+              }}
+            >
+              <span
+                aria-hidden
+                className="absolute inset-0 z-5 block w-full"
+                style={{
+                  WebkitTextStroke: isDark ? "1px #000" : "1px #fff",
+                  WebkitTextFillColor: "transparent",
+                  color: "transparent",
+                  WebkitMaskImage: "linear-gradient(to right, #000 0, #000 calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), #000 100%)",
+                  maskImage: "linear-gradient(to right, #000 0, #000 calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), #000 100%)"
+                }}
+              >
+                Vartika Shukla
+              </span>
+              <span
+                className="relative z-10 block w-full"
+                style={{
+                  WebkitMaskImage: "linear-gradient(to right, #000 0, #000 calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), #000 100%)",
+                  maskImage: "linear-gradient(to right, #000 0, #000 calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), #000 100%)",
+                  WebkitTextFillColor: isDark ? theme.text : "#1a1f24",
+                  color: isDark ? theme.text : "#1a1f24"
+                }}
+              >
+                Vartika Shukla
+              </span>
+              <span
+                aria-hidden
+                className="absolute inset-0 z-15 block w-full text-grain-base"
+                style={{
+                  WebkitMaskImage: "linear-gradient(to right, #000 0, #000 calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), #000 100%)",
+                  maskImage: "linear-gradient(to right, #000 0, #000 calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% - (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), #000 100%)",
+                  mixBlendMode: isDark ? "multiply" : "screen",
+                  opacity: isDark ? 0.9 : 0.7,
+                  WebkitTextStroke: "0 transparent"
+                }}
+              >
+                Vartika Shukla
+              </span>
+              <span
+                aria-hidden
+                className="absolute inset-0 z-20 block w-full"
+                style={{
+                  opacity: isDark ? 0.1 : 0.45,
+                  WebkitMaskImage: "linear-gradient(to right, transparent 0, transparent calc(50% - (var(--portrait-width) * 0.5)), #000 calc(50% - (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), transparent 100%)",
+                  maskImage: "linear-gradient(to right, transparent 0, transparent calc(50% - (var(--portrait-width) * 0.5)), #000 calc(50% - (var(--portrait-width) * 0.5)), #000 calc(50% + (var(--portrait-width) * 0.5)), transparent calc(50% + (var(--portrait-width) * 0.5)), transparent 100%)",
+                  WebkitTextStroke: "0 transparent"
+                }}
+              >
+                Vartika Shukla
+              </span>
+              <span aria-hidden className="absolute inset-0 z-30 block w-full text-grain">
+                Vartika Shukla
+              </span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Reveal Section - Notable Gurus */}
-      <RevealSection theme={theme} setCursorVariant={setCursorVariant} />
+      <RevealSection theme={theme} setCursorVariant={setCursorVariant} bgColor={getSectionBg(1)} />
 
       {/* Lineage Section */}
-      <LineageSection theme={theme}/>
+      <LineageSection theme={theme} bgColor={getSectionBg(2)} />
 
       {/* Offerings - with RED accent */}
-      <OfferingsSection theme={theme} isDark={isDark} setCursorVariant={setCursorVariant} />
+      <OfferingsSection theme={theme} isDark={isDark} setCursorVariant={setCursorVariant} bgColor={getSectionBg(0)} />
 
       {/* Testimonials */}
       <TestimonialsSection 
         theme={theme} 
         testimonials={testimonials}
-        setCursorVariant={setCursorVariant} 
+        setCursorVariant={setCursorVariant}
+        bgColor={getSectionBg(1)}
       />
 
       {/* CTA */}
-      <CTASection theme={theme} setCursorVariant={setCursorVariant} isDark={isDark} />
+      <CTASection theme={theme} setCursorVariant={setCursorVariant} isDark={isDark} bgColor={getSectionBg(2)} />
 
       {/* FAQs - with RED accent */}
-      <FAQ theme={theme} isDark={isDark} />
+      <FAQ theme={theme} isDark={isDark} bgColor={getSectionBg(0)} />
 
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
         @font-face {
           font-family: 'PetitFormal';
           src: url('/fonts/petit-formal-script.regular.ttf') format('truetype');
@@ -219,6 +338,34 @@ const WellnessWebsite = () => {
         .font-modernsanslight {
           font-family: 'ModernSansLight', serif;
           font-weight: bold;
+        }
+
+        .text-grain {
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          background-image:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.06) 45%, rgba(0, 0, 0, 0.18) 100%),
+            url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='0.9'/></svg>");
+          background-size: 240px 240px, 140px 140px;
+          background-position: 0 0, 12px 8px;
+          background-repeat: repeat;
+          -webkit-background-clip: text;
+          background-clip: text;
+          mix-blend-mode: multiply;
+          opacity: 0.35;
+          pointer-events: none;
+        }
+
+        .text-grain-base {
+          -webkit-text-fill-color: transparent;
+          color: transparent;
+          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><filter id='velvet'><feTurbulence type='fractalNoise' baseFrequency='0.008' numOctaves='4' seed='12' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feGaussianBlur stdDeviation='0.45'/><feComponentTransfer><feFuncR type='gamma' amplitude='1' exponent='1.8' offset='0'/><feFuncG type='gamma' amplitude='1' exponent='1.8' offset='0'/><feFuncB type='gamma' amplitude='1' exponent='1.8' offset='0'/></feComponentTransfer></filter><rect width='320' height='320' filter='url(%23velvet)' opacity='0.85'/></svg>");
+          background-size: 200px 200px;
+          background-position: 0 0;
+          background-repeat: repeat;
+          -webkit-background-clip: text;
+          background-clip: text;
+          pointer-events: none;
         }
 
         .font-petitformal {

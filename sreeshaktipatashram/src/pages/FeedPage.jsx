@@ -1,33 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { Plus, Pencil, Trash2, ArrowUpDown, Calendar, RotateCcw } from "lucide-react";
-import { fetchBlogs } from "@/api/blogApi";
-import { deleteAdminBlog, fetchAdminBlogs } from "@/api/adminApi";
+import { Link, useOutletContext } from "react-router-dom";
+import { Pencil, Trash2, Plus, RotateCcw, ArrowUpDown, Calendar } from "lucide-react";
 import { useAuth } from "@/auth/AuthContext";
-import ConfirmDialog from "@/components/ConfirmDialog";
+import { fetchFeed } from "@/api/feedApi";
+import { createAdminFeed, deleteAdminFeed, fetchAdminFeed, updateAdminFeed } from "@/api/adminApi";
 
-export default function BlogIndex({ adminView = false }) {
+export default function FeedPage({ adminView = false }) {
   const { isDark, theme } = useOutletContext();
-  const navigate = useNavigate();
   const { isAdmin, token } = useAuth();
-  const [blogs, setBlogs] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [form, setForm] = useState({ category: "NEWS", text: "", published: true });
+  const [editingId, setEditingId] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
-  const [confirmState, setConfirmState] = useState({ open: false, slug: null });
   const [pageLoading, setPageLoading] = useState(false);
   const MAX_PAGE_CACHE = 10;
-  const forceRefreshKey = "ssa_blogs_force_refresh";
+  const forceRefreshKey = "ssa_feed_force_refresh";
+  const [newestFirst, setNewestFirst] = useState(true);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const tabsRef = useRef(null);
   const [tabsWidth, setTabsWidth] = useState(null);
-  const cacheKeyPreview = "ssa_blogs_preview_cache_v3";
-  const cacheKeyAdmin = "ssa_blogs_admin_cache_v3";
-  const normalizeBlogs = (data) => {
-    if (Array.isArray(data)) return { items: data, total_pages: 1 };
-    if (Array.isArray(data?.items)) return data;
-    return { items: [], total_pages: 1 };
-  };
+  const cacheKeyPreview = "ssa_feed_preview_cache_v3";
+  const cacheKeyAdmin = "ssa_feed_admin_cache_v3";
 
   const readCache = (key) => {
     try {
@@ -64,9 +61,11 @@ export default function BlogIndex({ adminView = false }) {
     writeCache(key, { pages, order: nextOrder, total_pages: totalPagesValue, lastRefreshed: refreshedAt });
   };
 
-  const [newestFirst, setNewestFirst] = useState(true);
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const normalizeFeed = (data) => {
+    if (Array.isArray(data)) return { items: data, total_pages: 1 };
+    if (Array.isArray(data?.items)) return data;
+    return { items: [], total_pages: 1 };
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -79,7 +78,7 @@ export default function BlogIndex({ adminView = false }) {
       const cached = readCache(activeKey);
       const pageKey = String(page);
       if (!shouldForce && cached?.pages?.[pageKey]) {
-        setBlogs(cached.pages[pageKey]);
+        setItems(cached.pages[pageKey]);
         setTotalPages(cached.total_pages || 1);
         setLastRefreshed(cached.lastRefreshed || null);
         setLoading(false);
@@ -88,20 +87,20 @@ export default function BlogIndex({ adminView = false }) {
       try {
         if (token) {
           const [previewRaw, adminRaw] = await Promise.all([
-            fetchBlogs({ limit: 12, page, force: shouldForce }),
-            fetchAdminBlogs(token, { limit: 12, page })
+            fetchFeed({ limit: 15, page, force: shouldForce }),
+            fetchAdminFeed(token, { limit: 15, page })
           ]);
           if (!isMounted) return;
-          const previewData = normalizeBlogs(previewRaw);
-          const adminData = normalizeBlogs(adminRaw);
+          const previewData = normalizeFeed(previewRaw);
+          const adminData = normalizeFeed(adminRaw);
           const now = new Date().toISOString();
           updatePageCache(cacheKeyPreview, page, previewData.items, previewData.total_pages || 1, now);
           updatePageCache(cacheKeyAdmin, page, adminData.items, adminData.total_pages || 1, now);
           if (adminView) {
-            setBlogs(adminData.items);
+            setItems(adminData.items);
             setTotalPages(adminData.total_pages || 1);
           } else {
-            setBlogs(previewData.items);
+            setItems(previewData.items);
             setTotalPages(previewData.total_pages || 1);
           }
           setLastRefreshed(now);
@@ -111,13 +110,12 @@ export default function BlogIndex({ adminView = false }) {
           setLoading(false);
           return;
         }
-        const data = normalizeBlogs(await fetchBlogs({ limit: 12, page, force: shouldForce }));
+        const data = normalizeFeed(await fetchFeed({ limit: 15, page, force: shouldForce }));
         if (!isMounted) return;
-        const items = data.items;
-        setBlogs(items);
+        setItems(data.items);
         setTotalPages(data.total_pages || 1);
         const now = new Date().toISOString();
-        updatePageCache(cacheKeyPreview, page, items, data.total_pages || 1, now);
+        updatePageCache(cacheKeyPreview, page, data.items, data.total_pages || 1, now);
         setLastRefreshed(now);
       } finally {
         if (isMounted) setLoading(false);
@@ -147,14 +145,12 @@ export default function BlogIndex({ adminView = false }) {
 
   const filtered = useMemo(() => {
     const parse = (d) => (d ? new Date(d).getTime() : null);
-
     const fromTs = fromDate ? new Date(fromDate + "T00:00:00").getTime() : null;
     const toTs = toDate ? new Date(toDate + "T23:59:59").getTime() : null;
 
-    const arr = [...blogs].filter(b => {
-      const ts = b?.created_at ? parse(b.created_at) : null;
+    const arr = [...items].filter((item) => {
+      const ts = item?.created_at ? parse(item.created_at) : null;
       if (!ts) return true;
-
       if (fromTs && ts < fromTs) return false;
       if (toTs && ts > toTs) return false;
       return true;
@@ -163,42 +159,46 @@ export default function BlogIndex({ adminView = false }) {
     arr.sort((a, b) => {
       const ta = a?.created_at ? parse(a.created_at) : 0;
       const tb = b?.created_at ? parse(b.created_at) : 0;
-      return newestFirst ? (tb - ta) : (ta - tb);
+      return newestFirst ? tb - ta : ta - tb;
     });
 
     return arr;
-  }, [blogs, newestFirst, fromDate, toDate]);
+  }, [items, newestFirst, fromDate, toDate]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!token) return;
+    if (editingId) {
+      await updateAdminFeed(editingId, form, token);
+      setItems((prev) => prev.map((i) => (i.id === editingId ? { ...form, id: editingId } : i)));
+    } else {
+      const res = await createAdminFeed(form, token);
+      setItems((prev) => [{ ...form, id: res.id }, ...prev]);
+    }
+    sessionStorage.setItem("ssa_feed_force_refresh", Date.now().toString());
+    setPage(1);
+    setForm({ category: "NEWS", text: "", published: true });
+    setEditingId(null);
+  };
 
   return (
-    <section 
-      className="py-16 px-6 md:px-24 min-h-screen"
-      style={{ backgroundColor: theme.colors.bg.primary }}
-    >
+    <section className="py-16 px-6 md:px-24 min-h-screen" style={{ backgroundColor: theme.colors.bg.primary }}>
       <div className="max-w-6xl mx-auto">
-
-        {/* Header */}
         <div className="text-center mb-6">
-          <h1 
-            className="text-6xl md:text-7xl font-light tracking-wider leading-tight mb-6 font-petitformal"
-            style={{ color: theme.text }}
-          >
-            Blogs & Updates
+          <h1 className="text-6xl md:text-7xl font-light tracking-wider leading-tight mb-6" style={{ color: theme.accentSecondary }}>
+            Feed
           </h1>
-          <p 
-            className="text-sm md:text-base"
-            style={{ color: theme.textMuted }}
-          >
-            Writings, reflections, and insights
+          <p className="text-sm md:text-base" style={{ color: theme.textMuted }}>
+            Short updates and announcements
           </p>
-
           {!isAdmin && (
             <button
               onClick={async () => {
                 setLoading(true);
                 try {
-                  const raw = await fetchBlogs({ force: true, limit: 12, page });
-                  const data = normalizeBlogs(raw);
-                  setBlogs(data.items);
+                  const raw = await fetchFeed({ force: true, limit: 15, page });
+                  const data = normalizeFeed(raw);
+                  setItems(data.items);
                   setTotalPages(data.total_pages || 1);
                   const now = new Date().toISOString();
                   updatePageCache(cacheKeyPreview, page, data.items, data.total_pages || 1, now);
@@ -209,20 +209,12 @@ export default function BlogIndex({ adminView = false }) {
               }}
               className="mt-6 inline-flex items-center gap-2 px-4 py-2 border transition-colors rounded-none"
               style={{
-                borderColor: theme.accentTertiary + '40',
-                backgroundColor: theme.accentTertiary + '15',
+                borderColor: theme.accentTertiary + "40",
+                backgroundColor: theme.accentTertiary + "15",
                 color: theme.accent
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme.accentTertiary + '25';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = theme.accentTertiary + '15';
-              }}
-              aria-label="Refresh blogs"
-              title="Refresh"
             >
-              <RotateCcw size={14} style={{ color: isDark ? '#ffffff' : '#000000' }} />
+              <RotateCcw size={14} color={isDark ? "#ffffff" : "#000000"} />
               <span className="text-[10px] tracking-[0.35em] uppercase font-medium">Refresh</span>
             </button>
           )}
@@ -242,7 +234,7 @@ export default function BlogIndex({ adminView = false }) {
                 style={{ borderColor: theme.border }}
               >
                 <Link
-                  to="/blog"
+                  to="/feed"
                   className="px-4 py-2 text-xs tracking-wide"
                   style={{
                     backgroundColor: adminView ? "transparent" : theme.colors.bg.secondary,
@@ -252,7 +244,7 @@ export default function BlogIndex({ adminView = false }) {
                   Preview
                 </Link>
                 <Link
-                  to="/admin/blog"
+                  to="/admin/feed"
                   className="px-4 py-2 text-xs tracking-wide"
                   style={{
                     backgroundColor: adminView ? theme.colors.bg.secondary : "transparent",
@@ -268,26 +260,26 @@ export default function BlogIndex({ adminView = false }) {
                   try {
                     if (token) {
                       const [previewRaw, adminRaw] = await Promise.all([
-                        fetchBlogs({ force: true, limit: 12, page }),
-                        fetchAdminBlogs(token, { limit: 12, page })
+                        fetchFeed({ force: true, limit: 15, page }),
+                        fetchAdminFeed(token, { limit: 15, page })
                       ]);
-                      const previewData = normalizeBlogs(previewRaw);
-                      const adminData = normalizeBlogs(adminRaw);
+                      const previewData = normalizeFeed(previewRaw);
+                      const adminData = normalizeFeed(adminRaw);
                       const now = new Date().toISOString();
                       updatePageCache(cacheKeyPreview, page, previewData.items, previewData.total_pages || 1, now);
                       updatePageCache(cacheKeyAdmin, page, adminData.items, adminData.total_pages || 1, now);
                       if (adminView) {
-                        setBlogs(adminData.items);
+                        setItems(adminData.items);
                         setTotalPages(adminData.total_pages || 1);
                       } else {
-                        setBlogs(previewData.items);
+                        setItems(previewData.items);
                         setTotalPages(previewData.total_pages || 1);
                       }
                       setLastRefreshed(now);
                     } else {
-                      const raw = await fetchBlogs({ force: true, limit: 12, page });
-                      const data = normalizeBlogs(raw);
-                      setBlogs(data.items);
+                      const raw = await fetchFeed({ force: true, limit: 15, page });
+                      const data = normalizeFeed(raw);
+                      setItems(data.items);
                       setTotalPages(data.total_pages || 1);
                       const now = new Date().toISOString();
                       updatePageCache(cacheKeyPreview, page, data.items, data.total_pages || 1, now);
@@ -300,20 +292,12 @@ export default function BlogIndex({ adminView = false }) {
                 className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 border transition-colors rounded-none"
                 style={{
                   width: tabsWidth ? `${tabsWidth}px` : undefined,
-                  borderColor: theme.accentTertiary + '40',
-                  backgroundColor: theme.accentTertiary + '15',
+                  borderColor: theme.accentTertiary + "40",
+                  backgroundColor: theme.accentTertiary + "15",
                   color: theme.accent
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.accentTertiary + '25';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.accentTertiary + '15';
-                }}
-                aria-label="Refresh blogs"
-                title="Refresh"
               >
-                <RotateCcw size={14} style={{ color: isDark ? '#ffffff' : '#000000' }} />
+                <RotateCcw size={14} color={isDark ? "#ffffff" : "#000000"} />
                 <span className="text-[10px] tracking-[0.35em] uppercase font-medium">Refresh</span>
               </button>
               {lastRefreshed && (
@@ -328,11 +312,9 @@ export default function BlogIndex({ adminView = false }) {
           </div>
         )}
 
-        {/* Controls row */}
         <div className="mb-10 flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Sort toggle */}
           <button
-            onClick={() => setNewestFirst(v => !v)}
+            onClick={() => setNewestFirst((v) => !v)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-none border transition-colors"
             style={{
               backgroundColor: theme.colors.bg.card,
@@ -340,21 +322,20 @@ export default function BlogIndex({ adminView = false }) {
               color: theme.text
             }}
           >
-            <ArrowUpDown size={16} />
+            <ArrowUpDown size={16} color={isDark ? "#ffffff" : "#000000"} />
             <span className="text-sm">{newestFirst ? "Newest First" : "Oldest First"}</span>
           </button>
 
-          {/* Date range filter */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div 
+            <div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-none border"
               style={{
                 backgroundColor: theme.colors.bg.card,
                 borderColor: theme.border
               }}
             >
-              <Calendar 
-                size={16} 
+              <Calendar
+                size={16}
                 className="opacity-70"
                 style={{ color: theme.textMuted }}
               />
@@ -365,10 +346,7 @@ export default function BlogIndex({ adminView = false }) {
                 className="bg-transparent text-sm outline-none"
                 style={{ color: theme.text }}
               />
-              <span 
-                className="text-sm"
-                style={{ color: theme.textMuted }}
-              >
+              <span className="text-sm" style={{ color: theme.textMuted }}>
                 →
               </span>
               <input
@@ -395,185 +373,155 @@ export default function BlogIndex({ adminView = false }) {
           </div>
         </div>
 
-        {/* Floating create button (admin only) */}
         {isAdmin && adminView && (
-          <Link
-            to="/admin/blog/new"
-            className="fixed right-10 bottom-28 z-[300] w-16 h-16 rounded-full
-              border-2 flex items-center justify-center shadow-2xl
-              hover:scale-110 transition-all group"
-            style={{
-              backgroundColor: theme.accentTertiary,
-              borderColor: theme.accent,
-            }}
-            aria-label="Create new blog"
-            title="Create new blog"
-          >
-            <Plus size={32} strokeWidth={2.5} style={{ color: '#ffffff' }} />
-          </Link>
+          <div className="flex justify-center mb-10">
+            <button
+              onClick={() => {
+                setEditingId("new");
+                setForm({ category: "NEWS", text: "", published: true });
+              }}
+              className="fixed right-10 bottom-28 z-[300] w-16 h-16 rounded-full border-2 flex items-center justify-center shadow-2xl hover:scale-110 transition-all"
+              style={{ backgroundColor: theme.accentSecondary, borderColor: theme.accent }}
+              aria-label="Add feed"
+              title="Add feed"
+            >
+              <Plus size={32} strokeWidth={2.5} style={{ color: "#ffffff" }} />
+            </button>
+          </div>
         )}
 
-        {/* Loading */}
         {(loading || pageLoading) && (
-          <p 
-            className="text-center italic py-24"
-            style={{ color: theme.textMuted }}
-          >
+          <p className="text-center italic py-24" style={{ color: theme.textMuted }}>
             Loading page…
           </p>
         )}
 
-        {/* Empty state */}
         {!loading && !pageLoading && filtered.length === 0 && (
-          <div 
-            className="border-l-2 pl-6 italic py-12"
-            style={{ 
-              borderColor: theme.border,
-              color: theme.textMuted
-            }}
-          >
-            No blogs published yet (or none in this date range).
+          <div className="border-l-2 pl-6 italic py-12" style={{ borderColor: theme.border, color: theme.textMuted }}>
+            No feed items yet.
           </div>
         )}
 
-        {/* Blog list */}
         {!loading && !pageLoading && filtered.length > 0 && (
           <div className="space-y-6">
-            {filtered.map((b) => (
+            {filtered.map((item) => (
               <div
-                key={b.slug}
-                className="relative group border rounded-none p-7 transition-all duration-300 hover:shadow-xl"
-                style={{
-                  backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : theme.colors.bg.card,
-                  borderColor: theme.border
-                }}
-                role="button"
-                tabIndex={0}
-                onClick={() =>
-                  navigate(
-                    isAdmin && adminView ? `/admin/blog/preview/${b.slug}` : `/blog/${b.slug}`
-                  )
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    navigate(
-                      isAdmin && adminView ? `/admin/blog/preview/${b.slug}` : `/blog/${b.slug}`
-                    );
-                  }
-                }}
+                key={item.id || item.text}
+                className="relative border rounded-none p-6 transition-all duration-300 hover:shadow-xl"
+                style={{ backgroundColor: theme.colors.bg.secondary, borderColor: theme.border }}
               >
-                <div
-                  className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{
-                    background: isDark
-                      ? "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 65%)"
-                      : "linear-gradient(135deg, rgba(15, 118, 110, 0.08) 0%, rgba(15, 118, 110, 0) 65%)"
-                  }}
-                />
-                {isAdmin && adminView && (
+                {isAdmin && adminView && item.id && (
                   <div className="absolute top-5 right-5 flex gap-2">
-                    <Link
-                      to={`/admin/blog/edit/${b.slug}`}
-                      className="w-10 h-10 rounded-none border flex items-center justify-center transition-all"
-                      style={{
-                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : theme.colors.bg.card,
-                        borderColor: theme.border
-                      }}
-                      title="Edit"
-                      aria-label="Edit"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Pencil size={16} style={{ color: theme.accent }} />
-                    </Link>
-
                     <button
-                      className="w-10 h-10 rounded-none border flex items-center justify-center transition-all"
-                      style={{
-                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : theme.colors.bg.card,
-                        borderColor: theme.border
-                      }}
-                      title="Delete"
-                      aria-label="Delete"
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setConfirmState({ open: true, slug: b.slug });
-                        return;
-                        if (!token) return;
-                        await deleteAdminBlog(b.slug, token);
-                        setBlogs(prev => prev.filter(x => x.slug !== b.slug));
+                      className="w-10 h-10 rounded-none border flex items-center justify-center"
+                      style={{ borderColor: theme.border, color: theme.text }}
+                      onClick={() => {
+                        setEditingId(item.id);
+                        setForm({ category: item.category || "NEWS", text: item.text || "", published: !!item.published });
                       }}
                     >
-                      <Trash2 size={16} className="text-red-500" />
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      className="w-10 h-10 rounded-none border flex items-center justify-center"
+                      style={{ borderColor: theme.border, color: "#b91c1c" }}
+                      onClick={async () => {
+                        if (!token) return;
+                        await deleteAdminFeed(item.id, token);
+                        setItems((prev) => prev.filter((i) => i.id !== item.id));
+                      }}
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 )}
-                <Link
-                  to={isAdmin && adminView ? `/admin/blog/preview/${b.slug}` : `/blog/${b.slug}`}
-                  className="block"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {b.image_url ? (
-                    <div className="flex items-start gap-5">
-                      <div className="w-24 h-24 overflow-hidden border" style={{ borderColor: theme.border }}>
-                        <img
-                          src={b.image_url}
-                          alt={b.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div>
-                        <h2 
-                          className="text-3xl md:text-4xl font-light leading-snug group-hover:text-teal-600 transition-colors"
-                          style={{ color: theme.text }}
-                        >
-                          {b.title}
-                        </h2>
-
-                        <p 
-                          className="mt-3 max-w-3xl text-base"
-                          style={{ color: theme.textSecondary }}
-                        >
-                          {b.excerpt}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <h2 
-                        className="text-3xl md:text-4xl font-light leading-snug group-hover:text-teal-600 transition-colors"
-                        style={{ color: theme.text }}
-                      >
-                        {b.title}
-                      </h2>
-
-                      <p 
-                        className="mt-3 max-w-3xl text-base"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {b.excerpt}
-                      </p>
-                    </>
-                  )}
-
-                  {b.created_at && (
-                    <span 
-                      className="text-sm mt-4 block"
-                      style={{ color: theme.textMuted }}
-                    >
-                      {new Date(b.created_at).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
-                    </span>
-                  )}
-                </Link>
+                <p className="text-xs tracking-wide opacity-60 mb-2" style={{ color: theme.textMuted }}>
+                  {item.category || "NEWS"}
+                </p>
+                <p className="text-base leading-relaxed" style={{ color: theme.text }}>
+                  {item.text}
+                </p>
               </div>
             ))}
           </div>
         )}
+        {isAdmin && adminView && editingId && (
+          <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/40">
+            <form
+              onSubmit={submit}
+              className="border p-6 w-full max-w-xl bg-white"
+              style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.card }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg" style={{ color: theme.text }}>
+                  {editingId === "new" ? "Add Feed" : "Edit Feed"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setEditingId(null)}
+                  className="text-sm"
+                  style={{ color: theme.textMuted }}
+                >
+                  Close
+                </button>
+              </div>
+              <div className="flex items-center gap-4 mb-4">
+                <input
+                  className="border px-3 py-2 rounded-none"
+                  style={{ backgroundColor: theme.colors.bg.card, borderColor: theme.border, color: theme.text }}
+                  value={form.category}
+                  onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+                  placeholder="Category"
+                />
+              </div>
+              <div className="mb-4">
+                <p className="text-sm mb-2" style={{ color: theme.textMuted }}>
+                  Status
+                </p>
+                <div className="inline-flex border rounded-none overflow-hidden" style={{ borderColor: theme.border }}>
+                  <button
+                    type="button"
+                    onClick={() => setForm((p) => ({ ...p, published: false }))}
+                    className="px-4 py-2 text-xs tracking-wide"
+                    style={{
+                      backgroundColor: !form.published ? theme.colors.bg.secondary : "transparent",
+                      color: !form.published ? theme.text : theme.textMuted,
+                    }}
+                  >
+                    Save as Draft
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm((p) => ({ ...p, published: true }))}
+                    className="px-4 py-2 text-xs tracking-wide"
+                    style={{
+                      backgroundColor: form.published ? theme.accent : "transparent",
+                      color: form.published ? "#ffffff" : theme.textMuted,
+                    }}
+                  >
+                    Publish Live
+                  </button>
+                </div>
+              </div>
+              <textarea
+                className="w-full border p-3 rounded-none min-h-[120px]"
+                style={{ backgroundColor: theme.colors.bg.card, borderColor: theme.border, color: theme.text }}
+                value={form.text}
+                onChange={(e) => setForm((p) => ({ ...p, text: e.target.value }))}
+                placeholder="Write a feed update..."
+                required
+              />
+              <button
+                type="submit"
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 border rounded-none"
+                style={{ borderColor: theme.border, color: theme.text }}
+              >
+                <Plus size={14} /> {editingId === "new" ? "Add" : "Update"}
+              </button>
+            </form>
+          </div>
+        )}
+
         {!loading && totalPages > 1 && (
           <div className="flex flex-col items-center justify-center mt-10 gap-4">
             <div className="inline-flex items-center gap-2 flex-wrap justify-center">
@@ -651,21 +599,6 @@ export default function BlogIndex({ adminView = false }) {
             </div>
           </div>
         )}
-        <ConfirmDialog
-          open={confirmState.open}
-          title="Delete blog"
-          message="Are you sure you want to delete this post?"
-          confirmLabel="Delete"
-          cancelLabel="Cancel"
-          theme={theme}
-          onCancel={() => setConfirmState({ open: false, slug: null })}
-          onConfirm={async () => {
-            if (!token || !confirmState.slug) return;
-            await deleteAdminBlog(confirmState.slug, token);
-            setBlogs(prev => prev.filter(x => x.slug !== confirmState.slug));
-            setConfirmState({ open: false, slug: null });
-          }}
-        />
       </div>
     </section>
   );

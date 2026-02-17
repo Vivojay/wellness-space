@@ -63,7 +63,7 @@ export const faqs = [
 ];
 
 
-export default function FAQ({ theme, isDark }) {
+export default function FAQ({ theme, isDark, bgColor }) {
   const [openIndex, setOpenIndex] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const sectionRef = useRef(null);
@@ -104,7 +104,7 @@ export default function FAQ({ theme, isDark }) {
       id="faqs" 
       ref={sectionRef}
       className="cv-auto py-12 px-6 md:px-24 transition-colors duration-500 relative"
-      style={{ backgroundColor: theme.colors.bg.secondary }}
+      style={{ backgroundColor: bgColor ?? theme.colors.bg.secondary }}
     >
       {/* Subtle RED accent overlay */}
       <div 

@@ -1,9 +1,8 @@
-const API_URL = `${import.meta.env.VITE_API_URL}/blog`;
-const LIST_CACHE_KEY = "ssa_blogs_cache_v3";
-const LIST_CACHE_MRU_KEY = "ssa_blogs_cache_v3_mru";
+const API_URL = `${import.meta.env.VITE_API_URL}/feed`;
+const LIST_CACHE_KEY = "ssa_feed_cache_v3";
+const LIST_CACHE_MRU_KEY = "ssa_feed_cache_v3_mru";
 const MAX_PAGE_CACHE = 10;
 const LIST_CACHE_TTL = 5 * 60 * 1000;
-const BLOG_CACHE_TTL = 10 * 60 * 1000;
 
 const readCache = (key) => {
   try {
@@ -60,7 +59,7 @@ const touchPageCache = (page, data, now) => {
   writeMRU(next);
 };
 
-export async function fetchBlogs({ force = false, limit = 10, page = 1 } = {}) {
+export async function fetchFeed({ force = false, limit = 10, page = 1 } = {}) {
   const pageKey = `${LIST_CACHE_KEY}_${page}`;
   const cached = readCache(pageKey);
   const now = Date.now();
@@ -71,6 +70,7 @@ export async function fetchBlogs({ force = false, limit = 10, page = 1 } = {}) {
   if (limit) params.set("limit", String(limit));
   if (page) params.set("page", String(page));
   const res = await fetch(`${API_URL}?${params.toString()}`);
+  if (!res.ok) throw new Error("Failed to load feed");
   const data = await res.json();
   if (data?.items) {
     touchPageCache(page, data, now);
@@ -78,18 +78,4 @@ export async function fetchBlogs({ force = false, limit = 10, page = 1 } = {}) {
   }
   touchPageCache(page, data, now);
   return { items: Array.isArray(data) ? data : [], page, total: data?.length ?? 0, total_pages: 1 };
-}
-
-export async function fetchBlog(slug) {
-  const key = `ssa_blog_${slug}`;
-  const cached = readCache(key);
-  const now = Date.now();
-  if (cached?.ts && now - cached.ts < BLOG_CACHE_TTL && cached.data) {
-    return cached.data;
-  }
-  const res = await fetch(`${API_URL}/${slug}`);
-  if (!res.ok) throw new Error("Not found");
-  const data = await res.json();
-  writeCache(key, { ts: now, data });
-  return data;
 }

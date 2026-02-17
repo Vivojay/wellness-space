@@ -1,6 +1,8 @@
 import { ArrowDown, Minus, X } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/auth/AuthContext";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const ScrollToBottomButton = ({ chatRef, messages, theme }) => {
   const [isLocked, setIsLocked] = useState(false);
@@ -150,6 +152,8 @@ export default function FloatingUI(props) {
   const location = useLocation();
   const navigate = useNavigate();
   const isDonatePage = location.pathname === "/donate";
+  const { user, signOut } = useAuth();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const goHomeTop = () => {
     if (location.pathname === "/") {
       const scrollContainer = document.getElementById("app-scroll");
@@ -169,7 +173,21 @@ export default function FloatingUI(props) {
       navigate("/", { state: { scrollTo: id } });
       return;
     }
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById(id);
+    if (!el) return;
+    const nav = document.querySelector("[data-navbar]");
+    const navHeight = nav?.getBoundingClientRect().height || 110;
+    const offset = navHeight + 12;
+    const scrollContainer = document.getElementById("app-scroll");
+    if (scrollContainer) {
+      const elRect = el.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const targetTop = scrollContainer.scrollTop + (elRect.top - containerRect.top) - offset;
+      scrollContainer.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
+      return;
+    }
+    const targetTop = window.scrollY + el.getBoundingClientRect().top - offset;
+    window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -568,6 +586,7 @@ export default function FloatingUI(props) {
                 { name: 'Lineage', onClick: () => goToSection("lineage") },
                 { name: 'Offerings', onClick: () => goToSection("offerings") },
                 { name: 'FAQs', onClick: () => goToSection("faqs") },
+                ...(user ? [{ name: 'Sign Out', onClick: () => setConfirmOpen(true), isSignOut: true }] : []),
               ].map((item, idx) => (
                 <button 
                   key={idx} 
@@ -579,13 +598,13 @@ export default function FloatingUI(props) {
                 >
                   <span 
                     className="block text-lg font-light tracking-wide transition-all duration-300 group-hover:translate-x-3"
-                    style={{ color: item.isDonate ? "#b91c1c" : theme.text }}
+                    style={{ color: item.isDonate ? "#b91c1c" : item.isSignOut ? "#f59e0b" : theme.text }}
                   >
                     {item.name}
                   </span>
                   <div
                     className="absolute bottom-0 left-0 h-[2px] nav-underline"
-                    style={{ backgroundColor: item.isDonate ? "#b91c1c" : theme.accent }}
+                    style={{ backgroundColor: item.isDonate ? "#b91c1c" : item.isSignOut ? "#f59e0b" : theme.accent }}
                   />
                 </button>
               ))}
@@ -614,6 +633,21 @@ export default function FloatingUI(props) {
           </div>
         </div>
       </aside>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Sign Out"
+        message="Are you sure you want to sign out?"
+        confirmLabel="Sign out"
+        cancelLabel="Cancel"
+        theme={theme}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={async () => {
+          setConfirmOpen(false);
+          await signOut();
+          navigate("/admin/login");
+        }}
+      />
 
       {/* Hamburger icon */}
       <button 
