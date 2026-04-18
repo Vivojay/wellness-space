@@ -1,206 +1,205 @@
-import json
+import hashlib
+import hmac
 import os
 from datetime import datetime, timezone
 
 import requests
-from fastapi import APIRouter, HTTPException, Request
-from standardwebhooks import Webhook
+from fastapi import APIRouter, HTTPException
 
 from app.core.firebase import db
-from app.schemas.payment import DodoCheckoutCreate
+from app.schemas.payment import RazorpayOrderCreate, RazorpayVerifyPayment
 
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
 
-def _get_dodo_api_key() -> str:
-    api_key = os.getenv("DODO_API_KEY") or os.getenv("DODO_PAYMENTS_API_KEY")
-    if not api_key:
-        raise HTTPException(status_code=500, detail="Dodo Payments API key not configured")
-    return api_key
+def _get_razorpay_credentials() -> tuple[str, str]:
+    key_id = (os.getenv("RAZORPAY_KEY_ID") or "").strip()
+    key_secret = (os.getenv("RAZORPAY_KEY_SECRET") or "").strip()
+    if not key_id or not key_secret:
+        raise HTTPException(status_code=500, detail="Razorpay API keys not configured")
+    return key_id, key_secret
 
 
-def _get_dodo_base_url() -> str:
-    base_url = os.getenv("DODO_API_BASE")
-    if base_url:
-        return base_url.rstrip("/")
-    env = os.getenv("DODO_ENVIRONMENT", "test_mode")
-    return "https://live.dodopayments.com" if env == "live_mode" else "https://test.dodopayments.com"
+def _get_razorpay_base_url() -> str:
+    return (os.getenv("RAZORPAY_API_BASE") or "https://api.razorpay.com/v1").rstrip("/")
 
 
-@router.post("/dodo/checkout")
-def create_checkout(payload: DodoCheckoutCreate):
+def _parse_error(response: requests.Response) -> str:
+    try:
+        payload = response.json()
+        if isinstance(payload, dict):
+            err = payload.get("error")
+            if isinstance(err, dict):
+                desc = err.get("description") or err.get("reason") or err.get("code")
+                if desc:
+                    return str(desc)
+        return str(payload)
+    except Exception:
+        return response.text
+
+
+@router.post("/razorpay/order")
+def create_razorpay_order(payload: RazorpayOrderCreate):
     if payload.amount <= 0:
         raise HTTPException(status_code=400, detail="Invalid amount")
-    if payload.currency != "INR":
+
+    currency = (payload.currency or "INR").upper()
+    if currency != "INR":
         raise HTTPException(status_code=400, detail="Only INR is supported")
 
-    product_id = os.getenv("DODO_PRODUCT_ID")
-    if not product_id:
-        raise HTTPException(status_code=500, detail="Dodo product ID not configured")
+    key_id, key_secret = _get_razorpay_credentials()
+    base_url = _get_razorpay_base_url()
 
-    api_key = _get_dodo_api_key()
-    base_url = _get_dodo_base_url()
+    now = datetime.now(timezone.utc)
+    receipt = f"don_{now.strftime('%Y%m%d%H%M%S%f')[:18]}"
 
-    return_url = os.getenv("DODO_RETURN_URL")
-
-    body = {
-        "product_cart": [
-            {
-                "product_id": product_id,
-                "quantity": 1,
-                "amount": payload.amount,
-            }
-        ],
-        "customer": {
-            "email": payload.email,
-            "name": payload.name,
-            "phone_number": payload.phone,
-        },
-        "billing_currency": payload.currency,
-        "feature_flags": {
-            "allow_currency_selection": False,
+    order_body = {
+        "amount": payload.amount,
+        "currency": currency,
+        "receipt": receipt,
+        "notes": {
+            "type": "donation",
+            "name": payload.name or "",
+            "email": str(payload.email) if payload.email else "",
+            "phone": payload.phone or "",
         },
     }
-    if return_url:
-        body["return_url"] = return_url
 
     response = requests.post(
-        f"{base_url}/checkouts",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
-        },
-        data=json.dumps(body),
+        f"{base_url}/orders",
+        auth=(key_id, key_secret),
+        json=order_body,
         timeout=20,
     )
-
     if not response.ok:
-        raise HTTPException(status_code=response.status_code, detail=response.text)
+        raise HTTPException(status_code=response.status_code, detail=_parse_error(response))
 
-    session = response.json()
-    session_id = session.get("session_id") or session.get("id")
-    checkout_url = session.get("checkout_url") or session.get("url")
+    order = response.json()
+    order_id = order.get("id")
+    created_at = datetime.now(timezone.utc).isoformat()
 
-    doc = payload.model_dump()
-    doc.update({
-        "session_id": session_id,
-        "status": "created",
-        "provider": "dodo",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
-    if session_id:
-        db.collection("donations").document(session_id).set(doc)
-    db.collection("donation_events").add({
-        "event": "checkout_created",
-        "provider": "dodo",
-        "session_id": session_id,
-        "amount": payload.amount,
-        "currency": payload.currency,
-        "name": payload.name,
-        "email": payload.email,
-        "phone": payload.phone,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
+    if order_id:
+        db.collection("donations_orders").document(order_id).set(
+            {
+                "order_id": order_id,
+                "amount": order.get("amount", payload.amount),
+                "currency": order.get("currency", currency),
+                "status": order.get("status", "created"),
+                "provider": "razorpay",
+                "name": payload.name,
+                "email": str(payload.email) if payload.email else None,
+                "phone": payload.phone,
+                "created_at": created_at,
+            }
+        )
+
+    db.collection("donation_events").add(
+        {
+            "event": "razorpay_order_created",
+            "provider": "razorpay",
+            "order_id": order_id,
+            "amount": order.get("amount", payload.amount),
+            "currency": order.get("currency", currency),
+            "created_at": created_at,
+        }
+    )
 
     return {
-        "session_id": session_id,
-        "checkout_url": checkout_url,
+        "key_id": key_id,
+        "order_id": order_id,
+        "amount": order.get("amount", payload.amount),
+        "currency": order.get("currency", currency),
     }
 
 
-@router.get("/dodo/session/{session_id}")
-def get_session_status(session_id: str):
-    api_key = _get_dodo_api_key()
-    base_url = _get_dodo_base_url()
+@router.post("/razorpay/verify")
+def verify_razorpay_payment(payload: RazorpayVerifyPayment):
+    key_id, key_secret = _get_razorpay_credentials()
+    base_url = _get_razorpay_base_url()
 
-    session_res = requests.get(
-        f"{base_url}/checkouts/{session_id}",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-        },
+    expected_signature = hmac.new(
+        key_secret.encode("utf-8"),
+        f"{payload.razorpay_order_id}|{payload.razorpay_payment_id}".encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+    if not hmac.compare_digest(expected_signature, payload.razorpay_signature):
+        raise HTTPException(status_code=400, detail="Invalid payment signature")
+
+    payment_response = requests.get(
+        f"{base_url}/payments/{payload.razorpay_payment_id}",
+        auth=(key_id, key_secret),
         timeout=20,
     )
+    if not payment_response.ok:
+        raise HTTPException(status_code=payment_response.status_code, detail=_parse_error(payment_response))
 
-    if not session_res.ok:
-        raise HTTPException(status_code=session_res.status_code, detail=session_res.text)
+    payment = payment_response.json()
+    payment_status = payment.get("status")
 
-    session = session_res.json()
-    payment_id = session.get("payment_id")
-    payment_status = session.get("payment_status")
-
-    payment = None
-    if payment_id:
-        payment_res = requests.get(
-            f"{base_url}/payments/{payment_id}",
-            headers={
-                "Authorization": f"Bearer {api_key}",
+    if payment_status == "authorized":
+        capture_response = requests.post(
+            f"{base_url}/payments/{payload.razorpay_payment_id}/capture",
+            auth=(key_id, key_secret),
+            json={
+                "amount": payment.get("amount"),
+                "currency": payment.get("currency", "INR"),
             },
             timeout=20,
         )
-        if payment_res.ok:
-            payment = payment_res.json()
+        if capture_response.ok:
+            payment = capture_response.json()
+            payment_status = payment.get("status")
 
-    if payment_status == "succeeded":
-        ref = db.collection("donations").document(session_id)
-        ref.set({
-            "status": "paid",
-            "provider": "dodo",
-            "payment_id": payment_id,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
-        }, merge=True)
-        db.collection("donation_events").add({
-            "event": "payment_succeeded",
-            "provider": "dodo",
-            "session_id": session_id,
-            "payment_id": payment_id,
-            "payment_status": payment_status,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        })
+    created_at_epoch = payment.get("created_at")
+    if isinstance(created_at_epoch, (int, float)):
+        paid_at = datetime.fromtimestamp(created_at_epoch, tz=timezone.utc).isoformat()
+    else:
+        paid_at = datetime.now(timezone.utc).isoformat()
 
-    return {
-        "session_id": session_id,
-        "payment_id": payment_id,
-        "payment_status": payment_status,
-        "customer_name": session.get("customer_name"),
-        "customer_email": session.get("customer_email"),
-        "invoice_url": payment.get("invoice_url") if payment else None,
-        "amount": payment.get("total_amount") if payment else None,
-        "currency": payment.get("currency") if payment else None,
+    record = {
+        "provider": "razorpay",
+        "order_id": payload.razorpay_order_id,
+        "payment_id": payload.razorpay_payment_id,
+        "signature_verified": True,
+        "status": payment_status,
+        "amount": payment.get("amount"),
+        "currency": payment.get("currency", "INR"),
+        "method": payment.get("method"),
+        "bank": payment.get("bank"),
+        "wallet": payment.get("wallet"),
+        "vpa": payment.get("vpa"),
+        "name": payload.name,
+        "email": str(payload.email) if payload.email else None,
+        "phone": payload.phone,
+        "captured": payment.get("captured"),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "paid_at": paid_at,
     }
 
+    db.collection("donations").document(payload.razorpay_payment_id).set(record, merge=True)
+    db.collection("donation_events").add(
+        {
+            "event": "razorpay_payment_verified",
+            "provider": "razorpay",
+            "order_id": payload.razorpay_order_id,
+            "payment_id": payload.razorpay_payment_id,
+            "payment_status": payment_status,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+    )
 
-@router.post("/dodo/webhook")
-async def dodo_webhook(request: Request):
-    secret = os.getenv("DODO_WEBHOOK_SECRET")
-    if not secret:
-        raise HTTPException(status_code=500, detail="Dodo webhook secret not configured")
-
-    webhook_id = request.headers.get("webhook-id", "")
-    webhook_signature = request.headers.get("webhook-signature", "")
-    webhook_timestamp = request.headers.get("webhook-timestamp", "")
-
-    raw_body = await request.body()
-    webhook = Webhook(secret)
-
-    try:
-        webhook.verify(
-            raw_body.decode("utf-8"),
-            {
-                "webhook-id": webhook_id,
-                "webhook-signature": webhook_signature,
-                "webhook-timestamp": webhook_timestamp,
-            },
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail="Invalid webhook signature") from exc
-
-    payload = json.loads(raw_body.decode("utf-8"))
-    db.collection("donation_events").add({
-        "event": "dodo_webhook",
-        "provider": "dodo",
-        "payload": payload,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
-
-    return {"status": "ok"}
+    return {
+        "order_id": payload.razorpay_order_id,
+        "payment_id": payload.razorpay_payment_id,
+        "payment_status": payment_status,
+        "amount": payment.get("amount"),
+        "currency": payment.get("currency", "INR"),
+        "method": payment.get("method"),
+        "bank": payment.get("bank"),
+        "wallet": payment.get("wallet"),
+        "vpa": payment.get("vpa"),
+        "captured": payment.get("captured"),
+        "paid_at": paid_at,
+    }

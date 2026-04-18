@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 
 export default function Navbar({ isDark }) {
   const { pathname } = useLocation();
-  const isHome = pathname === "/" || pathname === "";
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -35,10 +34,14 @@ export default function Navbar({ isDark }) {
       style={{ backgroundColor: bgColor, borderColor, color: textColor }}
       data-navbar
     >
-      {/* ✅ Consistent font family across all pages */}
-      <span 
-        className="text-lg sm:text-xl md:text-2xl tracking-[0.3em]"
-        style={{ fontFamily: "'Noto Sans', sans-serif" }}
+      <span
+        className="block text-center leading-none whitespace-nowrap"
+        style={{
+          fontFamily: "'Noto Sans', sans-serif",
+          fontSize: "clamp(0.62rem, 2.35vw, 1.5rem)",
+          letterSpacing: "clamp(0.08em, 0.9vw, 0.3em)",
+          maxWidth: "calc(100vw - 154px)",
+        }}
       >
         Sreeshaktipat Ashram
       </span>

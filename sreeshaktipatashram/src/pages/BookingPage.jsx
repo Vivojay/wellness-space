@@ -1,9 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, RotateCcw } from "lucide-react";
 
 import bgImage from '/photos/Blue Pastel Abstract Grid Line BG.png';
-import { colorPalettes } from "@/config/themeConfig";
 import { Country, State } from "country-state-city";
 
 const BG_IMG =
@@ -116,6 +115,15 @@ export default function BookingPage() {
   const [phoneCode, setPhoneCode] = useState(() =>
     defaultCountry?.phonecode ? `+${defaultCountry.phonecode}` : ""
   );
+
+  useEffect(() => {
+    const scrollContainer = document.getElementById("app-scroll");
+    if (scrollContainer && scrollContainer.scrollHeight > scrollContainer.clientHeight + 2) {
+      scrollContainer.scrollTo({ top: 0, left: 0 });
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0 });
+  }, []);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -451,7 +459,7 @@ export default function BookingPage() {
         </div>
 
         {/* Centered modal */}
-        <div className="relative z-10 px-6 py-16 flex items-center justify-center min-h-screen">
+        <div className="relative z-10 px-4 sm:px-6 md:px-8 py-10 sm:py-12 md:py-16 flex items-start md:items-center justify-center min-h-screen">
             <div
               className="w-full max-w-4xl border shadow-2xl flex flex-col"
               style={{
@@ -465,7 +473,7 @@ export default function BookingPage() {
             >
             {/* Header */}
             <div 
-              className="px-10 py-8 border-b"
+              className="px-4 sm:px-6 md:px-10 py-6 sm:py-8 border-b"
               style={{ borderColor: theme.border }}
             >
               <div className="flex items-center justify-between gap-6 mb-6">
@@ -477,7 +485,7 @@ export default function BookingPage() {
                     BOOKING
                   </p>
                   <h1 
-                    className="text-3xl md:text-4xl font-light tracking-tight mt-3"
+                    className="text-2xl sm:text-3xl md:text-4xl font-light tracking-tight mt-3"
                     style={{ color: theme.text }}
                   >
                     Begin Your Journey
@@ -507,6 +515,15 @@ export default function BookingPage() {
                 </div>
               </div>
 
+              <div className="md:hidden mb-4">
+                <p
+                  className="text-[10px] tracking-[0.25em]"
+                  style={{ color: theme.textMuted }}
+                >
+                  STEP {step + 1} / {steps.length} · {steps[step]?.title}
+                </p>
+              </div>
+
               {/* Progress indicator */}
               <div className="relative">
                 <div 
@@ -522,11 +539,11 @@ export default function BookingPage() {
                   />
                 </div>
                 
-                <div className="flex justify-between mt-3">
+                <div className="flex justify-between mt-3 gap-2 overflow-x-auto">
                   {steps.slice(0, -1).map((s, i) => (
                     <div
                       key={i}
-                      className="text-[10px] tracking-wider transition-colors"
+                      className="text-[9px] sm:text-[10px] tracking-wider transition-colors whitespace-nowrap"
                       style={{ 
                         color: i <= step ? theme.accentTertiary : theme.textMuted 
                       }}
@@ -539,9 +556,9 @@ export default function BookingPage() {
             </div>
 
             {/* Body */}
-            <div className="px-10 py-10">
+            <div className="px-4 sm:px-6 md:px-10 py-6 sm:py-8 md:py-10">
               {step === 0 && (
-                <div className="grid md:grid-cols-2 gap-8">
+                <div className="grid md:grid-cols-2 gap-5 sm:gap-6 md:gap-8">
                   <Field
                     label="Full Name"
                     error={errors.fullName}
@@ -678,7 +695,7 @@ export default function BookingPage() {
                   </div>
 
                   <div
-                    className="grid gap-8 border p-5"
+                    className="grid gap-5 sm:gap-6 md:gap-8 border p-4 md:p-5"
                     style={{
                       borderColor: theme.border,
                       backgroundColor: theme.colors.bg.secondary,
@@ -868,7 +885,7 @@ export default function BookingPage() {
               )}
 
               {step === 1 && (
-                <div className="grid md:grid-cols-2 gap-8">
+                <div className="grid md:grid-cols-2 gap-5 sm:gap-6 md:gap-8">
                   <Field
                     label="Education"
                     error={errors.education}
@@ -964,7 +981,7 @@ export default function BookingPage() {
               )}
 
               {step === 2 && (
-                <div className="grid gap-8">
+                <div className="grid gap-5 sm:gap-6 md:gap-8">
                   <Field label="Taking any meds?" theme={theme} error={errors.medsTaking}>
                     <div className="grid sm:grid-cols-[180px_1fr] gap-4">
                       <div className="space-y-2">
@@ -1027,7 +1044,7 @@ export default function BookingPage() {
               )}
 
               {step === 3 && (
-                <div className="grid gap-8">
+                <div className="grid gap-5 sm:gap-6 md:gap-8">
                   <Field
                     label="Have you been initiated prior to this?"
                     error={errors.initiatedBefore}
@@ -1150,13 +1167,13 @@ export default function BookingPage() {
             {/* Footer controls */}
             {step !== 4 && (
               <div
-                className="px-10 py-8 border-t flex items-center justify-between"
+                className="px-4 sm:px-6 md:px-10 py-5 sm:py-6 md:py-8 border-t flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
                 style={{ borderColor: theme.border }}
               >
                 <button
                   onClick={prev}
                   disabled={step === 0}
-                  className="px-6 py-3 border text-sm tracking-wide transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 border text-sm tracking-wide transition-colors"
                   style={{
                     borderColor: step === 0 ? theme.borderLight : theme.border,
                     color: step === 0 ? theme.textMuted : theme.textLight,
@@ -1188,12 +1205,12 @@ export default function BookingPage() {
                   Back
                 </button>
 
-                <div className="flex items-center gap-3">
+                <div className="w-full sm:w-auto flex items-center gap-3">
                   {step < steps.length - 2 ? (
                     <button
                       onClick={next}
                       disabled={!canNext()}
-                      className="px-8 py-3 text-sm tracking-wide border transition-all inline-flex items-center gap-2"
+                      className="w-full sm:w-auto px-8 py-3 text-sm tracking-wide border transition-all inline-flex items-center justify-center gap-2"
                       style={{
                         borderColor: canNext()
                           ? (isDark ? theme.borderStrong : theme.borderStrong)
@@ -1232,7 +1249,7 @@ export default function BookingPage() {
                   ) : (
                     <button
                       onClick={submit}
-                      className="px-10 py-3 text-sm tracking-wide border transition-all"
+                      className="w-full sm:w-auto px-10 py-3 text-sm tracking-wide border transition-all"
                       style={{
                         backgroundColor: isDark ? theme.colors.bg.secondary : theme.accent,
                         borderColor: isDark ? theme.borderStrong : theme.accent,
@@ -1262,7 +1279,7 @@ export default function BookingPage() {
         </div>
 
         {/* Back to Home button */}
-        <div className="relative z-10 text-center pb-10">
+        <div className="relative z-10 text-center pb-8 sm:pb-10">
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 px-6 py-3 border text-sm tracking-wide transition-colors"

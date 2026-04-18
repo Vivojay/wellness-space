@@ -144,12 +144,12 @@ const WellnessWebsite = () => {
           className="absolute left-6 md:left-24 top-1/2 text-[10px]"
           style={{
             color: theme.textMuted,
-            width: "calc((100% - 6rem) * 0.55)",
+            width: "clamp(250px, 62vw, 720px)",
             transform: "translateY(-50%)"
           }}
         >
           <div
-            className="inline-flex flex-col justify-start px-3 py-4 space-y-2"
+            className="inline-flex flex-col justify-start px-3 py-4 space-y-3"
             style={{
               height: "45vh",
               minHeight: "320px",
@@ -159,8 +159,24 @@ const WellnessWebsite = () => {
               fontFamily: "'Outfit', sans-serif"
             }}
           >
-            <p>Guiding seekers toward inner steadiness and self-awareness.</p>
-            <p>Rooted in Siddha Maha Yoga, centered on lived transformation.</p>
+            <p
+              className="text-[10px] sm:text-[11px] tracking-[0.28em] uppercase"
+              style={{ color: isDark ? theme.textMuted : "rgba(12, 14, 18, 0.75)" }}
+            >
+              Vartika Shukla
+            </p>
+            <p
+              className="text-sm sm:text-base leading-relaxed max-w-[56ch]"
+              style={{
+                color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden"
+              }}
+            >
+              Vartika Shukla carries the Siddha Maha Yoga lineage with clarity and compassion, guiding seekers to awaken inner stillness and integrate spiritual practice into everyday life.
+            </p>
           </div>
         </div>
 
@@ -174,19 +190,20 @@ const WellnessWebsite = () => {
           <div
             className="relative"
             style={{
-              "--portrait-width": "clamp(120px, 14vw, 220px)",
-              "--portrait-height": "clamp(180px, 22vw, 340px)",
-              "--portrait-bottom": "3%"
+              "--portrait-width": "clamp(210px, 40vw, 390px)",
+              "--portrait-height": "clamp(300px, 54vw, 560px)",
+              "--portrait-frame": "clamp(10px, 1.25vw, 20px)",
+              "--portrait-bottom": "clamp(2%, 3.5vh, 6%)"
             }}
           >
             <div
               className="absolute left-1/2 bottom-[3%] z-0"
               style={{
-                width: "calc(var(--portrait-width) + 32px)",
-                height: "calc(var(--portrait-height) + 32px)",
+                width: "calc(var(--portrait-width) + (var(--portrait-frame) * 2))",
+                height: "calc(var(--portrait-height) + (var(--portrait-frame) * 2))",
                 bottom: "var(--portrait-bottom)",
                 transform: "translateX(-50%)",
-                padding: "16px",
+                padding: "var(--portrait-frame)",
                 backgroundColor: isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.45)",
                 border: isDark
                   ? "1px solid rgba(255, 255, 255, 0.2)"

@@ -5,167 +5,167 @@ import { ArrowLeft, FileText, BookOpen, ChevronLeft, ChevronRight, MousePointerC
 const pdfs = [
   {
     name: "The Power Unknown to God (04 October 2020)",
-    link: "https://sreeshaktipatashram.com/upload/The-Power-Unknown-to-God-04-October-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/The-Power-Unknown-to-God-04-October-2020.pdf"
   },
   {
     name: "The Secret Science of Shaktipat – Guide to Initiation",
-    link: "https://sreeshaktipatashram.com/upload/The-Secret-Science-of-Shaktipat_Guide-to-Initiation-13-September-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/The-Secret-Science-of-Shaktipat_Guide-to-Initiation-13-September-2020.pdf"
   },
   {
     name: "Blessed by His Guru",
-    link: "https://sreeshaktipatashram.com/upload/Blessed-by-his-Guru-23-Jan-2022-with-cover-page1.pdf"
+    link: "https://files.sreeshaktipatashram.com/Blessed-by-his-Guru-23-Jan-2022-with-cover-page1.pdf"
   },
   {
     name: "Born to Be a Yogi",
-    link: "https://sreeshaktipatashram.com/upload/Born-to-be-a-Yogi-updated-on-14-September-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/Born-to-be-a-Yogi-updated-on-14-September-2020.pdf"
   },
   {
     name: "Guru Gita (English)",
-    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-English-updated-on-19-Sep-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/Guru-Gita-English-updated-on-19-Sep-2020.pdf"
   },
   {
     name: "Secrets of Shaktipath and Kundalini Yoga – Vol 1 (English)",
-    link: "https://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-1-updated-on-18-12-2019-English.pdf"
+    link: "https://files.sreeshaktipatashram.com/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-1-updated-on-18-12-2019-English.pdf"
   },
   {
     name: "Secrets of Shaktipath and Kundalini Yoga – Vol 2 (English)",
-    link: "https://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-2-updated-on-18-September-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-2-updated-on-18-September-2020.pdf"
   },
   {
     name: "Secrets of Shaktipath and Kundalini Yoga – Vol 3 (English)",
-    link: "https://sreeshaktipatashram.com/upload/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-3-updated-on-17-September-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/Secrets-of-Shakthipath-and-Kundalini-Yoga-Vol-3-updated-on-17-September-2020.pdf"
   },
   {
     name: "The Illusion (English)",
-    link: "https://sreeshaktipatashram.com/upload/The-Illusion-updated-on-11-Oct-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/The-Illusion-updated-on-11-Oct-2020.pdf"
   },
   {
     name: "The Power Unknown to God (Russian)",
-    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Russian.pdf"
+    link: "https://files.sreeshaktipatashram.com/Power-Unknown-to-God-Russian.pdf"
   },
   {
     name: "The Power Unknown to God (Afrikaans)",
-    link: "https://sreeshaktipatashram.com/upload/Afrikaans-Power-Unknown-to-God-Afrikaans.pdf"
+    link: "https://files.sreeshaktipatashram.com/Afrikaans-Power-Unknown-to-God-Afrikaans.pdf"
   },
   {
     name: "The Power Unknown to God (German)",
-    link: "https://sreeshaktipatashram.com/upload/Die-Kraft-die-Gott-nicht-kennt-Power-Unknown-to-God-German-updated-on-13-Sep-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/Die-Kraft-die-Gott-nicht-kennt-Power-Unknown-to-God-German-updated-on-13-Sep-2020.pdf"
   },
   {
     name: "The Power Unknown to God (Spanish)",
-    link: "https://sreeshaktipatashram.com/upload/El-poder-desconocido-para-Dios-Power-Unknown-to-God-Spanish.pdf"
+    link: "https://files.sreeshaktipatashram.com/El-poder-desconocido-para-Dios-Power-Unknown-to-God-Spanish.pdf"
   },
   {
     name: "French Q&A – Volume 1",
-    link: "https://sreeshaktipatashram.com/upload/French-QA-Vol-1-Paperback-with-cover-06-Feb-2023.pdf"
+    link: "https://files.sreeshaktipatashram.com/French-QA-Vol-1-Paperback-with-cover-06-Feb-2023.pdf"
   },
   {
     name: "Guru Gita (German)",
-    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-German-7th-April-2021.pdf"
+    link: "https://files.sreeshaktipatashram.com/Guru-Gita-German-7th-April-2021.pdf"
   },
   {
     name: "Guru Gita (Italian)",
-    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-Italian-23rd-March-2021.pdf"
+    link: "https://files.sreeshaktipatashram.com/Guru-Gita-Italian-23rd-March-2021.pdf"
   },
   {
     name: "Guru Gita (Malayalam)",
-    link: "https://sreeshaktipatashram.com/upload/Guru-Gita-Malayalam-13-October-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/Guru-Gita-Malayalam-13-October-2020.pdf"
   },
   {
     name: "I Segreti di Shaktipat e Kundalini Yoga – Vol 1 (Italian)",
-    link: "https://sreeshaktipatashram.com/upload/I-segreti-di-Shaktipat-e-Kundalini-Yoga-Vol-1-13-March-2023-Paperback-with-cover-Italian.pdf"
+    link: "https://files.sreeshaktipatashram.com/I-segreti-di-Shaktipat-e-Kundalini-Yoga-Vol-1-13-March-2023-Paperback-with-cover-Italian.pdf"
   },
   {
     name: "The Power Unknown to God (Italian)",
-    link: "https://sreeshaktipatashram.com/upload/La-potente-energia-sconosciuta-a-Dio-Power-Unknown-to-God-Italian.pdf"
+    link: "https://files.sreeshaktipatashram.com/La-potente-energia-sconosciuta-a-Dio-Power-Unknown-to-God-Italian.pdf"
   },
   {
     name: "The Power Unknown to God (French)",
-    link: "https://sreeshaktipatashram.com/upload/Le-pouvoir-inconnu-à-Dieu-Power-Unknown-to-God-French.pdf"
+    link: "https://files.sreeshaktipatashram.com/Le-pouvoir-inconnu-à-Dieu-Power-Unknown-to-God-French.pdf"
   },
   {
     name: "The Power Unknown to God (Portuguese)",
-    link: "https://sreeshaktipatashram.com/upload/O-Poder-Desconhecido-para-Deus-Power-Unknown-to-God-Portuguese.pdf"
+    link: "https://files.sreeshaktipatashram.com/O-Poder-Desconhecido-para-Deus-Power-Unknown-to-God-Portuguese.pdf"
   },
   {
     name: "The Power Unknown to God (Malayalam)",
-    link: "https://sreeshaktipatashram.com/upload/Parashakti-Power-Unknown-to-God-Malayalam.pdf"
+    link: "https://files.sreeshaktipatashram.com/Parashakti-Power-Unknown-to-God-Malayalam.pdf"
   },
   {
     name: "The Power Unknown to God (Tamil)",
-    link: "https://sreeshaktipatashram.com/upload/Parashakti-Power-Unknown-to-God-Tamil.pdf"
+    link: "https://files.sreeshaktipatashram.com/Parashakti-Power-Unknown-to-God-Tamil.pdf"
   },
   {
     name: "Portuguese Q&A – Volume 1",
-    link: "https://sreeshaktipatashram.com/upload/Portuguese-QA-Vol-1-Paperback-with-cover-26-Feb-2023.pdf"
+    link: "https://files.sreeshaktipatashram.com/Portuguese-QA-Vol-1-Paperback-with-cover-26-Feb-2023.pdf"
   },
   {
     name: "Portuguese Q&A – Volume 2",
-    link: "https://sreeshaktipatashram.com/upload/Portuguese-QA-Vol-2-Paperback-with-cover-28-Feb-2023.pdf"
+    link: "https://files.sreeshaktipatashram.com/Portuguese-QA-Vol-2-Paperback-with-cover-28-Feb-2023.pdf"
   },
   {
     name: "The Power Unknown to God (Polish)",
-    link: "https://sreeshaktipatashram.com/upload/Power-Uknown-to-GOD-Polish-31st-March-2021.pdf"
+    link: "https://files.sreeshaktipatashram.com/Power-Uknown-to-GOD-Polish-31st-March-2021.pdf"
   },
   {
     name: "The Power Unknown to God (Chinese)",
-    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Chinese.pdf"
+    link: "https://files.sreeshaktipatashram.com/Power-Unknown-to-God-Chinese.pdf"
   },
   {
     name: "The Power Unknown to God (Gujarati)",
-    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Gujarati.pdf"
+    link: "https://files.sreeshaktipatashram.com/Power-Unknown-to-God-Gujarati.pdf"
   },
   {
     name: "The Power Unknown to God (Marathi)",
-    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Marathi.pdf"
+    link: "https://files.sreeshaktipatashram.com/Power-Unknown-to-God-Marathi.pdf"
   },
   {
     name: "The Power Unknown to God (Vietnamese)",
-    link: "https://sreeshaktipatashram.com/upload/Power-Unknown-to-God-Vietnamese-.pdf"
+    link: "https://files.sreeshaktipatashram.com/Power-Unknown-to-God-Vietnamese-.pdf"
   },
   {
     name: "The Power Unknown to God (Bengali & Sanskrit)",
-    link: "https://sreeshaktipatashram.com/upload/Sanskrit_Bengali-Power-Unknown-to-God-Bengali_Sanskrit-15-11-2017.pdf"
+    link: "https://files.sreeshaktipatashram.com/Sanskrit_Bengali-Power-Unknown-to-God-Bengali_Sanskrit-15-11-2017.pdf"
   },
   {
     name: "Secretos de Shaktipat y Kundalini Yoga – Vol 1 (Spanish)",
-    link: "https://sreeshaktipatashram.com/upload/Secretos-de-Shaktipat-y-Kundalini-Yoga-Vol-1-Paperback-with-cover-27-Feb-2023-Spanish.pdf"
+    link: "https://files.sreeshaktipatashram.com/Secretos-de-Shaktipat-y-Kundalini-Yoga-Vol-1-Paperback-with-cover-27-Feb-2023-Spanish.pdf"
   },
   {
     name: "Sekrety Shaktipat i Kundalini Jogi – Tom 1 (Polish)",
-    link: "https://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-1-Paperback-with-cover-02-Feb-2023-Polish.pdf"
+    link: "https://files.sreeshaktipatashram.com/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-1-Paperback-with-cover-02-Feb-2023-Polish.pdf"
   },
   {
     name: "Sekrety Shaktipat i Kundalini Jogi – Tom 2 (Polish)",
-    link: "https://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-2-Paperback-with-cover-12-Feb-2023-1-Polish.pdf"
+    link: "https://files.sreeshaktipatashram.com/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-2-Paperback-with-cover-12-Feb-2023-1-Polish.pdf"
   },
   {
     name: "Sekrety Shaktipat i Kundalini Jogi – Tom 3 (Polish)",
-    link: "https://sreeshaktipatashram.com/upload/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-3-Paperback-with-cover-15-March-2023-1-Polish.pdf"
+    link: "https://files.sreeshaktipatashram.com/Sekrety-Shaktipat-i-Kundalini-Jogi-Tom-–-3-Paperback-with-cover-15-March-2023-1-Polish.pdf"
   },
   {
     name: "Shaktipat Chintamani – Part 1 (Hindi)",
-    link: "https://sreeshaktipatashram.com/upload/Shaktipat-Chintamani-Hindi-1.pdf"
+    link: "https://files.sreeshaktipatashram.com/Shaktipat-Chintamani-Hindi-1.pdf"
   },
   {
     name: "Shaktipat Chintamani – Part 2 (Hindi)",
-    link: "https://sreeshaktipatashram.com/upload/Shaktipat-Chintamani-Hindi-2.pdf"
+    link: "https://files.sreeshaktipatashram.com/Shaktipat-Chintamani-Hindi-2.pdf"
   },
   {
     name: "The Illusion (French)",
-    link: "https://sreeshaktipatashram.com/upload/The-Illusion-French-15th-April-2021.pdf"
+    link: "https://files.sreeshaktipatashram.com/The-Illusion-French-15th-April-2021.pdf"
   },
   {
     name: "The Illusion (German)",
-    link: "https://sreeshaktipatashram.com/upload/The-Illusion-German-1st-April-2021.pdf"
+    link: "https://files.sreeshaktipatashram.com/The-Illusion-German-1st-April-2021.pdf"
   },
   {
     name: "The Illusion (Telugu)",
-    link: "https://sreeshaktipatashram.com/upload/The-Illusion-Telugu-27-October-2020.pdf"
+    link: "https://files.sreeshaktipatashram.com/The-Illusion-Telugu-27-October-2020.pdf"
   },
   {
     name: "The Power Unknown to God (Dutch)",
-    link: "https://sreeshaktipatashram.com/upload/The-Power-Unknown-to-God-Dutch-14th-April-2021.pdf"
+    link: "https://files.sreeshaktipatashram.com/The-Power-Unknown-to-God-Dutch-14th-April-2021.pdf"
   }
 ];
 
@@ -181,10 +181,31 @@ function ReadingsPage() {
   const [isSidebarPinned, setIsSidebarPinned] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const pdfViewerRef = useRef(null);
-  const sidebarWidth = 320;
-  const entryWidth = 48;
   const [thumbStatus, setThumbStatus] = useState({});
   const thumbStatusRef = useRef({});
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window === "undefined" ? 1280 : window.innerWidth
+  );
+
+  const isPhone = viewportWidth < 640;
+  const isTablet = viewportWidth < 1024;
+  const sidebarWidth = isTablet ? 264 : 320;
+  const entryWidth = isTablet ? 36 : 48;
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const scrollContainer = document.getElementById("app-scroll");
+    if (scrollContainer && scrollContainer.scrollHeight > scrollContainer.clientHeight + 2) {
+      scrollContainer.scrollTo({ top: 0, left: 0 });
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0 });
+  }, []);
 
   const theme = {
     bg: isDark ? 'bg-neutral-900' : 'bg-neutral-50',
@@ -252,7 +273,13 @@ function ReadingsPage() {
   }, [openPdf]);
 
   useEffect(() => {
-    if (!openPdf) return;
+    if (openPdf && !isTablet) return;
+    setIsSidebarHovered(false);
+    setIsSidebarPinned(false);
+  }, [isTablet, openPdf]);
+
+  useEffect(() => {
+    if (!openPdf || isTablet) return;
 
     const handleMove = (e) => {
       if (isSidebarPinned) return;
@@ -275,7 +302,7 @@ function ReadingsPage() {
 
     window.addEventListener('pointermove', handleMove, { passive: true });
     return () => window.removeEventListener('pointermove', handleMove);
-  }, [openPdf, isSidebarPinned, isSidebarHovered]);
+  }, [entryWidth, isSidebarHovered, isSidebarPinned, isTablet, openPdf, sidebarWidth]);
 
   // ACCELERATING KEYBOARD NAVIGATION
   useEffect(() => {
@@ -393,11 +420,15 @@ function ReadingsPage() {
     setTimeout(() => setIsAnimating(false), 350);
   }, [isAnimating, filteredTotal]);
 
-  const visibleCount = 7;
-  const halfVisible = 3;
-  const tileSize = 460;
-  const peekOffset = 10;
-  const primarySpread = 128;       // extra push ONLY for ±1 layer
+  const visibleCount = isPhone ? 3 : isTablet ? 5 : 7;
+  const halfVisible = Math.floor(visibleCount / 2);
+  const tileSize = isPhone ? 220 : isTablet ? 320 : 460;
+  const peekOffset = isPhone ? 18 : isTablet ? 14 : 10;
+  const primarySpread = isPhone ? 40 : isTablet ? 72 : 128;
+  const carouselWidth = Math.min(
+    tileSize + (visibleCount - 1) * peekOffset,
+    Math.max(tileSize, viewportWidth - (isPhone ? 24 : isTablet ? 56 : 96))
+  );
 
   const visiblePdfs = useMemo(() => {
     if (filteredTotal === 0) return [];
@@ -481,12 +512,12 @@ function ReadingsPage() {
     setIsAnimating(true);
     setCurrentIndex(clickedAbsoluteIdx);
     setTimeout(() => setIsAnimating(false), 400);
-  }, [visiblePdfs, filteredTotal, currentIndex, filtered]);
+  }, [currentIndex, filtered, filteredTotal, halfVisible]);
 
   return (
     // <div className={`min-h-screen ${theme.bg} ${theme.text} px-12 pt-32`}>
     <div
-      className={`relative min-h-screen ${theme.text} px-12 pt-32 overflow-x-hidden`}
+      className={`relative min-h-screen ${theme.text} px-3 sm:px-6 lg:px-12 pt-24 sm:pt-28 md:pt-32 overflow-x-hidden`}
       style={{
         backgroundColor: theme.pageBg,
         touchAction: "pan-y",
@@ -531,9 +562,9 @@ function ReadingsPage() {
       <div className="relative z-10 h-full flex flex-col">
 
       {/* ENHANCED SEARCH + Results counter */}
-      <div className="w-3xl mx-auto mb-12">
-        <div className={`relative flex items-center gap-4 border ${theme.border} py-5 px-8 ${theme.cardBg} shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md`}>
-          <FileText className="w-6 h-6 flex-shrink-0" />
+      <div className="w-full max-w-5xl mx-auto mb-8 md:mb-12">
+        <div className={`relative flex items-center gap-3 sm:gap-4 border ${theme.border} py-4 sm:py-5 px-4 sm:px-8 ${theme.cardBg} shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md`}>
+          <FileText className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
           <input
             ref={searchInputRef}   // keep this for Ctrl+K focus
             value={query}
@@ -545,12 +576,12 @@ function ReadingsPage() {
               }
             }}
             placeholder="Type to search..."
-            className={`bg-transparent outline-none flex-1 text-xl font-medium ${isDark ? 'placeholder:text-neutral-300' : 'placeholder:text-neutral-500'} transition-colors duration-200 pr-12`}
+            className={`bg-transparent outline-none flex-1 text-base sm:text-lg lg:text-xl font-medium ${isDark ? 'placeholder:text-neutral-300' : 'placeholder:text-neutral-500'} transition-colors duration-200 pr-0 sm:pr-12`}
           />
           
           {/* Add the Ctrl+K indicator pill */}
           <div
-            className="absolute right-12 top-1/2 -translate-y-1/2 text-xs px-3 py-2 font-mono select-none pointer-events-none backdrop-blur-lg"
+            className="hidden sm:block absolute right-12 top-1/2 -translate-y-1/2 text-xs px-3 py-2 font-mono select-none pointer-events-none backdrop-blur-lg"
             style={{
               backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
               color: isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.6)',
@@ -564,7 +595,7 @@ function ReadingsPage() {
           {query && (
             <button
               onClick={() => setQuery("")}
-              className={`w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 group ${theme.textSecondary} hover:${theme.text} absolute right-3 z-20`}
+              className={`w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 group ${theme.textSecondary} hover:${theme.text} absolute right-2 sm:right-3 z-20`}
               type="button"
               aria-label="Clear search"
             >
@@ -595,7 +626,7 @@ function ReadingsPage() {
 
           {/* Content */}
           <div
-            className="relative text-center p-12 w-3xl shadow-xl backdrop-blur-xl"
+            className="relative text-center p-6 sm:p-10 md:p-12 w-[92%] max-w-2xl shadow-xl backdrop-blur-xl"
             style={{
               backgroundColor: isDark ? 'rgba(20, 20, 20, 0.7)' : 'rgba(255, 255, 255, 0.7)'
             }}
@@ -624,8 +655,8 @@ function ReadingsPage() {
       {/* ENHANCED LIBRARY */}
       <div className="relative mt-6 py-8">
         <div className="relative mx-auto" style={{ 
-          width: `${tileSize + (visibleCount-1) * peekOffset}px`,
-          height: `${tileSize + 80}px`
+          width: `${carouselWidth}px`,
+          height: `${tileSize + (isPhone ? 56 : 80)}px`
         }}>
           <div className={`absolute inset-0 flex items-center ${isAnimating ? 'transition-all duration-400 ease-out-back' : 'transition-all duration-300 ease-out'}`}>
             {visiblePdfs.map(({ pdf, offset, leftPos, absOffset, heightScale, bgOpacity, textOpacity, blurValue }, index) => {
@@ -689,7 +720,7 @@ function ReadingsPage() {
 
                   {/* NEW: Click indicator for center */}
                   {isCenter && (
-                    <div className="absolute bottom-30 right-3 w-8 h-8 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300 z-30"
+                    <div className="absolute bottom-3 sm:bottom-4 right-3 w-8 h-8 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300 z-30"
                       style={{ backgroundColor: theme.accent }}>
                       <MousePointerClick className="w-4 h-4 text-white" />
                     </div>
@@ -699,14 +730,14 @@ function ReadingsPage() {
                   {(isCenter || filteredTotal <= 3) && (
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[100%] z-20 px-0 pb-0 pt-0">
                       <div
-                        className="px-4 py-13"
+                        className="px-3 sm:px-4 py-4 sm:py-6"
                         style={{
                           backgroundColor: isDark ? 'rgba(12, 16, 20, 0.92)' : 'rgba(255, 255, 255, 0.96)',
                           border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)'
                         }}
                       >
                         <p
-                          className="text-xs font-semibold leading-tight tracking-wide mb-1 line-clamp-2"
+                          className="text-[11px] sm:text-xs font-semibold leading-tight tracking-wide mb-1 line-clamp-2"
                           style={{ color: isDark ? '#ffffff' : 'rgba(0,0,0,0.95)' }}
                         >
                           {pdf.name}
@@ -746,7 +777,7 @@ function ReadingsPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 justify-center hidden sm:flex">
           <div
             className="backdrop-blur-xl px-4 py-2 text-xs font-mono"
             style={{
@@ -783,7 +814,7 @@ function ReadingsPage() {
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => navigate("/")}
-            className="inline-flex items-center gap-2 mt-8 px-8 py-3 border text-sm tracking-wide transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-2 mt-8 px-6 sm:px-8 py-3 border text-sm tracking-wide transition-colors whitespace-nowrap"
             style={{
               borderColor: isDark ? theme.borderStrong : theme.borderStrong,
               color: theme.text,
@@ -813,7 +844,10 @@ function ReadingsPage() {
       {openPdf && (
         <div
           className="fixed inset-0 z-[1000] bg-black/55 backdrop-blur-lg flex justify-center overflow-y-auto" 
-          style={{ touchAction: 'pan-y pinch-zoom', padding: '120px 16px 24px' }}
+          style={{
+            touchAction: 'pan-y pinch-zoom',
+            padding: isPhone ? '88px 8px 16px' : '120px 16px 24px'
+          }}
           onClick={(e) => {
             if (!e.target.closest('.pdf-viewer-content')) {
               setOpenPdf(null);
@@ -825,92 +859,97 @@ function ReadingsPage() {
               className={`relative pdf-viewer-content ${theme.cardBg} shadow-2xl border border-neutral-800/30 max-w-[100rem] w-full overflow-hidden flex`}
               style={{
                 touchAction: 'pan-y pinch-zoom',
-                height: 'calc(100vh - 144px)',
-                maxHeight: 'calc(100vh - 144px)'
+                height: isPhone ? 'calc(100vh - 104px)' : 'calc(100vh - 144px)',
+                maxHeight: isPhone ? 'calc(100vh - 104px)' : 'calc(100vh - 144px)'
               }}
             >
              
-            {/* Hover trigger always available */}
-            <div
-              className="absolute left-0 top-0 h-full w-12 z-50"
-              onMouseEnter={() => !isSidebarPinned && setIsSidebarHovered(true)}
-            />
+            {!isTablet && (
+              <>
+                {/* Hover trigger always available */}
+                <div
+                  className="absolute left-0 top-0 h-full w-12 z-50"
+                  onMouseEnter={() => !isSidebarPinned && setIsSidebarHovered(true)}
+                />
 
-            {/* Single thin vertical teal pull-tab/pill */}
-            <div
-              className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-24 bg-teal-200 rounded-full z-50 pointer-events-none transition-all duration-300 ${
-                isSidebarPinned || isSidebarHovered ? 'left-[308px]' : 'left-2'
-              }`}
-            />
+                {/* Single thin vertical teal pull-tab/pill */}
+                <div
+                  className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-24 bg-teal-200 rounded-full z-50 pointer-events-none transition-all duration-300 ${
+                    isSidebarPinned || isSidebarHovered ? '' : 'left-2'
+                  }`}
+                  style={isSidebarPinned || isSidebarHovered ? { left: `${sidebarWidth - 12}px` } : undefined}
+                />
 
-            {/* Collapsible Description Sidebar with proper hover handling */}
-            <div 
-              className="absolute left-0 top-0 h-full z-40"
-              style={{ pointerEvents: isSidebarPinned || isSidebarHovered ? 'auto' : 'none' }}
-            >
-              {/* Sidebar Content */}
-              <div className={`
-                h-full ${theme.cardBg} border-r ${theme.border} flex flex-col overflow-hidden transition-all duration-300 ease-out
-                ${isSidebarPinned || isSidebarHovered ? 'w-80 opacity-100' : 'w-0 opacity-0'}
-              `}>
-                {/* Sidebar Header with pin button */}
-                <div className={`px-6 py-5 border-b ${theme.border} flex items-center justify-between`}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <h3 className={`text-sm font-semibold ${theme.text} tracking-wide uppercase`}>
-                      Document Details
-                    </h3>
-                  </div>
-                  
-                  {/* Pin/Unpin button */}
-                  <button 
-                    onClick={() => setIsSidebarPinned(!isSidebarPinned)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${isSidebarPinned ? 'bg-teal-500/20 text-teal-500' : 'bg-neutral-800/30 text-neutral-500 hover:bg-neutral-800/50'} transition-all duration-200`}
-                    aria-label={isSidebarPinned ? "Unpin sidebar" : "Pin sidebar"}
+                {/* Collapsible Description Sidebar with proper hover handling */}
+                <div 
+                  className="absolute left-0 top-0 h-full z-40"
+                  style={{ pointerEvents: isSidebarPinned || isSidebarHovered ? 'auto' : 'none' }}
+                >
+                  {/* Sidebar Content */}
+                  <div
+                    className={`h-full ${theme.cardBg} border-r ${theme.border} flex flex-col overflow-hidden transition-all duration-300 ease-out ${
+                      isSidebarPinned || isSidebarHovered ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    style={{ width: isSidebarPinned || isSidebarHovered ? `${sidebarWidth}px` : '0px' }}
                   >
-                    {isSidebarPinned ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                
-                {/* Sidebar Content */}
-                <div className="flex-1 overflow-y-auto p-6">
-                  {/* PDF Icon and Basic Info */}
-                  <div className="flex flex-col items-center mb-8">
-                    <div className="w-24 h-32 bg-gradient-to-br from-neutral-200/20 to-neutral-300/10 backdrop-blur-sm rounded-lg border border-neutral-800/10 flex items-center justify-center mb-4">
-                      <FileText className="w-16 h-20 text-neutral-500" />
+                    {/* Sidebar Header with pin button */}
+                    <div className={`px-6 py-5 border-b ${theme.border} flex items-center justify-between`}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <h3 className={`text-sm font-semibold ${theme.text} tracking-wide uppercase`}>
+                          Document Details
+                        </h3>
+                      </div>
+
+                      {/* Pin/Unpin button */}
+                      <button 
+                        onClick={() => setIsSidebarPinned(!isSidebarPinned)}
+                        className={`w-8 h-8 flex items-center justify-center rounded ${isSidebarPinned ? 'bg-teal-500/20 text-teal-500' : 'bg-neutral-800/30 text-neutral-500 hover:bg-neutral-800/50'} transition-all duration-200`}
+                        aria-label={isSidebarPinned ? "Unpin sidebar" : "Pin sidebar"}
+                      >
+                        {isSidebarPinned ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                          </svg>
+                        )}
+                      </button>
                     </div>
-                    <div className="text-center">
-                      <p className={`text-xs font-medium ${theme.textSecondary} mb-1`}>
-                        {openPdf.name.split('.').pop()?.toUpperCase()} Document
-                      </p>
-                      <p className={`text-xs ${theme.textSecondary} font-normal`}>
-                        {filtered.findIndex(p => p.link === openPdf.link) + 1} of {filteredTotal}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Description Section */}
-                  <div>
-                    <h4 className={`text-sm font-semibold ${theme.text} mb-3 flex items-center gap-2`}>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Description
-                    </h4>
-                    <div className={`p-4 rounded-lg ${isDark ? 'bg-neutral-800/30' : 'bg-neutral-100/50'} backdrop-blur-sm`}>
-                      <p className={`text-sm ${theme.text} leading-relaxed`}>
-                        {openPdf.desc || 'No description available for this document.'}
-                      </p>
-                    </div>
-                  </div>
+
+                    {/* Sidebar Content */}
+                    <div className="flex-1 overflow-y-auto p-6">
+                      {/* PDF Icon and Basic Info */}
+                      <div className="flex flex-col items-center mb-8">
+                        <div className="w-24 h-32 bg-gradient-to-br from-neutral-200/20 to-neutral-300/10 backdrop-blur-sm rounded-lg border border-neutral-800/10 flex items-center justify-center mb-4">
+                          <FileText className="w-16 h-20 text-neutral-500" />
+                        </div>
+                        <div className="text-center">
+                          <p className={`text-xs font-medium ${theme.textSecondary} mb-1`}>
+                            {openPdf.name.split('.').pop()?.toUpperCase()} Document
+                          </p>
+                          <p className={`text-xs ${theme.textSecondary} font-normal`}>
+                            {filtered.findIndex(p => p.link === openPdf.link) + 1} of {filteredTotal}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Description Section */}
+                      <div>
+                        <h4 className={`text-sm font-semibold ${theme.text} mb-3 flex items-center gap-2`}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Description
+                        </h4>
+                        <div className={`p-4 rounded-lg ${isDark ? 'bg-neutral-800/30' : 'bg-neutral-100/50'} backdrop-blur-sm`}>
+                          <p className={`text-sm ${theme.text} leading-relaxed`}>
+                            {openPdf.desc || 'No description available for this document.'}
+                          </p>
+                        </div>
+                      </div>
                   
                   {/* Quick Actions */}
                   {/* <div className="mt-8">
@@ -946,8 +985,8 @@ function ReadingsPage() {
                     </div>
                   </div> */}
                   
-                  {/* Document Info */}
-                  <div className="mt-8">
+                      {/* Document Info */}
+                      <div className="mt-8">
                     <h4 className={`text-sm font-semibold ${theme.text} mb-3 flex items-center gap-2`}>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -968,30 +1007,32 @@ function ReadingsPage() {
                         <span className={`font-medium ${theme.text}`}>50-150</span>
                       </div>
                     </div>
+                      </div>
+                    </div>
+
+                    {/* Sidebar Footer */}
+                    <div className={`px-6 py-4 border-t ${theme.border} text-center`}>
+                      <p className={`text-xs ${theme.textSecondary}`}>
+                        {isSidebarPinned ? 'Sidebar pinned • Click pin icon to unpin' : <>Navigate away to close sidebar&nbsp;&nbsp;&nbsp;&nbsp;→</>}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                
-                {/* Sidebar Footer */}
-                <div className={`px-6 py-4 border-t ${theme.border} text-center`}>
-                  <p className={`text-xs ${theme.textSecondary}`}>
-                    {isSidebarPinned ? 'Sidebar pinned • Click pin icon to unpin' : <>Navigate away to close sidebar&nbsp;&nbsp;&nbsp;&nbsp;→</>}
-                  </p>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
             
             {/* Main Content Area */}
             <div className="h-full flex-1 flex flex-col min-w-0 overflow-hidden">
               {/* Header with better font and rectangular close button */}
-              <div className={`sticky top-0 z-30 flex items-center justify-between px-8 py-5 border-b ${theme.border} bg-gradient-to-r from-transparent via-neutral-50/5 to-transparent ${isDark ? 'via-neutral-800/5' : ''}`}>
-                <div className="flex items-center gap-4 min-w-0">
+              <div className={`sticky top-0 z-30 flex items-center justify-between px-3 sm:px-6 md:px-8 py-3 sm:py-5 border-b ${theme.border} bg-gradient-to-r from-transparent via-neutral-50/5 to-transparent ${isDark ? 'via-neutral-800/5' : ''}`}>
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0 pr-14 sm:pr-20">
                   <div className="flex-shrink-0">
-                    <FileText className="w-8 h-10 text-neutral-500" />
+                    <FileText className="w-6 h-8 sm:w-8 sm:h-10 text-neutral-500" />
                   </div>
                   <div className="min-w-0">
                     {/* Better font for PDF title - using font-sans with better tracking */}
                       <h2
-                        className="text-2xl font-semibold tracking-wide leading-tight truncate"
+                        className="text-sm sm:text-xl md:text-2xl font-semibold tracking-wide leading-tight truncate"
                         style={{
                           fontFamily: "'Source Sans 3', sans-serif",
                           color: theme.text
@@ -1008,7 +1049,7 @@ function ReadingsPage() {
                   onClick={() => setOpenPdf(null)}
                   aria-label="Close PDF viewer"
                 >
-                  <svg className="w-7 h-7 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -1027,14 +1068,14 @@ function ReadingsPage() {
               </div>
 
               {/* Footer */}
-              <div className={`px-8 py-4 border-t ${theme.border} flex flex-col items-center gap-3`}>
-                <div className={`text-sm ${theme.textSecondary} flex items-center gap-3`}>
+              <div className={`px-3 sm:px-6 md:px-8 py-4 border-t ${theme.border} flex flex-col items-center gap-3`}>
+                <div className={`text-xs sm:text-sm ${theme.textSecondary} flex items-center gap-2 sm:gap-3 text-center`}>
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     <span>PDF Viewer</span>
                   </div>
                   <div className="text-xs opacity-70">
-                    {isSidebarPinned ? 'Sidebar pinned' : 'Hover left edge for details'}
+                    {isTablet ? 'Tap Open in New Tab for best mobile reading' : isSidebarPinned ? 'Sidebar pinned' : 'Hover left edge for details'}
                   </div>
                 </div>
                 

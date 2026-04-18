@@ -22,8 +22,11 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
   return (
     <section 
       id="offerings" 
-      className="cv-auto py-40 px-8 md:px-24 transition-colors duration-500 relative"
-      style={{ backgroundColor: bgColor ?? theme.colors.bg.primary }}
+      className="cv-auto py-20 md:py-32 lg:py-40 px-4 sm:px-6 md:px-12 lg:px-24 transition-colors duration-500 relative"
+      style={{
+        backgroundColor: bgColor ?? theme.colors.bg.primary,
+        scrollMarginTop: "128px",
+      }}
     >
       {/* Subtle RED accent overlay for this section */}
       <div 
@@ -34,7 +37,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
       />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="text-center mb-24">
+        <div className="text-center mb-12 md:mb-24">
           <span 
             className="text-[10px] tracking-[0.4em] mb-6 block"
             style={{ 
@@ -45,7 +48,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
           >
             OUR OFFERINGS
           </span>
-          <h2 className="text-5xl md:text-6xl font-light tracking-tight leading-[1.15]">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-light tracking-tight leading-[1.15]">
             <span 
               className="gradient-text"
               style={{
@@ -63,7 +66,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-0">
+        <div className="grid md:grid-cols-3 gap-3 md:gap-0">
           {offerings.map((item, idx) => (
             <div
               key={idx}
@@ -71,7 +74,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
               onMouseEnter={() => setCursorVariant('hover')}
               onMouseLeave={() => setCursorVariant('default')}
             >
-              <div className="group relative h-[450px] w-full overflow-hidden">
+              <div className="group relative h-[340px] sm:h-[400px] lg:h-[450px] w-full overflow-hidden">
                 {/* Image */}
                 <img
                   src={`https://images.unsplash.com/${item.img}?w=600&h=800&fit=crop&q=80`}
@@ -87,13 +90,13 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
 
                 {/* Text overlay */}
                 <div
-                  className="absolute top-60 left-0 right-0 p-8
+                  className="absolute inset-x-0 bottom-0 p-5 sm:p-6 lg:p-8
                              transition-all duration-700
                              opacity-90 group-hover:opacity-100
-                             group-hover:-translate-y-2"
+                              group-hover:-translate-y-2"
                 >
                   <h3 
-                    className="text-2xl font-light tracking-wide text-white mb-3"
+                    className="text-xl sm:text-2xl font-light tracking-wide text-white mb-3"
                     style={{ 
                       textShadow: '0 2px 8px rgba(0,0,0,0.6)',
                       fontFamily: "'Source Sans 3', sans-serif"
@@ -102,7 +105,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
                     {item.title}
                   </h3>
                   <p 
-                    className="text-sm font-light leading-relaxed text-white/85 max-w-[90%]"
+                    className="text-xs sm:text-sm font-light leading-relaxed text-white/85 max-w-full"
                     style={{ 
                       textShadow: '0 1px 4px rgba(0,0,0,0.5)',
                       fontFamily: "'Source Sans 3', sans-serif"

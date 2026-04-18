@@ -1,12 +1,22 @@
+import { useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Heart } from "lucide-react";
 
 export default function DonatePage() {
   const { theme } = useOutletContext();
 
+  useEffect(() => {
+    const scrollContainer = document.getElementById("app-scroll");
+    if (scrollContainer && scrollContainer.scrollHeight > scrollContainer.clientHeight + 2) {
+      scrollContainer.scrollTo({ top: 0, left: 0 });
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0 });
+  }, []);
+
   return (
     <section
-      className="min-h-screen px-6 md:px-24 pt-32 pb-24 relative overflow-hidden"
+      className="min-h-screen px-4 sm:px-6 md:px-24 pt-24 md:pt-32 pb-16 md:pb-24 relative overflow-hidden"
       style={{ backgroundColor: theme.colors.bg.primary, color: theme.text }}
     >
       <div
@@ -25,14 +35,14 @@ export default function DonatePage() {
         </p>
 
         <h1
-          className="text-4xl md:text-5xl font-light tracking-tight mt-6"
+          className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight mt-6"
           style={{ color: theme.text }}
         >
           Support the Lineage
         </h1>
 
         <p
-          className="mt-6 text-base leading-relaxed"
+          className="mt-6 text-sm sm:text-base leading-relaxed"
           style={{ color: theme.textSecondary }}
         >
           Your contribution supports teachings, retreats, and the preservation of
@@ -41,7 +51,7 @@ export default function DonatePage() {
         </p>
 
         <div
-          className="mt-12 max-w-md mx-auto border p-7 sm:p-8"
+          className="mt-10 sm:mt-12 max-w-xs sm:max-w-md mx-auto border p-5 sm:p-8"
           style={{
             borderColor: theme.border,
             backgroundColor: theme.colors.bg.card,

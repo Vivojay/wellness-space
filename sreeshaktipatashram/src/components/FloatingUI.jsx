@@ -154,9 +154,18 @@ export default function FloatingUI(props) {
   const isDonatePage = location.pathname === "/donate";
   const { user, signOut } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const getScrollableContainer = () => {
+    const scrollContainer = document.getElementById("app-scroll");
+    if (!scrollContainer) return null;
+    const isScrollable = scrollContainer.scrollHeight > scrollContainer.clientHeight + 2;
+    return isScrollable ? scrollContainer : null;
+  };
+
   const goHomeTop = () => {
+    setSidebarExpanded(false);
     if (location.pathname === "/") {
-      const scrollContainer = document.getElementById("app-scroll");
+      const scrollContainer = getScrollableContainer();
       if (scrollContainer) {
         scrollContainer.scrollTo({ top: 0, left: 0, behavior: "smooth" });
       } else {
@@ -168,26 +177,16 @@ export default function FloatingUI(props) {
     navigate("/", { state: { scrollTo: "top" } });
   };
 
-  const goToSection = async (id) => {
-    if (location.pathname !== "/") {
-      navigate("/", { state: { scrollTo: id } });
+  const goToSection = (id) => {
+    setSidebarExpanded(false);
+    const scrollState = { scrollTo: id, ts: Date.now() };
+
+    if (location.pathname === "/") {
+      navigate("/", { replace: true, state: scrollState });
       return;
     }
-    const el = document.getElementById(id);
-    if (!el) return;
-    const nav = document.querySelector("[data-navbar]");
-    const navHeight = nav?.getBoundingClientRect().height || 110;
-    const offset = navHeight + 12;
-    const scrollContainer = document.getElementById("app-scroll");
-    if (scrollContainer) {
-      const elRect = el.getBoundingClientRect();
-      const containerRect = scrollContainer.getBoundingClientRect();
-      const targetTop = scrollContainer.scrollTop + (elRect.top - containerRect.top) - offset;
-      scrollContainer.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
-      return;
-    }
-    const targetTop = window.scrollY + el.getBoundingClientRect().top - offset;
-    window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: "smooth" });
+
+    navigate("/", { state: scrollState });
   };
 
   useEffect(() => {
@@ -579,7 +578,6 @@ export default function FloatingUI(props) {
               {[
                 { name: 'Home', onClick: goHomeTop },
                 { name: 'Readings', onClick: () => navigate("/readings") },
-                { name: 'Gallery', onClick: () => navigate("/gallery") },
                 { name: 'Donate', onClick: () => navigate("/donate"), isDonate: true },
                 { name: 'Join Us', onClick: () => navigate("/booking") },
                 { name: 'Blogs & Updates', onClick: () => navigate("/blog") },

@@ -104,6 +104,13 @@ export default function AppShell() {
   const { pathname } = location;
   const isHome = pathname === "/" || pathname === "";
 
+  const getScrollableContainer = useCallback(() => {
+    const node = scrollContainerRef.current || document.getElementById("app-scroll");
+    if (!node) return null;
+    const isScrollable = node.scrollHeight > node.clientHeight + 2;
+    return isScrollable ? node : null;
+  }, []);
+
   const chatPanelRef = useRef(null);
   const feedPanelRef = useRef(null);
 
@@ -133,7 +140,7 @@ export default function AppShell() {
   // Scroll progress
   useEffect(() => {
     const getProgress = () => {
-      const target = scrollTarget;
+      const target = getScrollableContainer();
       if (target) {
         const max = Math.max(1, target.scrollHeight - target.clientHeight);
         return target.scrollTop / max;
@@ -150,7 +157,7 @@ export default function AppShell() {
       setScrollProgress(getProgress());
     };
 
-    const listenerTarget = scrollTarget || window;
+    const listenerTarget = getScrollableContainer() || window;
     listenerTarget.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     window.addEventListener("resize", onScroll, { passive: true });
@@ -159,7 +166,7 @@ export default function AppShell() {
       listenerTarget.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [pathname, scrollTarget]);
+  }, [getScrollableContainer, pathname, scrollTarget]);
 
   useEffect(() => {
     const targetId = location.state?.scrollTo;
@@ -172,7 +179,7 @@ export default function AppShell() {
       return navHeight + 12;
     };
     const scrollToEl = (el) => {
-      const scrollContainer = document.getElementById("app-scroll");
+      const scrollContainer = getScrollableContainer();
       const offset = getOffset();
       if (scrollContainer) {
         const elRect = el.getBoundingClientRect();
@@ -186,7 +193,7 @@ export default function AppShell() {
     };
     const tryScroll = () => {
       if (targetId === "top") {
-        const scrollContainer = document.getElementById("app-scroll");
+        const scrollContainer = getScrollableContainer();
         if (scrollContainer) {
           scrollContainer.scrollTo({ top: 0, left: 0, behavior: "smooth" });
         } else {
@@ -203,13 +210,13 @@ export default function AppShell() {
         return;
       }
       attempts += 1;
-      if (attempts < 12) {
+      if (attempts < 60) {
         requestAnimationFrame(tryScroll);
       }
     };
 
     requestAnimationFrame(tryScroll);
-  }, [isHome, location.pathname, location.state, navigate]);
+  }, [getScrollableContainer, isHome, location.pathname, location.state, navigate]);
 
   useEffect(() => {
     if (chatOpen) setActiveOverlay("chat");

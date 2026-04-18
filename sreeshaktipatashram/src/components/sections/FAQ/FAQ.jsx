@@ -103,8 +103,11 @@ export default function FAQ({ theme, isDark, bgColor }) {
     <section 
       id="faqs" 
       ref={sectionRef}
-      className="cv-auto py-12 px-6 md:px-24 transition-colors duration-500 relative"
-      style={{ backgroundColor: bgColor ?? theme.colors.bg.secondary }}
+      className="cv-auto py-16 md:py-24 px-4 sm:px-6 md:px-12 lg:px-24 transition-colors duration-500 relative"
+      style={{
+        backgroundColor: bgColor ?? theme.colors.bg.secondary,
+        scrollMarginTop: "128px",
+      }}
     >
       {/* Subtle RED accent overlay */}
       <div 
@@ -115,8 +118,8 @@ export default function FAQ({ theme, isDark, bgColor }) {
       />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-6xl md:text-7xl font-light tracking-tight leading-tight mb-12 relative inline-block">
+        <div className="text-center mb-10 md:mb-12">
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-light tracking-tight leading-tight mb-8 md:mb-12 relative inline-block">
             <span 
               className="gradient-text"
               style={{
@@ -141,7 +144,7 @@ export default function FAQ({ theme, isDark, bgColor }) {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {visibleFAQs.map((faq, index) => (
             <div
               key={index}
@@ -153,11 +156,11 @@ export default function FAQ({ theme, isDark, bgColor }) {
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none"
+                className="w-full flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 text-left focus:outline-none"
                 style={{ color: theme.text }}
               >
                 <span 
-                  className="font-medium"
+                  className="font-medium text-sm sm:text-base"
                   style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                 >
                   {faq.question}
@@ -168,7 +171,7 @@ export default function FAQ({ theme, isDark, bgColor }) {
               </button>
 
               <div
-                className={`transition-all duration-500 ease-in-out px-6 overflow-hidden ${
+                className={`transition-all duration-500 ease-in-out px-4 sm:px-6 overflow-hidden ${
                   openIndex === index ? "max-h-96 py-4" : "max-h-0"
                 }`}
               >

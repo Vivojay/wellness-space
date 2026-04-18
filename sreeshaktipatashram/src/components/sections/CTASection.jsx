@@ -87,7 +87,7 @@ const CTASection = ({ theme, setCursorVariant, isDark, bgColor }) => {
             className="relative z-10 tracking-[0.2em] text-sm"
             style={{ color: theme.text }}
           >
-            Book Now
+            Join Us
           </span>
         </button>
       </div>
