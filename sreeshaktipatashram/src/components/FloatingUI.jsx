@@ -152,8 +152,9 @@ export default function FloatingUI(props) {
   const location = useLocation();
   const navigate = useNavigate();
   const isDonatePage = location.pathname === "/donate";
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const ENABLE_CHAT_WIDGET = false;
 
   const getScrollableContainer = () => {
     const scrollContainer = document.getElementById("app-scroll");
@@ -357,192 +358,189 @@ export default function FloatingUI(props) {
         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       </button>
 
-      {/* Chatbot */}
-      <div
-        className="fixed bottom-8 right-8"
-        style={{ zIndex: activeOverlay === "chat" ? 120 : 110 }}
-        onMouseDown={() => setActiveOverlay?.("chat")}
-        onTouchStart={() => setActiveOverlay?.("chat")}
-      >
-        {!chatOpen ? (
-          <button
-            onClick={() => { setChatOpen(true); setActiveOverlay?.("chat"); }}
-            onMouseEnter={() => setChatExpanded(true)}
-            onMouseLeave={() => setChatExpanded(false)}
-            className="group flex items-center gap-3 backdrop-blur-xl 
-              border rounded-full px-5 py-3 transition-all duration-300 
-              hover:scale-105 shadow-lg"
-            style={{
-              backgroundColor: theme.cardBg,
-              borderColor: theme.border,
-              color: theme.text
-            }}
-            data-chat-trigger
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className={`overflow-hidden transition-all duration-1000 
-              ${chatExpanded ? 'w-38 opacity-100' : 'w-0 opacity-0'}`}>
-              {/* <span className="text-sm whitespace-nowrap">Chat with us (UNDER DEVELOPMENT)</span> */}
-              <span className="text-sm whitespace-nowrap">[UNDER DEVELOPMENT]</span>
-            </span>
-          </button>
-        ) : (
-          <div className='relative'>
-            <div 
-              ref={chatPanelRef} 
-              className="backdrop-blur-xl border shadow-2xl w-96 h-[500px] flex flex-col relative rounded-none overflow-hidden"
+      {ENABLE_CHAT_WIDGET && (
+        <div
+          className="fixed bottom-8 right-8"
+          style={{ zIndex: activeOverlay === "chat" ? 120 : 110 }}
+          onMouseDown={() => setActiveOverlay?.("chat")}
+          onTouchStart={() => setActiveOverlay?.("chat")}
+        >
+          {!chatOpen ? (
+            <button
+              onClick={() => { setChatOpen(true); setActiveOverlay?.("chat"); }}
+              onMouseEnter={() => setChatExpanded(true)}
+              onMouseLeave={() => setChatExpanded(false)}
+              className="group flex items-center gap-3 backdrop-blur-xl 
+                border rounded-full px-5 py-3 transition-all duration-300 
+                hover:scale-105 shadow-lg"
               style={{
                 backgroundColor: theme.cardBg,
-                borderColor: theme.border
+                borderColor: theme.border,
+                color: theme.text
               }}
+              data-chat-trigger
             >
-              {/* Chat Header */}
+              <MessageCircle className="w-5 h-5" />
+              <span className={`overflow-hidden transition-all duration-1000 
+                ${chatExpanded ? 'w-38 opacity-100' : 'w-0 opacity-0'}`}>
+                <span className="text-sm whitespace-nowrap">[UNDER DEVELOPMENT]</span>
+              </span>
+            </button>
+          ) : (
+            <div className='relative'>
               <div 
-                className="flex items-center justify-between p-5 border-b"
-                style={{ borderColor: theme.border }}
+                ref={chatPanelRef} 
+                className="backdrop-blur-xl border shadow-2xl w-96 h-[500px] flex flex-col relative rounded-none overflow-hidden"
+                style={{
+                  backgroundColor: theme.cardBg,
+                  borderColor: theme.border
+                }}
               >
-                <div>
-                  <h3 className="font-medium text-base" style={{ color: theme.text }}>
-                    Chat with us [UNDER DEVELOPMENT]
-                  </h3>
-                  <p className="text-xs" style={{ color: theme.textMuted }}>
-                    We're here to help
-                  </p>
-                </div>
-                <button
-                  onClick={() => setChatOpen(false)}
-                  className="w-9 h-9 rounded-full flex items-center justify-center 
-                    border-2 transition-colors duration-200"
-                  style={{
-                    backgroundColor: theme.accentSecondary,
-                    borderColor: theme.borderStrong
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.accent;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.accentSecondary;
-                  }}
+                <div 
+                  className="flex items-center justify-between p-5 border-b"
+                  style={{ borderColor: theme.border }}
                 >
-                  <Minus className="w-4 h-4" style={{ color: isDark ? theme.textMuted : theme.text }} />
-                </button>
-              </div>
-
-              {/* Messages Container */}
-              <div className="flex-1 overflow-hidden">
-                <div
-                  ref={chatRef}
-                  className="h-full px-5 py-5 space-y-4 overflow-y-auto"
-                  style={{ 
-                    scrollbarWidth: 'thin', 
-                    scrollbarColor: `${theme.borderSecondary} transparent` 
-                  }}
-                >
-                  {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div 
-                        className="max-w-[80%] px-4 py-3 text-sm rounded-none"
-                        style={{
-                          backgroundColor: msg.type === 'user' 
-                            ? theme.accent 
-                            : theme.cardBg,
-                          color: msg.type === 'user' 
-                            ? '#ffffff' 
-                            : theme.text,
-                          border: msg.type === 'bot' ? `1px solid ${theme.border}` : 'none'
-                        }}
-                      >
-                        {msg.text}
-                      </div>
-                    </div>
-                  ))}
-
-                  {messages.length === 1 && (
-                    <div className="space-y-2 mt-4">
-                      <p className="text-xs mb-3" style={{ color: theme.textMuted }}>
-                        Quick questions:
-                      </p>
-                      {quickQuestions.map((q, idx) => (
-                        <button 
-                          key={idx} 
-                          onClick={() => handleSendMessage(q)}
-                          className="w-full text-left text-sm p-3 rounded-none border transition-colors"
-                          style={{
-                            backgroundColor: theme.cardBg,
-                            borderColor: theme.border,
-                            color: theme.text
-                          }}
-                          onMouseEnter={() => setCursorVariant('hover')}
-                          onMouseLeave={() => setCursorVariant('default')}
-                        >
-                          {q}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {botTyping && (
-                    <div 
-                      className="flex items-center gap-2 p-3 rounded-none shadow"
-                      style={{ backgroundColor: theme.bgSecondary }}
-                    >
-                      <p className="text-xs opacity-70 mb-0" style={{ color: theme.textMuted }}>
-                        BOT
-                      </p>
-                      <div className="flex gap-1">
-                        <span className="w-2 h-2 rounded-none animate-bounce delay-75" style={{ backgroundColor: theme.textMuted }}></span>
-                        <span className="w-2 h-2 rounded-none animate-bounce delay-150" style={{ backgroundColor: theme.textMuted }}></span>
-                        <span className="w-2 h-2 rounded-none animate-bounce delay-200" style={{ backgroundColor: theme.textMuted }}></span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Input */}
-              <div 
-                className="p-4 border-t"
-                style={{ borderColor: theme.border }}
-              >
-                <div className="flex gap-2">
-                  <input 
-                    ref={inputRef} 
-                    type="text" 
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(inputValue); }}
-                    placeholder="Type your message..."
-                    className="flex-1 border px-4 py-2 text-sm rounded-none 
-                      focus:outline-none cursor-text caret-current"
-                    style={{ 
-                      backgroundColor: theme.cardBg,
-                      borderColor: theme.border,
-                      color: theme.text,
-                      cursor: 'text' 
-                    }}
-                  />
-                  <button 
-                    onClick={() => handleSendMessage(inputValue)}
-                    className="w-10 h-10 rounded-none border flex items-center justify-center 
-                      transition-transform hover:scale-110"
+                  <div>
+                    <h3 className="font-medium text-base" style={{ color: theme.text }}>
+                      Chat with us [UNDER DEVELOPMENT]
+                    </h3>
+                    <p className="text-xs" style={{ color: theme.textMuted }}>
+                      We're here to help
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setChatOpen(false)}
+                    className="w-9 h-9 rounded-full flex items-center justify-center 
+                      border-2 transition-colors duration-200"
                     style={{
-                      backgroundColor: theme.accent,
-                      borderColor: theme.borderStrong,
-                      color: '#ffffff'
+                      backgroundColor: theme.accentSecondary,
+                      borderColor: theme.borderStrong
                     }}
-                    onMouseEnter={() => setCursorVariant('hover')}
-                    onMouseLeave={() => setCursorVariant('default')}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.accentSecondary;
+                    }}
                   >
-                    <Send className="w-4 h-4" />
+                    <Minus className="w-4 h-4" style={{ color: isDark ? theme.textMuted : theme.text }} />
                   </button>
                 </div>
-              </div>
-            </div>
 
-            {chatOpen && <ScrollToBottomButton chatRef={chatRef} messages={messages} theme={theme} />}
-          </div>
-        )}
-      </div>
+                <div className="flex-1 overflow-hidden">
+                  <div
+                    ref={chatRef}
+                    className="h-full px-5 py-5 space-y-4 overflow-y-auto"
+                    style={{ 
+                      scrollbarWidth: 'thin', 
+                      scrollbarColor: `${theme.borderSecondary} transparent` 
+                    }}
+                  >
+                    {messages.map((msg, idx) => (
+                      <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div 
+                          className="max-w-[80%] px-4 py-3 text-sm rounded-none"
+                          style={{
+                            backgroundColor: msg.type === 'user' 
+                              ? theme.accent 
+                              : theme.cardBg,
+                            color: msg.type === 'user' 
+                              ? '#ffffff' 
+                              : theme.text,
+                            border: msg.type === 'bot' ? `1px solid ${theme.border}` : 'none'
+                          }}
+                        >
+                          {msg.text}
+                        </div>
+                      </div>
+                    ))}
+
+                    {messages.length === 1 && (
+                      <div className="space-y-2 mt-4">
+                        <p className="text-xs mb-3" style={{ color: theme.textMuted }}>
+                          Quick questions:
+                        </p>
+                        {quickQuestions.map((q, idx) => (
+                          <button 
+                            key={idx} 
+                            onClick={() => handleSendMessage(q)}
+                            className="w-full text-left text-sm p-3 rounded-none border transition-colors"
+                            style={{
+                              backgroundColor: theme.cardBg,
+                              borderColor: theme.border,
+                              color: theme.text
+                            }}
+                            onMouseEnter={() => setCursorVariant('hover')}
+                            onMouseLeave={() => setCursorVariant('default')}
+                          >
+                            {q}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {botTyping && (
+                      <div 
+                        className="flex items-center gap-2 p-3 rounded-none shadow"
+                        style={{ backgroundColor: theme.bgSecondary }}
+                      >
+                        <p className="text-xs opacity-70 mb-0" style={{ color: theme.textMuted }}>
+                          BOT
+                        </p>
+                        <div className="flex gap-1">
+                          <span className="w-2 h-2 rounded-none animate-bounce delay-75" style={{ backgroundColor: theme.textMuted }}></span>
+                          <span className="w-2 h-2 rounded-none animate-bounce delay-150" style={{ backgroundColor: theme.textMuted }}></span>
+                          <span className="w-2 h-2 rounded-none animate-bounce delay-200" style={{ backgroundColor: theme.textMuted }}></span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div 
+                  className="p-4 border-t"
+                  style={{ borderColor: theme.border }}
+                >
+                  <div className="flex gap-2">
+                    <input 
+                      ref={inputRef} 
+                      type="text" 
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(inputValue); }}
+                      placeholder="Type your message..."
+                      className="flex-1 border px-4 py-2 text-sm rounded-none 
+                        focus:outline-none cursor-text caret-current"
+                      style={{ 
+                        backgroundColor: theme.cardBg,
+                        borderColor: theme.border,
+                        color: theme.text,
+                        cursor: 'text' 
+                      }}
+                    />
+                    <button 
+                      onClick={() => handleSendMessage(inputValue)}
+                      className="w-10 h-10 rounded-none border flex items-center justify-center 
+                        transition-transform hover:scale-110"
+                      style={{
+                        backgroundColor: theme.accent,
+                        borderColor: theme.borderStrong,
+                        color: '#ffffff'
+                      }}
+                      onMouseEnter={() => setCursorVariant('hover')}
+                      onMouseLeave={() => setCursorVariant('default')}
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {chatOpen && <ScrollToBottomButton chatRef={chatRef} messages={messages} theme={theme} />}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Sidebar */}
       <aside 
@@ -581,6 +579,7 @@ export default function FloatingUI(props) {
                 { name: 'Donate', onClick: () => navigate("/donate"), isDonate: true },
                 { name: 'Join Us', onClick: () => navigate("/booking") },
                 { name: 'Blogs & Updates', onClick: () => navigate("/blog") },
+                ...(isAdmin ? [{ name: 'Donation Ledger', onClick: () => navigate('/admin/donations'), isAdmin: true }] : []),
                 { name: 'Lineage', onClick: () => goToSection("lineage") },
                 { name: 'Offerings', onClick: () => goToSection("offerings") },
                 { name: 'FAQs', onClick: () => goToSection("faqs") },
@@ -596,7 +595,7 @@ export default function FloatingUI(props) {
                 >
                   <span 
                     className="block text-lg font-light tracking-wide transition-all duration-300 group-hover:translate-x-3"
-                    style={{ color: item.isDonate ? "#b91c1c" : item.isSignOut ? "#f59e0b" : theme.text }}
+                    style={{ color: item.isDonate ? "#b91c1c" : item.isSignOut ? "#f59e0b" : item.isAdmin ? theme.accent : theme.text }}
                   >
                     {item.name}
                   </span>

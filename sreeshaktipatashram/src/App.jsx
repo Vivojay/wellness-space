@@ -12,6 +12,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminBlogPreview from "./pages/AdminBlogPreview";
 import RequireAdmin from "./auth/RequireAdmin";
 import FeedPage from "./pages/FeedPage";
+import AdminDonations from "./pages/AdminDonations";
 
 function App() {
   return (
@@ -63,6 +64,14 @@ function App() {
           element={
             <RequireAdmin>
               <FeedPage adminView />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/admin/donations"
+          element={
+            <RequireAdmin>
+              <AdminDonations />
             </RequireAdmin>
           }
         />

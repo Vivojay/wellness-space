@@ -19,6 +19,17 @@ async function authFetch(path, { token, method = "GET", body } = {}) {
   return res.json();
 }
 
+function buildQuery(params = {}) {
+  const qp = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    const text = String(value).trim();
+    if (!text) return;
+    qp.set(key, text);
+  });
+  return qp.toString();
+}
+
 export async function fetchAdminBlogs(token, { limit = 20, page = 1 } = {}) {
   const params = new URLSearchParams();
   if (limit) params.set("limit", String(limit));
@@ -59,4 +70,28 @@ export async function updateAdminFeed(id, payload, token) {
 
 export async function deleteAdminFeed(id, token) {
   return authFetch(`/feed/${id}`, { method: "DELETE", token });
+}
+
+export async function fetchAdminDonations(token, filters = {}) {
+  const query = buildQuery(filters);
+  const suffix = query ? `?${query}` : "";
+  return authFetch(`/payments/admin/declarations${suffix}`, { token });
+}
+
+export async function exportAdminDonationsCsv(token, filters = {}) {
+  const query = buildQuery(filters);
+  const suffix = query ? `?${query}` : "";
+  const res = await fetch(`${API_URL}/payments/admin/declarations/export${suffix}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Failed to export declarations");
+  }
+
+  return res.text();
 }

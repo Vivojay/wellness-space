@@ -23,6 +23,13 @@ export default function AdminHeader({ theme }) {
         >
           Admin Feed
         </Link>
+        <Link
+          to="/admin/donations"
+          className="text-sm tracking-wide"
+          style={{ color: theme.text }}
+        >
+          Donation Ledger
+        </Link>
       </div>
       <button
         onClick={async () => {
