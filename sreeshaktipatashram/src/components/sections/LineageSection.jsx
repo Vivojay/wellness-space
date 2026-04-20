@@ -11,13 +11,13 @@ import vartikaShukla from "@/assets/images/lineage/vartika-shukla.jpg";
 
 const LineageSection = ({ theme, bgColor }) => {
   const lineage = [
-    { img: swamiGanga, name: "Swami Gangadhar Tirtha" },
-    { img: naray, name: "Swami Narayandev Tirtha" },
+    { img: swamiGanga, name: "Swami Gangadhar Tirth" },
+    { img: naray, name: "Swami Narayandev Tirth" },
     { img: yog, name: "Paramahansa Yogananda" },
-    { img: vishnu, name: "Swami Vishnu Tirtha" },
-    { img: shivom, name: "Swami Shivom Tirtha" },
-    { img: sahjananda, name: "Swami Sahajananda Tirtha" },
-    { img: gurujiKurti, name: "Guruji T Sreenivasulu" },
+    { img: vishnu, name: "Swami Vishnu Tirth" },
+    { img: shivom, name: "Swami Shivom Tirth" },
+    { img: sahjananda, name: "Swami Sahajananda Tirth" },
+    { img: gurujiKurti, name: "Col. T Sreenivasulu (R)" },
     { img: vartikaShukla, name: "Guruji Vartika Shukla" },
   ];
 
@@ -31,7 +31,7 @@ const LineageSection = ({ theme, bgColor }) => {
       }}
     >
       <div className="max-w-6xl mx-auto">
-        <div className="mb-12 md:mb-20">
+        <div className="mb-12 md:mb-20 text-center">
           <span 
             className="text-[10px] tracking-[0.4em]"
             style={{ 
@@ -46,7 +46,7 @@ const LineageSection = ({ theme, bgColor }) => {
             <span 
               className="gradient-text"
               style={{
-                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
                 display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
@@ -64,20 +64,26 @@ const LineageSection = ({ theme, bgColor }) => {
           {lineage.map((item, idx) => (
             <div
               key={idx}
-              className="relative aspect-[3/4] overflow-hidden group"
+              className="lineage-card relative aspect-[3/4] overflow-hidden group"
             >
               <img
                 src={item.img}
                 alt={item.name}
                 className="absolute inset-0 w-full h-full object-cover hover-zoom"
+                style={{ filter: idx === lineage.length - 1 ? "brightness(1.1)" : undefined }}
                 loading="lazy"
                 decoding="async"
               />
               <div 
-                className="absolute inset-0"
+                className="lineage-overlay absolute inset-0"
                 style={{
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.4), transparent)'
+                  background:
+                    "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.82) 24%, rgba(0,0,0,0.52) 36%, rgba(0,0,0,0.12) 46%, rgba(0,0,0,0) 56%)",
                 }}
+              />
+              <div
+                className="lineage-highlight absolute inset-0 pointer-events-none"
+                style={{ borderColor: theme.accent }}
               />
               <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
                 <p 

@@ -36,15 +36,15 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant, bgColor })
         >
           VOICES OF TRANSFORMATION
         </span>
-        <h2 className="text-5xl md:text-6xl font-light tracking-tight relative inline-block">
-          <span 
-            className="gradient-text"
-            style={{
-              background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
-              display: 'inline-block',
-              fontFamily: "'Source Sans 3', sans-serif",
-              fontWeight: 300,
-              letterSpacing: '-0.02em'
+        <h2 className="text-3xl sm:text-4xl md:text-6xl font-light tracking-tight relative inline-block">
+            <span 
+              className="gradient-text"
+              style={{
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                display: 'inline-block',
+                fontFamily: "'Source Sans 3', sans-serif",
+                fontWeight: 300,
+                letterSpacing: '-0.02em'
             }}
           >
             Testimonials

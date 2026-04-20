@@ -6,7 +6,7 @@ import RightFeed from "@/components/RightFeed";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
 import { getTheme, getThemeCSSVars } from "@/config/themeConfig";
-import { fetchFeed } from "@/api/feedApi";
+import { fetchFeed, fetchFeedMeta } from "@/api/feedApi";
 
 import {
   Sun,
@@ -17,6 +17,27 @@ import {
   Send,
   Circle,
 } from "lucide-react";
+
+const FEED_READ_CURSOR_KEY = "ssa_feed_read_cursor_v1";
+const FEED_LAST_NOTIFIED_CURSOR_KEY = "ssa_feed_last_notified_cursor_v1";
+const FEED_DING_AUDIO_URL =
+  "https://cdn.freesound.org/previews/740/740423_2675894-lq.mp3";
+
+const readLocal = (key) => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const writeLocal = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore storage failures
+  }
+};
 
 /**
  * Simple hamburger icon component expected by FloatingUI
@@ -98,11 +119,17 @@ export default function AppShell() {
   const [feedItems, setFeedItems] = useState([
     { category: "NEWS", text: "Welcome to Sreeshaktipat Ashram – new blog posts coming soon." },
   ]);
+  const [feedUnreadCount, setFeedUnreadCount] = useState(0);
+  const [latestFeedCursor, setLatestFeedCursor] = useState(null);
+  const [pendingBellCursor, setPendingBellCursor] = useState(null);
+  const feedBellAudioRef = useRef(null);
 
   const location = useLocation();
   const navigate = useNavigate();
   const { pathname } = location;
   const isHome = pathname === "/" || pathname === "";
+  const rightFeedOpenRef = useRef(rightFeedOpen);
+  const pathnameRef = useRef(pathname);
 
   const getScrollableContainer = useCallback(() => {
     const node = scrollContainerRef.current || document.getElementById("app-scroll");
@@ -117,6 +144,52 @@ export default function AppShell() {
   // ✅ Use centralized theme configuration
   const theme = useMemo(() => getTheme(isDark), [isDark]);
   const themeCSSVars = useMemo(() => getThemeCSSVars(isDark), [isDark]);
+
+  const playFeedBell = useCallback(async (cursor, { force = false } = {}) => {
+    if (!cursor) return false;
+
+    const lastNotifiedCursor = readLocal(FEED_LAST_NOTIFIED_CURSOR_KEY);
+    if (!force && lastNotifiedCursor === cursor) {
+      return false;
+    }
+
+    try {
+      if (!feedBellAudioRef.current) {
+        const audio = new Audio(FEED_DING_AUDIO_URL);
+        audio.preload = "auto";
+        feedBellAudioRef.current = audio;
+      }
+
+      const bell = feedBellAudioRef.current;
+      bell.currentTime = 0;
+      await bell.play();
+      writeLocal(FEED_LAST_NOTIFIED_CURSOR_KEY, cursor);
+      setPendingBellCursor(null);
+      return true;
+    } catch {
+      setPendingBellCursor(cursor);
+      return false;
+    }
+  }, []);
+
+  const markFeedAsRead = useCallback(
+    (cursorOverride = null) => {
+      const cursor = cursorOverride || latestFeedCursor;
+      if (!cursor) return;
+      writeLocal(FEED_READ_CURSOR_KEY, cursor);
+      setFeedUnreadCount(0);
+      setPendingBellCursor(null);
+    },
+    [latestFeedCursor]
+  );
+
+  useEffect(() => {
+    if (!feedBellAudioRef.current) {
+      const audio = new Audio(FEED_DING_AUDIO_URL);
+      audio.preload = "auto";
+      feedBellAudioRef.current = audio;
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -227,16 +300,90 @@ export default function AppShell() {
   }, [rightFeedOpen]);
 
   useEffect(() => {
+    rightFeedOpenRef.current = rightFeedOpen;
+  }, [rightFeedOpen]);
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!pendingBellCursor) return;
+
+    let disposed = false;
+    const attempt = async () => {
+      if (disposed) return;
+      await playFeedBell(pendingBellCursor, { force: true });
+    };
+
+    window.addEventListener("pointerdown", attempt, { passive: true });
+    window.addEventListener("keydown", attempt);
+    window.addEventListener("touchstart", attempt, { passive: true });
+
+    return () => {
+      disposed = true;
+      window.removeEventListener("pointerdown", attempt);
+      window.removeEventListener("keydown", attempt);
+      window.removeEventListener("touchstart", attempt);
+    };
+  }, [pendingBellCursor, playFeedBell]);
+
+  useEffect(() => {
+    if (rightFeedOpen) {
+      markFeedAsRead();
+    }
+  }, [markFeedAsRead, rightFeedOpen]);
+
+  useEffect(() => {
+    if (pathname === "/feed") {
+      markFeedAsRead();
+    }
+  }, [markFeedAsRead, pathname]);
+
+  useEffect(() => {
     let isMounted = true;
     let intervalId = null;
 
     const loadFeed = async ({ force = false } = {}) => {
       try {
-        const data = await fetchFeed({ limit: 10, force });
+        const readCursor = readLocal(FEED_READ_CURSOR_KEY);
+        const [data, meta] = await Promise.all([
+          fetchFeed({ limit: 10, force }),
+          fetchFeedMeta({ since: readCursor || undefined }).catch(() => null),
+        ]);
         const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
         if (isMounted) {
           if (items.length) {
             setFeedItems(items);
+          }
+
+          const latestCursor = meta?.latest_cursor || items[0]?.created_at || null;
+          setLatestFeedCursor(latestCursor);
+
+          let unreadCount = Number(meta?.unread_count || 0);
+          if (!meta) {
+            if (readCursor) {
+              unreadCount = items.filter((item) => {
+                const createdAt = item?.created_at;
+                return createdAt && createdAt > readCursor;
+              }).length;
+            } else {
+              unreadCount = items.length;
+            }
+          }
+
+          const shouldMarkReadImmediately = rightFeedOpenRef.current || pathnameRef.current === "/feed";
+          if (shouldMarkReadImmediately && latestCursor) {
+            writeLocal(FEED_READ_CURSOR_KEY, latestCursor);
+            setFeedUnreadCount(0);
+            setPendingBellCursor(null);
+            return;
+          }
+
+          setFeedUnreadCount(Math.max(0, unreadCount));
+
+          if (unreadCount > 0 && latestCursor) {
+            playFeedBell(latestCursor);
           }
         }
       } catch (e) {
@@ -255,7 +402,7 @@ export default function AppShell() {
       isMounted = false;
       if (intervalId) clearInterval(intervalId);
     };
-  }, []);
+  }, [playFeedBell]);
 
   // Click outside handler - CLOSE BOTH PANELS
   useEffect(() => {
@@ -349,6 +496,8 @@ export default function AppShell() {
         rightFeedOpen={rightFeedOpen}
         setRightFeedOpen={setRightFeedOpen}
         feedItems={feedItems}
+        unreadCount={feedUnreadCount}
+        onFeedOpened={markFeedAsRead}
         activeOverlay={activeOverlay}
         setActiveOverlay={setActiveOverlay}
         feedPanelRef={feedPanelRef}

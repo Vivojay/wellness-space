@@ -4,8 +4,8 @@ export default function RevealSection({ theme, setCursorVariant, bgColor }) {
   const guruCards = [
     {
       img: "https://images.weserv.nl/?url=https://drive.google.com/uc?id=16RqiNKrawYBaQyWis9IQbg75Cseqq4oq&w=1200&q=85",
-      title: "Paramesti Shaktipat Guru",
-      subtitle: "GREAT GRAND SHAKTIPAT GURU",
+      title: "Swami Sahajananda Tirth",
+      subtitle: "Shaktipat Guru",
       body: `Born in a traditional Indian family, Swami Sahajananda Tirth was devotional from his young age.
 During his spiritual journey, His Holiness met many spiritual masters such as Sri Aurobindo,
 Ramana Maharshi of Thiruvannamalai, and Swami Bhaskarananda Tirth, spending time with them in
@@ -18,8 +18,8 @@ in the Siddha Maha Yoga tradition.`,
     },
     {
       img: "https://images.weserv.nl/?url=https://drive.google.com/uc?id=1k26h7tuUlQc9_ufFEvthhz4IkLX4dVRu&w=1200&q=85",
-      title: "Guru T Sreenivasulu",
-      subtitle: "GRAND SHAKTIPAT GURU",
+      title: "Col. T Sreenivasulu (R)",
+      subtitle: "Shaktipat Guru",
       body: `His Holiness Col. T Sreenivasulu Ji is an alumnus of prestigious institutions like Sainik School Korukonda,
 National Defence Academy, and Indian Military Academy. At age fifteen, his passion for the Himalayas and
 mountaineering led him to a spiritual journey when he met his master on a train!
@@ -36,12 +36,12 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
     >
       <div className="max-w-6xl mx-auto">
         {/* Two-toned diagonal title */}
-        <div className="mb-16">
-          <h2 className="text-5xl md:text-6xl font-light tracking-tight mb-6 relative inline-block">
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-light tracking-tight mb-6 relative inline-block">
             <span 
               className="relative gradient-text"
               style={{
-                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.accent} 50%, ${theme.accent} 100%)`,
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
                 display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
@@ -51,12 +51,6 @@ Some of his disciples are Shaktipat Gurus spreading the message worldwide.`,
               Notable Gurus
             </span>
           </h2>
-          <div className="flex items-center gap-6">
-            <div 
-              className="w-16 h-[1px]"
-              style={{ backgroundColor: theme.accent }}
-            />
-          </div>
         </div>
 
         <div className="space-y-12">

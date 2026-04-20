@@ -128,31 +128,48 @@ const WellnessWebsite = () => {
               "radial-gradient(circle at 52% 76%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 12%, rgba(0, 0, 0, 0.3) 24%, rgba(0, 0, 0, 0) 34%)"
           }}
         />
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12 relative h-full">
-          <div className="flex flex-col h-full relative">
-            <p
-              className="text-[11px] tracking-[0.4em] uppercase"
-              style={{ color: isDark ? theme.textMuted : "#121417" }}
+        <div className="max-w-6xl mx-auto relative h-full">
+          <div className="text-center">
+            <span
+              className="text-[10px] tracking-[0.4em] mb-4 block"
+              style={{
+                color: theme.textMuted,
+                fontFamily: "'Source Sans 3', sans-serif",
+                fontWeight: 400,
+              }}
             >
-              About Me
-            </p>
+              ABOUT
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-light tracking-tight leading-[1.15]">
+              <span
+                className="gradient-text"
+                style={{
+                  background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                  display: "inline-block",
+                  fontFamily: "'Source Sans 3', sans-serif",
+                  fontWeight: 300,
+                  letterSpacing: "-0.02em",
+                  paddingBottom: "2px",
+                  lineHeight: "1.15",
+                }}
+              >
+                About Me
+              </span>
+            </h2>
           </div>
-
         </div>
 
         <div
-          className="absolute left-6 md:left-24 top-1/2 text-[10px]"
+          className="absolute left-4 right-4 md:left-24 md:right-[56%] top-[28%] md:top-1/2 text-[10px]"
           style={{
             color: theme.textMuted,
-            width: "clamp(250px, 62vw, 720px)",
             transform: "translateY(-50%)"
           }}
         >
           <div
             className="inline-flex flex-col justify-start px-3 py-4 space-y-3"
             style={{
-              height: "45vh",
-              minHeight: "320px",
+              minHeight: "220px",
               // backgroundColor: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.65)",
               backgroundColor: isDark ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0)",
               color: isDark ? "#ffffff" : "rgba(12, 14, 18, 0.95)",
@@ -163,16 +180,14 @@ const WellnessWebsite = () => {
               className="text-[10px] sm:text-[11px] tracking-[0.28em] uppercase"
               style={{ color: isDark ? theme.textMuted : "rgba(12, 14, 18, 0.75)" }}
             >
-              Vartika Shukla
+              Goddess Vartika (Grand Guru)
             </p>
             <p
               className="text-sm sm:text-base leading-relaxed max-w-[56ch]"
               style={{
                 color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden"
+                whiteSpace: "normal",
+                overflowWrap: "anywhere"
               }}
             >
               Vartika Shukla carries the Siddha Maha Yoga lineage with clarity and compassion, guiding seekers to awaken inner stillness and integrate spiritual practice into everyday life.

@@ -4,7 +4,18 @@ import { useAuth } from "@/auth/AuthContext";
 import { createAdminFeed, deleteAdminFeed, updateAdminFeed } from "@/api/adminApi";
 import { Minus } from 'lucide-react';
 
-const RightFeed = ({ theme, isDark, rightFeedOpen, setRightFeedOpen, feedItems, activeOverlay, setActiveOverlay, feedPanelRef }) => {
+const RightFeed = ({
+  theme,
+  isDark,
+  rightFeedOpen,
+  setRightFeedOpen,
+  feedItems,
+  unreadCount = 0,
+  onFeedOpened,
+  activeOverlay,
+  setActiveOverlay,
+  feedPanelRef,
+}) => {
   const navigate = useNavigate();
   const { isAdmin, token } = useAuth();
   const feedRef = useRef(null);
@@ -13,6 +24,11 @@ const RightFeed = ({ theme, isDark, rightFeedOpen, setRightFeedOpen, feedItems, 
   const [quickCategory, setQuickCategory] = useState("NEWS");
   const [quickBusy, setQuickBusy] = useState(false);
   const [localItems, setLocalItems] = useState([]);
+
+  const minimizeButtonBaseBg = isDark ? "rgba(255, 255, 255, 0.92)" : theme.accentSecondary;
+  const minimizeButtonHoverBg = isDark ? "#ffffff" : theme.accent;
+  const minimizeButtonBorder = isDark ? "rgba(255, 255, 255, 0.98)" : theme.borderStrong;
+  const minimizeButtonIcon = isDark ? "#0f172a" : theme.text;
 
   useEffect(() => {
     if (feedRef.current) {
@@ -44,7 +60,11 @@ const RightFeed = ({ theme, isDark, rightFeedOpen, setRightFeedOpen, feedItems, 
       {/* Open Button */}
       {!rightFeedOpen && (
         <button
-          onClick={() => { setRightFeedOpen(true); setActiveOverlay?.("feed"); }}
+          onClick={() => {
+            setRightFeedOpen(true);
+            setActiveOverlay?.("feed");
+            onFeedOpened?.();
+          }}
           className="fixed right-6 top-1/2 -translate-y-1/2 z-[70]
             w-10 h-32 rounded-full shadow-2xl backdrop-blur-xl
             border flex items-center justify-center
@@ -63,6 +83,20 @@ const RightFeed = ({ theme, isDark, rightFeedOpen, setRightFeedOpen, feedItems, 
           >
             FEED
           </span>
+          {unreadCount > 0 && (
+            <span
+              className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full text-[10px] leading-5 font-semibold text-center"
+              style={{
+                backgroundColor: "#ef4444",
+                color: "#ffffff",
+                boxShadow: "0 6px 14px rgba(239, 68, 68, 0.35)",
+              }}
+              aria-label={`${unreadCount} unread feed updates`}
+              title={`${unreadCount} unread feed updates`}
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
         </button>
       )}
 
@@ -108,7 +142,10 @@ const RightFeed = ({ theme, isDark, rightFeedOpen, setRightFeedOpen, feedItems, 
                   </button>
                 )}
                 <button
-                  onClick={() => navigate("/feed")}
+                  onClick={() => {
+                    onFeedOpened?.();
+                    navigate("/feed");
+                  }}
                   className="text-[10px] tracking-[0.2em] border px-2 py-1"
                   style={{ borderColor: theme.border, color: theme.textMuted }}
                 >
@@ -121,18 +158,18 @@ const RightFeed = ({ theme, isDark, rightFeedOpen, setRightFeedOpen, feedItems, 
               className="w-9 h-9 rounded-full flex items-center justify-center 
                 border-2 transition-colors duration-200"
               style={{
-                backgroundColor: theme.accentSecondary,
-                borderColor: theme.borderStrong,
-                color: isDark ? theme.textMuted : theme.text
+                backgroundColor: minimizeButtonBaseBg,
+                borderColor: minimizeButtonBorder,
+                color: minimizeButtonIcon
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme.accent;
+                e.currentTarget.style.backgroundColor = minimizeButtonHoverBg;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = theme.accentSecondary;
+                e.currentTarget.style.backgroundColor = minimizeButtonBaseBg;
               }}
             >
-              <Minus className="w-4 h-4" style={{ color: isDark ? theme.textMuted : theme.text }} />
+              <Minus className="w-4 h-4" style={{ color: minimizeButtonIcon }} />
             </button>
           </div>
 

@@ -119,7 +119,7 @@ export default function FAQ({ theme, isDark, bgColor }) {
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-10 md:mb-12">
-          <h2 className="text-3xl sm:text-5xl md:text-7xl font-light tracking-tight leading-tight mb-8 md:mb-12 relative inline-block">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-light tracking-tight leading-tight mb-8 md:mb-12 relative inline-block">
             <span 
               className="gradient-text"
               style={{

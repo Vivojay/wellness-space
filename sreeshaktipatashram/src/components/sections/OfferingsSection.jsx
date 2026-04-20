@@ -1,21 +1,25 @@
 import React from "react";
 
+import readImage from "@/assets/images/TIJ/read.jpg";
+import reflectImage from "@/assets/images/TIJ/reflect.jpg";
+import realizeImage from "@/assets/images/TIJ/realize.jpg";
+
 const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
   const offerings = [
     { 
       title: 'Read', 
       desc: 'Read and understand why this path is called Siddha Maha Yoga. Download all information freely. Click here for free PDFs, Audio Books and Videos.', 
-      img: 'photo-1506126613408-eca07ce68773' 
+      img: readImage 
     },
     { 
       title: 'Reflect', 
       desc: 'Contemplate on the profound yet, simple nature of this Yoga path.', 
-      img: 'photo-1599901860904-17e6ed7083a0' 
+      img: reflectImage 
     },
     { 
       title: 'Realize', 
       desc: 'You will quickly learn that this path of Yoga is very unique!. Shaktipat initiation is free. Click here to contact Shaktipat Guru Vartika Shukla in our lineage.', 
-      img: 'photo-1544367567-0f2fcb009e0b' 
+      img: realizeImage 
     }
   ];
 
@@ -77,7 +81,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
               <div className="group relative h-[340px] sm:h-[400px] lg:h-[450px] w-full overflow-hidden">
                 {/* Image */}
                 <img
-                  src={`https://images.unsplash.com/${item.img}?w=600&h=800&fit=crop&q=80`}
+                  src={item.img}
                   alt={item.title}
                   className="absolute inset-0 w-full h-full object-cover hover-zoom"
                   style={{ filter: 'contrast(0.95) saturate(0.9)' }}

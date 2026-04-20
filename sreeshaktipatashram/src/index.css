@@ -34,6 +34,16 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+input.show-number-spin[type="number"] {
+  -moz-appearance: auto;
+}
+
+input.show-number-spin[type="number"]::-webkit-outer-spin-button,
+input.show-number-spin[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: auto;
+  margin: 0;
+}
+
 
 html, body, #root {
   height: 100%;
@@ -88,19 +98,51 @@ body {
   transform: scale(1);
 }
 
-.group:hover .hover-zoom {
-  transform: scale(1.05);
-}
-
 .hover-underline {
   width: 0;
   opacity: 0;
   transition: width 0.5s ease, opacity 0.5s ease;
 }
 
-.group:hover .hover-underline {
-  width: 6rem;
-  opacity: 1;
+.lineage-card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lineage-overlay {
+  transition: background 0.35s ease;
+}
+
+.lineage-highlight {
+  border: 1px solid transparent;
+  opacity: 0;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .hover-zoom {
+    transform: scale(1.05);
+  }
+
+  .group:hover .hover-underline {
+    width: 6rem;
+    opacity: 1;
+  }
+
+  .lineage-card:hover .lineage-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.96) 0%,
+      rgba(0, 0, 0, 0.86) 24%,
+      rgba(0, 0, 0, 0.58) 34%,
+      rgba(0, 0, 0, 0.14) 44%,
+      rgba(0, 0, 0, 0) 54%
+    );
+  }
+
+  .lineage-card:hover .lineage-highlight {
+    opacity: 1;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 18px 42px rgba(0, 0, 0, 0.28);
+  }
 }
 
 .nav-underline {
@@ -112,4 +154,42 @@ body {
 .group:hover .nav-underline {
   width: 100%;
   opacity: 1;
+}
+
+@keyframes joinusRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes joinusPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.joinus-btn__trace::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 300deg,
+    var(--joinus-trace-soft) 324deg,
+    var(--joinus-trace) 346deg,
+    transparent 360deg
+  );
+  animation: joinusRotate 3.2s linear infinite, joinusPulse 1.8s ease-in-out infinite;
+}
+
+.joinus-btn__trace::before {
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
 }

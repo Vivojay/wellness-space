@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { CheckCircle2, ChevronLeft, Heart, QrCode } from "lucide-react";
+import { ChevronDown, ChevronLeft, QrCode } from "lucide-react";
 import { Country } from "country-state-city";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -36,19 +36,27 @@ function formatLocalDate() {
   }).format(new Date());
 }
 
-function sanitizeAmountInput(value) {
-  const cleaned = String(value || "").replace(/[^\d.]/g, "");
-  const [whole = "", ...rest] = cleaned.split(".");
-  if (!rest.length) return whole;
-  return `${whole}.${rest.join("").slice(0, 2)}`;
+function normalizeAmountString(value) {
+  const text = String(value || "").trim();
+  if (!text || !AMOUNT_REGEX.test(text)) return text;
+  const numeric = Number(text);
+  if (!Number.isFinite(numeric) || numeric < 1) return text;
+  return numeric.toFixed(2);
 }
 
-function normalizeAmountString(value) {
-  const amount = String(value || "").trim();
-  if (!amount || !AMOUNT_REGEX.test(amount)) return amount;
-  const numeric = Number(amount);
-  if (!Number.isFinite(numeric) || numeric <= 0) return amount;
-  return numeric.toFixed(2);
+function statusLabel(value) {
+  return STATUS_OPTIONS.find((item) => item.value === value)?.label || "--";
+}
+
+function MandatoryLabel({ children, theme }) {
+  return (
+    <span className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
+      <span className="mr-1" style={{ color: "#b91c1c" }} aria-hidden>
+        *
+      </span>
+      {children}
+    </span>
+  );
 }
 
 export default function DonatePage() {
@@ -56,6 +64,8 @@ export default function DonatePage() {
 
   const [step, setStep] = useState("form");
   const [form, setForm] = useState(INITIAL_FORM);
+  const [countryQuery, setCountryQuery] = useState("");
+  const [countryOpen, setCountryOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -63,6 +73,8 @@ export default function DonatePage() {
   const [declarationDate] = useState(() => formatLocalDate());
   const [qrAuditDeclarationId, setQrAuditDeclarationId] = useState("");
   const [qrAuditError, setQrAuditError] = useState("");
+
+  const countryContainerRef = useRef(null);
 
   const clientTimezone = useMemo(() => {
     try {
@@ -84,10 +96,10 @@ export default function DonatePage() {
   }, [countries]);
 
   const filteredCountries = useMemo(() => {
-    const search = form.country.trim().toLowerCase();
-    if (!search) return countries.slice(0, 120);
-    return countries.filter((country) => country.toLowerCase().includes(search)).slice(0, 120);
-  }, [countries, form.country]);
+    const query = countryQuery.trim().toLowerCase();
+    if (!query) return countries.slice(0, 120);
+    return countries.filter((country) => country.toLowerCase().includes(query)).slice(0, 120);
+  }, [countries, countryQuery]);
 
   const scrollToTop = () => {
     const scrollContainer = document.getElementById("app-scroll");
@@ -106,20 +118,20 @@ export default function DonatePage() {
     scrollToTop();
   }, [step]);
 
-  const updateField = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-    setSubmitError("");
-  };
+  useEffect(() => {
+    const onPointerDown = (event) => {
+      if (!countryContainerRef.current?.contains(event.target)) {
+        setCountryOpen(false);
+      }
+    };
 
-  const handleAmountBlur = () => {
-    const normalized = normalizeAmountString(form.amount);
-    if (normalized && normalized !== form.amount) {
-      updateField("amount", normalized);
-    }
-  };
-
-  const declarationAmountPreview = normalizeAmountString(form.amount) || "[Amount]";
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+    };
+  }, []);
 
   useEffect(() => {
     if (step !== "qr") return;
@@ -156,35 +168,32 @@ export default function DonatePage() {
     };
   }, [clientTimezone, declarationDate, intentData, qrAuditDeclarationId, step]);
 
-  const handleEditDeclaration = async () => {
-    if (intentData?.declaration_id) {
-      try {
-        await createDonationDeclarationAudit({
-          declaration_id: intentData.declaration_id,
-          event: "qr_refresh_requested",
-          amount: intentData.amount,
-          declaration_date_local: declarationDate,
-          client_timezone: clientTimezone,
-          notes: "User switched from QR page back to declaration form",
-        });
-      } catch {
-        // non-blocking
-      }
-    }
-    setStep("form");
+  const updateField = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    setSubmitError("");
   };
 
-  const normalizeCountry = (value) => {
-    const normalized = countriesByLowercase.get(value.trim().toLowerCase());
-    return normalized || value.trim();
+  const selectCountry = (country) => {
+    setCountryQuery(country);
+    updateField("country", country);
+    setCountryOpen(false);
   };
+
+  const handleAmountBlur = () => {
+    const normalized = normalizeAmountString(form.amount);
+    if (normalized && normalized !== form.amount) {
+      updateField("amount", normalized);
+    }
+  };
+
+  const declarationAmountPreview = normalizeAmountString(form.amount) || "[Amount]";
 
   const validateForm = () => {
     const errors = {};
-    const amount = form.amount.trim();
+    const amount = String(form.amount || "").trim();
     const parsedAmount = Number(amount);
-    const country = form.country.trim();
-    const normalizedCountry = countriesByLowercase.get(country.toLowerCase());
+    const normalizedCountry = countriesByLowercase.get(String(form.country || "").trim().toLowerCase());
 
     if (!form.donorName.trim()) {
       errors.donorName = "Donor name is required.";
@@ -194,28 +203,24 @@ export default function DonatePage() {
       errors.amount = "Donation amount is required.";
     } else if (!AMOUNT_REGEX.test(amount)) {
       errors.amount = "Enter a valid INR amount with up to 2 decimals.";
-    } else if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-      errors.amount = "Amount must be greater than zero.";
+    } else if (!Number.isFinite(parsedAmount) || parsedAmount < 1) {
+      errors.amount = "Amount must be at least INR 1.";
     }
 
     if (!form.residentialStatus) {
       errors.residentialStatus = "Select one residential status.";
     }
 
-    if (!country) {
+    if (!form.country.trim()) {
       errors.country = "Country is required.";
     } else if (!normalizedCountry) {
-      errors.country = "Choose a country from the searchable list.";
+      errors.country = "Select a valid country from the dropdown list.";
     }
 
     if (!form.email.trim()) {
       errors.email = "Email is required.";
     } else if (!EMAIL_REGEX.test(form.email.trim())) {
       errors.email = "Enter a valid email address.";
-    }
-
-    if (!form.details.trim()) {
-      errors.details = "Details field is required.";
     }
 
     if (!form.confirmLegalIncome) {
@@ -233,7 +238,7 @@ export default function DonatePage() {
 
     return {
       errors,
-      normalizedCountry: normalizedCountry || normalizeCountry(country),
+      normalizedCountry: normalizedCountry || form.country.trim(),
     };
   };
 
@@ -246,7 +251,7 @@ export default function DonatePage() {
       return;
     }
 
-    const normalizedAmount = Number(form.amount.trim()).toFixed(2);
+    const normalizedAmount = Number(form.amount).toFixed(2);
     const payload = {
       donor_name: form.donorName.trim(),
       amount: normalizedAmount,
@@ -287,6 +292,24 @@ export default function DonatePage() {
     }
   };
 
+  const handleEditDeclaration = async () => {
+    if (intentData?.declaration_id) {
+      try {
+        await createDonationDeclarationAudit({
+          declaration_id: intentData.declaration_id,
+          event: "qr_refresh_requested",
+          amount: intentData.amount,
+          declaration_date_local: declarationDate,
+          client_timezone: clientTimezone,
+          notes: "User switched from QR page back to declaration form",
+        });
+      } catch {
+        // non-blocking
+      }
+    }
+    setStep("form");
+  };
+
   return (
     <section
       className="min-h-screen px-4 sm:px-6 md:px-24 pt-24 md:pt-32 pb-16 md:pb-24 relative overflow-hidden"
@@ -299,7 +322,7 @@ export default function DonatePage() {
         }}
       />
 
-      <div className="relative z-10 max-w-4xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <div className="text-center">
           <p className="text-[11px] tracking-[0.4em] uppercase" style={{ color: theme.textMuted }}>
             Donate
@@ -313,316 +336,363 @@ export default function DonatePage() {
           </h1>
 
           <p className="mt-6 text-sm sm:text-base leading-relaxed" style={{ color: theme.textSecondary }}>
-            Please complete the donation declaration first. Once submitted, your personalized Google Pay QR
-            will be generated for the declared amount.
+            Please complete the declaration first. Once submitted, your personalized Google Pay QR will be
+            generated for the declared amount.
           </p>
         </div>
 
-        {step === "form" ? (
-          <form
-            onSubmit={handleDeclarationSubmit}
-            className="mt-10 sm:mt-12 max-w-3xl mx-auto border p-5 sm:p-8"
-            style={{
-              borderColor: theme.border,
-              backgroundColor: theme.colors.bg.card,
-              boxShadow: "0 22px 60px rgba(0, 0, 0, 0.14)",
-            }}
+        <div className="mt-7 flex flex-wrap justify-center items-center gap-3">
+          <div
+            className="inline-flex items-center gap-2 border px-3 py-2"
+            style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.card, color: theme.textMuted }}
           >
-            <div className="flex items-center justify-center gap-3 mb-7">
-              <div
-                className="w-10 h-10 flex items-center justify-center border"
-                style={{ borderColor: theme.accent, color: theme.accent }}
-              >
-                <Heart className="w-5 h-5" />
-              </div>
-              <p className="text-xs tracking-[0.25em] uppercase" style={{ color: theme.textMuted }}>
-                Donation Declaration
-              </p>
-            </div>
+            <span className="text-[10px] tracking-[0.25em] uppercase">Date</span>
+            <span className="text-sm" style={{ color: theme.text }}>
+              {declarationDate}
+            </span>
+          </div>
+          <div
+            className="inline-flex items-center gap-2 border px-3 py-2"
+            style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.card, color: theme.textMuted }}
+          >
+            <img src="/photos/logo_gpay.png" alt="Google Pay" className="w-4 h-4 object-contain" />
+            <span className="text-[11px]">Google Pay Secured Flow</span>
+          </div>
+        </div>
 
-            <div
-              className="border p-4 mb-6 text-sm leading-relaxed"
-              style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary, color: theme.textSecondary }}
-            >
-              I, <strong style={{ color: theme.text }}>{form.donorName.trim() || "[Donor Name]"}</strong>, hereby
-              declare that I am voluntarily contributing an amount of INR{" "}
-              <strong style={{ color: theme.text }}>{declarationAmountPreview}</strong> to{" "}
-              <strong style={{ color: theme.text }}>SIDDHA MAHAYOGA FOUNDATION</strong>, a registered non-profit
-              organization in India.
-            </div>
-
-            <div className="space-y-5">
-              <div>
-                <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
-                  Donor Name
-                </label>
-                <input
-                  type="text"
-                  value={form.donorName}
-                  onChange={(e) => updateField("donorName", e.target.value)}
-                  className="w-full border px-4 py-3 text-sm bg-transparent outline-none"
-                  style={{ borderColor: theme.border, color: theme.text }}
-                  placeholder="Enter full name"
-                />
-                {fieldErrors.donorName && (
-                  <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.donorName}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
-                  Amount (INR)
-                </label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={form.amount}
-                  onChange={(e) => updateField("amount", sanitizeAmountInput(e.target.value))}
-                  onBlur={handleAmountBlur}
-                  className="w-full border px-4 py-3 text-sm bg-transparent outline-none"
-                  style={{ borderColor: theme.border, color: theme.text }}
-                  placeholder="100.00"
-                />
-                {fieldErrors.amount && (
-                  <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.amount}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <p className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
-                  Residential Status
-                </p>
-                <div className="space-y-2">
-                  {STATUS_OPTIONS.map((option) => {
-                    const selected = form.residentialStatus === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => updateField("residentialStatus", option.value)}
-                        className="w-full border px-4 py-3 flex items-center justify-between text-left"
-                        style={{
-                          borderColor: selected ? theme.accent : theme.border,
-                          backgroundColor: selected ? `${theme.accent}12` : "transparent",
-                          color: theme.text,
-                        }}
-                      >
-                        <span className="text-sm">{option.label}</span>
-                        <span
-                          className="w-4 h-4 border flex items-center justify-center"
-                          style={{
-                            borderColor: selected ? theme.accent : theme.border,
-                            color: selected ? theme.accent : "transparent",
-                          }}
-                        >
-                          <CheckCircle2 className="w-3 h-3" />
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {fieldErrors.residentialStatus && (
-                  <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.residentialStatus}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
-                  Country of Residence
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={form.country}
-                    onChange={(e) => updateField("country", e.target.value)}
-                    list="donation-country-options"
-                    className="w-full border px-4 py-3 pr-10 text-sm bg-transparent outline-none"
-                    style={{ borderColor: theme.border, color: theme.text }}
-                    placeholder="Search country"
-                    autoComplete="off"
-                  />
-                  <ChevronLeft
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rotate-[-90deg] w-4 h-4"
-                    style={{ color: theme.textMuted }}
-                  />
-                </div>
-                <datalist id="donation-country-options">
-                  {filteredCountries.map((country) => (
-                    <option key={country} value={country} />
-                  ))}
-                </datalist>
-                {fieldErrors.country && (
-                  <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.country}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
-                  Donor Email
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => updateField("email", e.target.value)}
-                  className="w-full border px-4 py-3 text-sm bg-transparent outline-none"
-                  style={{ borderColor: theme.border, color: theme.text }}
-                  placeholder="name@example.com"
-                />
-                {fieldErrors.email && (
-                  <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.email}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
-                  Date
-                </label>
-                <input
-                  type="text"
-                  value={declarationDate}
-                  readOnly
-                  className="w-full border px-4 py-3 text-sm bg-transparent outline-none"
-                  style={{ borderColor: theme.border, color: theme.textMuted }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
-                  Details
-                </label>
-                <textarea
-                  value={form.details}
-                  onChange={(e) => updateField("details", e.target.value)}
-                  className="w-full border px-4 py-3 text-sm bg-transparent outline-none min-h-[100px]"
-                  style={{ borderColor: theme.border, color: theme.text }}
-                  placeholder="Mention any additional declaration details"
-                />
-                {fieldErrors.details && (
-                  <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.details}
-                  </p>
-                )}
-              </div>
-
-              <div
-                className="border p-4 space-y-3"
-                style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary }}
-              >
-                <p className="text-xs tracking-[0.2em] uppercase" style={{ color: theme.textMuted }}>
-                  Mandatory Declarations
-                </p>
-
-                <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
-                  <input
-                    type="checkbox"
-                    checked={form.confirmLegalIncome}
-                    onChange={(e) => updateField("confirmLegalIncome", e.target.checked)}
-                    className="mt-1"
-                  />
-                  <span>
-                    The funds being donated are from my personal/legal income.
-                    <span className="ml-1" style={{ color: "#b91c1c" }} aria-hidden>
-                      *
-                    </span>
-                  </span>
-                </label>
-                {fieldErrors.confirmLegalIncome && (
-                  <p className="text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.confirmLegalIncome}
-                  </p>
-                )}
-
-                <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
-                  <input
-                    type="checkbox"
-                    checked={form.confirmVoluntary}
-                    onChange={(e) => updateField("confirmVoluntary", e.target.checked)}
-                    className="mt-1"
-                  />
-                  <span>
-                    The donation is made voluntarily without coercion or personal benefit expectation.
-                    <span className="ml-1" style={{ color: "#b91c1c" }} aria-hidden>
-                      *
-                    </span>
-                  </span>
-                </label>
-                {fieldErrors.confirmVoluntary && (
-                  <p className="text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.confirmVoluntary}
-                  </p>
-                )}
-
-                <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
-                  <input
-                    type="checkbox"
-                    checked={form.confirmCharitableUse}
-                    onChange={(e) => updateField("confirmCharitableUse", e.target.checked)}
-                    className="mt-1"
-                  />
-                  <span>
-                    I understand this donation will be used solely for charitable purposes.
-                    <span className="ml-1" style={{ color: "#b91c1c" }} aria-hidden>
-                      *
-                    </span>
-                  </span>
-                </label>
-                {fieldErrors.confirmCharitableUse && (
-                  <p className="text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.confirmCharitableUse}
-                  </p>
-                )}
-
-                <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
-                  <input
-                    type="checkbox"
-                    checked={form.acknowledgeFcra}
-                    onChange={(e) => updateField("acknowledgeFcra", e.target.checked)}
-                    className="mt-1"
-                  />
-                  <span>
-                    I acknowledge compliance with applicable laws, including FCRA where applicable.
-                    <span className="ml-1" style={{ color: "#b91c1c" }} aria-hidden>
-                      *
-                    </span>
-                  </span>
-                </label>
-                {fieldErrors.acknowledgeFcra && (
-                  <p className="text-xs" style={{ color: "#b91c1c" }}>
-                    {fieldErrors.acknowledgeFcra}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {submitError && (
-              <p className="mt-5 text-sm" style={{ color: "#b91c1c" }}>
-                {submitError}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="mt-6 w-full border px-6 py-3 text-sm tracking-[0.2em] uppercase transition-colors"
+        {step === "form" ? (
+          <div className="mt-10 grid xl:grid-cols-[minmax(300px,0.95fr)_minmax(0,1.15fr)] gap-6 items-start">
+            <aside
+              className="border p-5 sm:p-6 xl:sticky xl:top-28"
               style={{
-                borderColor: theme.accent,
-                color: theme.text,
-                backgroundColor: submitting ? `${theme.accent}22` : `${theme.accent}14`,
+                borderColor: theme.border,
+                backgroundColor: theme.colors.bg.card,
+                boxShadow: "0 12px 40px rgba(0, 0, 0, 0.12)",
               }}
             >
-              {submitting ? "Generating QR..." : "Submit Declaration & Continue"}
-            </button>
-          </form>
+              <p className="text-xs tracking-[0.22em] uppercase" style={{ color: theme.textMuted }}>
+                Donation Declaration
+              </p>
+              <p className="mt-1 text-[11px]" style={{ color: theme.textMuted }}>
+                Optional live preview
+              </p>
+
+              <div
+                className="mt-4 border p-4 text-sm leading-relaxed"
+                style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary, color: theme.textSecondary }}
+              >
+                I, <strong style={{ color: theme.text }}>{form.donorName.trim() || "[Donor Name]"}</strong>, hereby
+                declare that I am voluntarily contributing an amount of INR{" "}
+                <strong style={{ color: theme.text }}>{declarationAmountPreview}</strong> to{" "}
+                <strong style={{ color: theme.text }}>SIDDHA MAHAYOGA FOUNDATION</strong>, a registered non-profit
+                organization in India.
+              </div>
+
+              <div className="mt-4 space-y-2 text-xs" style={{ color: theme.textMuted }}>
+                <p>
+                  <span style={{ color: "#b91c1c" }} aria-hidden>
+                    *
+                  </span>{" "}
+                  Mandatory fields and declarations required.
+                </p>
+                <p>Country selection must be from dropdown list.</p>
+              </div>
+            </aside>
+
+            <form
+              onSubmit={handleDeclarationSubmit}
+              className="relative border p-5 sm:p-8"
+              style={{
+                borderColor: theme.border,
+                backgroundColor: theme.colors.bg.card,
+                boxShadow: "0 22px 60px rgba(0, 0, 0, 0.14)",
+              }}
+            >
+              <div className="hidden lg:block absolute -top-3 -left-3 border px-2 py-1" style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary }}>
+                <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: theme.textMuted }}>
+                  <img src="/photos/logo_gpay.png" alt="Google Pay" className="w-3.5 h-3.5 object-contain" />
+                  Google Pay
+                </span>
+              </div>
+              <div className="hidden lg:block absolute -top-3 -right-3 border px-2 py-1" style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary }}>
+                <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: theme.textMuted }}>
+                  <img src="/photos/logo_gpay.png" alt="Google Pay" className="w-3.5 h-3.5 object-contain" />
+                  Trusted
+                </span>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <MandatoryLabel theme={theme}>Donor Name</MandatoryLabel>
+                  <input
+                    type="text"
+                    value={form.donorName}
+                    onChange={(e) => updateField("donorName", e.target.value)}
+                    className="w-full border px-4 py-3 text-sm bg-transparent outline-none"
+                    style={{ borderColor: theme.border, color: theme.text }}
+                    placeholder="Enter full name"
+                  />
+                  {fieldErrors.donorName && (
+                    <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.donorName}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <MandatoryLabel theme={theme}>Amount (INR)</MandatoryLabel>
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={form.amount}
+                    onChange={(e) => updateField("amount", e.target.value)}
+                    onBlur={handleAmountBlur}
+                    className="show-number-spin w-full border px-4 py-3 text-sm bg-transparent outline-none"
+                    style={{ borderColor: theme.border, color: theme.text }}
+                    placeholder="100.00"
+                  />
+                  {fieldErrors.amount && (
+                    <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.amount}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <MandatoryLabel theme={theme}>Residential Status</MandatoryLabel>
+                  <div className="space-y-2">
+                    {STATUS_OPTIONS.map((option) => {
+                      const checked = form.residentialStatus === option.value;
+                      return (
+                        <label
+                          key={option.value}
+                          className="w-full border px-4 py-3 flex items-center gap-3"
+                          style={{
+                            borderColor: checked ? theme.accent : theme.border,
+                            backgroundColor: checked ? `${theme.accent}12` : "transparent",
+                            color: theme.text,
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="residentialStatus"
+                            value={option.value}
+                            checked={checked}
+                            onChange={(e) => updateField("residentialStatus", e.target.value)}
+                            className="accent-red-700"
+                          />
+                          <span className="text-sm">{option.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {fieldErrors.residentialStatus && (
+                    <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.residentialStatus}
+                    </p>
+                  )}
+                </div>
+
+                <div ref={countryContainerRef}>
+                  <MandatoryLabel theme={theme}>Country of Residence</MandatoryLabel>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={countryQuery}
+                      onFocus={() => setCountryOpen(true)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCountryQuery(value);
+                        updateField("country", value);
+                        setCountryOpen(true);
+                      }}
+                      className="w-full border px-4 py-3 pr-10 text-sm bg-transparent outline-none"
+                      style={{ borderColor: theme.border, color: theme.text }}
+                      placeholder="Search and select country"
+                      autoComplete="off"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCountryOpen((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                      style={{ color: theme.textMuted }}
+                      aria-label="Toggle country options"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    {countryOpen && (
+                      <div
+                        className="absolute z-40 mt-1 w-full max-h-56 overflow-y-auto border"
+                        style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.card }}
+                      >
+                        {filteredCountries.length ? (
+                          filteredCountries.map((country) => (
+                            <button
+                              key={country}
+                              type="button"
+                              onClick={() => selectCountry(country)}
+                              className="w-full px-4 py-2 text-left text-sm"
+                              style={{ color: theme.text }}
+                            >
+                              {country}
+                            </button>
+                          ))
+                        ) : (
+                          <p className="px-4 py-3 text-sm" style={{ color: theme.textMuted }}>
+                            No country found for this search.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {fieldErrors.country && (
+                    <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.country}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <MandatoryLabel theme={theme}>Email (for correspondence)</MandatoryLabel>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    className="w-full border px-4 py-3 text-sm bg-transparent outline-none"
+                    style={{ borderColor: theme.border, color: theme.text }}
+                    placeholder="name@example.com"
+                  />
+                  {fieldErrors.email && (
+                    <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.email}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <span className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: theme.textMuted }}>
+                    Details (Optional)
+                  </span>
+                  <textarea
+                    value={form.details}
+                    onChange={(e) => updateField("details", e.target.value)}
+                    className="w-full border px-4 py-3 text-sm bg-transparent outline-none min-h-[100px]"
+                    style={{ borderColor: theme.border, color: theme.text }}
+                    placeholder="Mention any additional declaration details"
+                  />
+                </div>
+
+                <div
+                  className="border p-4 space-y-3"
+                  style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary }}
+                >
+                  <p className="text-xs tracking-[0.2em] uppercase" style={{ color: theme.textMuted }}>
+                    Mandatory Declarations
+                  </p>
+
+                  <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
+                    <input
+                      type="checkbox"
+                      checked={form.confirmLegalIncome}
+                      onChange={(e) => updateField("confirmLegalIncome", e.target.checked)}
+                      className="mt-1"
+                    />
+                    <span>
+                      <span className="mr-1" style={{ color: "#b91c1c" }} aria-hidden>
+                        *
+                      </span>
+                      The funds being donated are from my personal/legal income.
+                    </span>
+                  </label>
+                  {fieldErrors.confirmLegalIncome && (
+                    <p className="text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.confirmLegalIncome}
+                    </p>
+                  )}
+
+                  <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
+                    <input
+                      type="checkbox"
+                      checked={form.confirmVoluntary}
+                      onChange={(e) => updateField("confirmVoluntary", e.target.checked)}
+                      className="mt-1"
+                    />
+                    <span>
+                      <span className="mr-1" style={{ color: "#b91c1c" }} aria-hidden>
+                        *
+                      </span>
+                      The donation is made voluntarily without coercion or personal benefit expectation.
+                    </span>
+                  </label>
+                  {fieldErrors.confirmVoluntary && (
+                    <p className="text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.confirmVoluntary}
+                    </p>
+                  )}
+
+                  <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
+                    <input
+                      type="checkbox"
+                      checked={form.confirmCharitableUse}
+                      onChange={(e) => updateField("confirmCharitableUse", e.target.checked)}
+                      className="mt-1"
+                    />
+                    <span>
+                      <span className="mr-1" style={{ color: "#b91c1c" }} aria-hidden>
+                        *
+                      </span>
+                      I understand this donation will be used solely for charitable purposes.
+                    </span>
+                  </label>
+                  {fieldErrors.confirmCharitableUse && (
+                    <p className="text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.confirmCharitableUse}
+                    </p>
+                  )}
+
+                  <label className="flex items-start gap-3 text-sm" style={{ color: theme.textSecondary }}>
+                    <input
+                      type="checkbox"
+                      checked={form.acknowledgeFcra}
+                      onChange={(e) => updateField("acknowledgeFcra", e.target.checked)}
+                      className="mt-1"
+                    />
+                    <span>
+                      <span className="mr-1" style={{ color: "#b91c1c" }} aria-hidden>
+                        *
+                      </span>
+                      I acknowledge compliance with applicable laws, including FCRA where applicable.
+                    </span>
+                  </label>
+                  {fieldErrors.acknowledgeFcra && (
+                    <p className="text-xs" style={{ color: "#b91c1c" }}>
+                      {fieldErrors.acknowledgeFcra}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {submitError && (
+                <p className="mt-5 text-sm" style={{ color: "#b91c1c" }}>
+                  {submitError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="mt-6 w-full border px-6 py-3 text-sm tracking-[0.2em] uppercase transition-colors"
+                style={{
+                  borderColor: theme.accent,
+                  color: theme.text,
+                  backgroundColor: submitting ? `${theme.accent}22` : `${theme.accent}14`,
+                }}
+              >
+                {submitting ? "Generating QR..." : "Submit Declaration & Continue"}
+              </button>
+            </form>
+          </div>
         ) : (
           <div
             className="mt-10 sm:mt-12 max-w-2xl mx-auto border p-5 sm:p-8"
@@ -642,7 +712,10 @@ export default function DonatePage() {
                 </div>
                 <div>
                   <p className="text-xs tracking-[0.25em] uppercase" style={{ color: theme.textMuted }}>
-                    Google Pay QR
+                    <span className="inline-flex items-center gap-1">
+                      <img src="/photos/logo_gpay.png" alt="Google Pay" className="w-3.5 h-3.5 object-contain" />
+                      Google Pay QR
+                    </span>
                   </p>
                   <p className="text-sm" style={{ color: theme.textSecondary }}>
                     Declaration submitted successfully
@@ -692,8 +765,7 @@ export default function DonatePage() {
                 <strong style={{ color: theme.text }}>Donor:</strong> {intentData?.donor_name}
               </p>
               <p>
-                <strong style={{ color: theme.text }}>Status:</strong>{" "}
-                {STATUS_OPTIONS.find((item) => item.value === intentData?.residential_status)?.label}
+                <strong style={{ color: theme.text }}>Status:</strong> {statusLabel(intentData?.residential_status)}
               </p>
               <p>
                 <strong style={{ color: theme.text }}>Country:</strong> {intentData?.country}
@@ -705,8 +777,7 @@ export default function DonatePage() {
                 <strong style={{ color: theme.text }}>Date:</strong> {intentData?.declaration_date}
               </p>
               <p>
-                <strong style={{ color: theme.text }}>Timezone:</strong>{" "}
-                {intentData?.client_timezone || "Not available"}
+                <strong style={{ color: theme.text }}>Timezone:</strong> {intentData?.client_timezone || "Not available"}
               </p>
             </div>
 

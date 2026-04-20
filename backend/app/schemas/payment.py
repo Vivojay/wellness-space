@@ -134,8 +134,8 @@ class DonationDeclarationIntentCreate(BaseModel):
     @field_validator("amount")
     @classmethod
     def validate_amount(cls, value: Decimal):
-        if value <= Decimal("0"):
-            raise ValueError("Amount must be greater than zero")
+        if value < Decimal("1"):
+            raise ValueError("Amount must be at least INR 1")
         if value > Decimal("10000000"):
             raise ValueError("Amount is too large")
         return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -185,8 +185,8 @@ class DonationDeclarationAuditCreate(BaseModel):
             parsed = Decimal(str(value))
         except (InvalidOperation, ValueError, TypeError) as exc:
             raise ValueError("Amount must be a valid number") from exc
-        if parsed <= Decimal("0"):
-            raise ValueError("Amount must be greater than zero")
+        if parsed < Decimal("1"):
+            raise ValueError("Amount must be at least INR 1")
         return parsed.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     @field_validator("declaration_date_local", "client_timezone", "notes", mode="before")

@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 
 const CTASection = ({ theme, setCursorVariant, isDark, bgColor }) => {
-  const enterEase = "cubic-bezier(0.6, 0.05, 0.2, 0.95)";
-  const exitEase  = "cubic-bezier(0.8, 0, 0.3, 1)";
-  const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
+  const traceColor = isDark ? "rgba(94, 234, 212, 0.95)" : "rgba(191, 114, 73, 0.96)";
+  const traceSoft = isDark ? "rgba(94, 234, 212, 0.24)" : "rgba(191, 114, 73, 0.24)";
 
   return (
     <section 
@@ -15,14 +14,26 @@ const CTASection = ({ theme, setCursorVariant, isDark, bgColor }) => {
     >
       <div className="max-w-4xl mx-auto text-center">
         <h2 
-          className="text-6xl md:text-7xl font-light tracking-tight leading-tight mb-10"
+          className="text-3xl sm:text-4xl md:text-6xl font-light tracking-tight leading-tight mb-10"
           style={{
-            color: theme.text,
             fontFamily: "'Source Sans 3', sans-serif",
             fontWeight: 300
           }}
         >
-          Begin Your Journey
+          <span
+            className="gradient-text"
+            style={{
+              background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+              display: "inline-block",
+              fontFamily: "'Source Sans 3', sans-serif",
+              fontWeight: 300,
+              letterSpacing: "-0.02em",
+              paddingBottom: "2px",
+              lineHeight: "1.15",
+            }}
+          >
+            Begin Your Journey
+          </span>
         </h2>
         <p 
           className="text-lg font-light mb-12"
@@ -36,52 +47,27 @@ const CTASection = ({ theme, setCursorVariant, isDark, bgColor }) => {
 
         <button
           onMouseEnter={() => {
-            setHovered(true);
             setCursorVariant("hover");
           }}
           onMouseLeave={() => {
-            setHovered(false);
             setCursorVariant("default");
           }}
-          className="relative px-16 py-5 hover:scale-105 transition-transform duration-300"
+          className="joinus-btn relative px-16 py-5 hover:scale-105 transition-transform duration-300 overflow-hidden"
           style={{ 
-            border: "none", 
+            border: `1px solid ${isDark ? theme.accentSecondary : "#4a2c1f"}`,
             outline: "none",
             backgroundColor: theme.accent + '40',
             fontFamily: "'Source Sans 3', sans-serif"
           }}
           onClick={() => navigate("/booking")}
         >
-          {/* SVG BORDER using pathLength */}
-          <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 100 40"
-            preserveAspectRatio="none"
+          <span
+            className="joinus-btn__trace absolute inset-0 pointer-events-none"
             style={{
-              position: "absolute",
-              inset: 0,
-              pointerEvents: "none",
+              "--joinus-trace": traceColor,
+              "--joinus-trace-soft": traceSoft,
             }}
-          >
-            <rect
-              x="0"
-              y="0"
-              width="100"
-              height="40"
-              fill="none"
-              stroke={isDark ? theme.accentSecondary : "#4a2c1f"}
-              strokeWidth="2"
-              pathLength="1"
-              strokeDasharray="1"
-              strokeDashoffset={hovered ? 0 : 1}
-              style={{
-                transition: `stroke-dashoffset 600ms ${
-                  hovered ? enterEase : exitEase
-                }`,
-              }}
-            />
-          </svg>
+          />
 
           <span 
             className="relative z-10 tracking-[0.2em] text-sm"

@@ -79,3 +79,21 @@ export async function fetchFeed({ force = false, limit = 10, page = 1 } = {}) {
   touchPageCache(page, data, now);
   return { items: Array.isArray(data) ? data : [], page, total: data?.length ?? 0, total_pages: 1 };
 }
+
+export async function fetchFeedMeta({ since } = {}) {
+  const params = new URLSearchParams();
+  if (since) {
+    params.set("since", String(since));
+  }
+  const suffix = params.toString() ? `?${params.toString()}` : "";
+  const res = await fetch(`${API_URL}/meta${suffix}`);
+  if (!res.ok) {
+    throw new Error("Failed to load feed metadata");
+  }
+  const data = await res.json();
+  return {
+    latest_cursor: data?.latest_cursor || null,
+    unread_count: Number(data?.unread_count || 0),
+    total_published: Number(data?.total_published || 0),
+  };
+}
