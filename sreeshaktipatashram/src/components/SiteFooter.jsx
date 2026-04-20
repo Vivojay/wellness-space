@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { FaInstagram, FaFacebook, FaYoutube } from "react-icons/fa";
 
 export default function SiteFooter({ theme, zIndex = 20 }) {
   const [visitCount, setVisitCount] = useState(null);
@@ -9,6 +8,8 @@ export default function SiteFooter({ theme, zIndex = 20 }) {
     if (!counterUrl || typeof window === "undefined") return;
 
     const host = window.location.hostname;
+    if (import.meta.env.DEV || host === "localhost" || host === "127.0.0.1") return;
+
     const controller = new AbortController();
 
     fetch(`${counterUrl}/count?host=${encodeURIComponent(host)}`, {
@@ -73,22 +74,19 @@ export default function SiteFooter({ theme, zIndex = 20 }) {
                 {
                   name: "Instagram",
                   href: "https://www.instagram.com/vartikashukla_siddhamahayoga",
-                  Icon: FaInstagram,
                   hoverBg: "linear-gradient(135deg, rgba(254, 218, 117, 0.35) 0%, rgba(250, 126, 30, 0.3) 30%, rgba(214, 41, 118, 0.3) 55%, rgba(150, 47, 191, 0.3) 78%, rgba(79, 91, 213, 0.3) 100%)"
                 },
                 {
                   name: "Facebook",
                   href: "https://www.facebook.com/sreeshaktipatashram",
-                  Icon: FaFacebook,
                   hoverBg: "linear-gradient(135deg, rgba(24, 119, 242, 0.35) 0%, rgba(66, 165, 255, 0.28) 55%, rgba(123, 196, 255, 0.26) 100%)"
                 },
                 {
                   name: "YouTube",
                   href: "https://www.youtube.com/@sreeshaktipatashram3633",
-                  Icon: FaYoutube,
                   hoverBg: "linear-gradient(135deg, rgba(255, 59, 48, 0.35) 0%, rgba(255, 0, 0, 0.3) 45%, rgba(176, 0, 0, 0.28) 100%)"
                 }
-              ].map(({ name, href, Icon, hoverBg }, idx) => {
+              ].map(({ name, href, hoverBg }, idx) => {
                 const isGradientIcon = ["Instagram", "Facebook", "YouTube"].includes(name);
                 const gradientStops = {
                   Instagram: [
@@ -136,34 +134,30 @@ export default function SiteFooter({ theme, zIndex = 20 }) {
                       e.currentTarget.style.backgroundColor = "transparent";
                     }}
                   >
-                    {isGradientIcon ? (
-                      <span className="relative w-5 h-5">
-                        <svg
-                          viewBox="0 0 448 512"
-                          className="absolute inset-0 w-5 h-5 opacity-85 transition-opacity duration-300 group-hover:opacity-0"
-                          aria-hidden
-                        >
-                          <path fill={theme.text} d={paths[name]} />
-                        </svg>
-                        <svg
-                          viewBox="0 0 448 512"
-                          className="absolute inset-0 w-5 h-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                          aria-hidden
-                        >
-                          <defs>
-                            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-                              {gradientStops[name].map((stop, index) => {
-                                const [color, offset] = stop.split(" ");
-                                return <stop key={index} offset={offset} stopColor={color} />;
-                              })}
-                            </linearGradient>
-                          </defs>
-                          <path fill={`url(#${gradientId})`} d={paths[name]} />
-                        </svg>
-                      </span>
-                    ) : (
-                      <Icon className="w-5 h-5 opacity-85" style={{ color: theme.text }} />
-                    )}
+                    <span className="relative w-5 h-5">
+                      <svg
+                        viewBox="0 0 448 512"
+                        className="absolute inset-0 w-5 h-5 opacity-85 transition-opacity duration-300 group-hover:opacity-0"
+                        aria-hidden
+                      >
+                        <path fill={theme.text} d={paths[name]} />
+                      </svg>
+                      <svg
+                        viewBox="0 0 448 512"
+                        className="absolute inset-0 w-5 h-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        aria-hidden
+                      >
+                        <defs>
+                          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                            {gradientStops[name].map((stop, index) => {
+                              const [color, offset] = stop.split(" ");
+                              return <stop key={index} offset={offset} stopColor={color} />;
+                            })}
+                          </linearGradient>
+                        </defs>
+                        <path fill={`url(#${gradientId})`} d={paths[name]} />
+                      </svg>
+                    </span>
                   </a>
                 );
               })}

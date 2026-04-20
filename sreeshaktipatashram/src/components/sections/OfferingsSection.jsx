@@ -100,7 +100,7 @@ const OfferingsSection = ({ theme, setCursorVariant, bgColor }) => {
                     }}
                     loading="lazy"
                     decoding="async"
-                    fetchPriority="low"
+                    fetchpriority="low"
                     sizes="(min-width: 1024px) 33vw, (min-width: 768px) 33vw, 100vw"
                   />
                 </picture>

@@ -259,7 +259,7 @@ const WellnessWebsite = () => {
                   }}
                   loading="lazy"
                   decoding="async"
-                  fetchPriority="low"
+                  fetchpriority="low"
                 />
               </div>
             </div>

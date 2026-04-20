@@ -1,4 +1,4 @@
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `ssa-static-${VERSION}`;
 const IMAGE_CACHE = `ssa-images-${VERSION}`;
 const PAGE_CACHE = `ssa-pages-${VERSION}`;
@@ -10,7 +10,7 @@ const PRECACHE_URLS = [
   "/photos/logo_gpay.png",
 ];
 
-const CACHEABLE_DESTINATIONS = new Set(["script", "style", "font"]);
+const CACHEABLE_DESTINATIONS = new Set(["font"]);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
