@@ -46,7 +46,7 @@ const LineageSection = ({ theme, bgColor }) => {
             <span 
               className="gradient-text"
               style={{
-                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.headingSecondary} 50%, ${theme.headingSecondary} 100%)`,
                 display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
@@ -78,12 +78,8 @@ const LineageSection = ({ theme, bgColor }) => {
                 className="lineage-overlay absolute inset-0"
                 style={{
                   background:
-                    "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.82) 24%, rgba(0,0,0,0.52) 36%, rgba(0,0,0,0.12) 46%, rgba(0,0,0,0) 56%)",
+                    "linear-gradient(to top, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.44) 24%, rgba(0,0,0,0.25) 36%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0) 62%)",
                 }}
-              />
-              <div
-                className="lineage-highlight absolute inset-0 pointer-events-none"
-                style={{ borderColor: theme.accent }}
               />
               <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
                 <p 

@@ -345,15 +345,23 @@ export default function FloatingUI(props) {
       {/* Theme Toggle */}
       <button
         onClick={() => setIsDark(!isDark)}
-        className="fixed right-8 top-8 z-[100] w-11 h-11 rounded-full backdrop-blur-xl 
+        className="fixed right-8 top-8 z-[1101] w-11 h-11 rounded-full backdrop-blur-xl 
           border flex items-center justify-center transition-all duration-300 hover:scale-110"
         style={{
           backgroundColor: theme.cardBg,
           borderColor: theme.border,
           color: theme.text
         }}
-        onMouseEnter={() => setCursorVariant('hover')}
-        onMouseLeave={() => setCursorVariant('default')}
+        onMouseEnter={(e) => {
+          setCursorVariant('hover');
+          e.currentTarget.style.backgroundColor = `${theme.accent}24`;
+          e.currentTarget.style.borderColor = theme.accent;
+        }}
+        onMouseLeave={(e) => {
+          setCursorVariant('default');
+          e.currentTarget.style.backgroundColor = theme.cardBg;
+          e.currentTarget.style.borderColor = theme.border;
+        }}
       >
         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       </button>
@@ -546,10 +554,13 @@ export default function FloatingUI(props) {
       <aside 
         ref={sidebarRef}
         className="fixed left-0 top-0 h-screen backdrop-blur-xl 
-          border-r transition-all duration-500 ease-out z-50"
+          border-r transition-all duration-500 ease-out z-[1050]"
         style={{ 
           width: sidebarExpanded ? '280px' : '0px', 
           opacity: sidebarExpanded ? 1 : 0,
+          pointerEvents: sidebarExpanded ? 'auto' : 'none',
+          overflow: 'hidden',
+          zIndex: sidebarExpanded ? 1050 : 40,
           backgroundColor: theme.sidebarBg,
           borderColor: theme.border
         }}
@@ -650,13 +661,23 @@ export default function FloatingUI(props) {
       <button 
         ref={hamburgerBtnRef} 
         onClick={() => setSidebarExpanded(!sidebarExpanded)}
-        className="fixed top-8 z-[60] w-11 h-11 rounded-full backdrop-blur-xl 
+        className="fixed top-8 z-[1100] w-11 h-11 rounded-full backdrop-blur-xl 
           border flex items-center justify-center transition-all duration-500"
         style={{ 
           left: sidebarExpanded ? '300px' : '32px',
           backgroundColor: theme.cardBg,
           borderColor: theme.border,
           color: theme.text
+        }}
+        onMouseEnter={(e) => {
+          setCursorVariant('hover');
+          e.currentTarget.style.backgroundColor = `${theme.accent}24`;
+          e.currentTarget.style.borderColor = theme.accent;
+        }}
+        onMouseLeave={(e) => {
+          setCursorVariant('default');
+          e.currentTarget.style.backgroundColor = theme.cardBg;
+          e.currentTarget.style.borderColor = theme.border;
         }}
       >
         <HamburgerIcon open={sidebarExpanded} />
@@ -667,7 +688,7 @@ export default function FloatingUI(props) {
         <button
           type="button"
           onClick={() => navigate("/donate")}
-          className="fixed bottom-8 left-8 z-[60] px-4 py-2 rounded-full border text-sm tracking-[0.12em] uppercase transition-all duration-300"
+          className="donate-pulse fixed bottom-8 left-8 z-[60] px-4 py-2 rounded-full border text-sm tracking-[0.12em] uppercase transition-all duration-300"
           style={{
             backgroundColor: theme.cardBg,
             borderColor: "#b91c1c",
@@ -676,10 +697,14 @@ export default function FloatingUI(props) {
             left: sidebarExpanded ? "320px" : "32px"
           }}
           onMouseEnter={(e) => {
+            setCursorVariant('hover');
             e.currentTarget.style.backgroundColor = "rgba(185, 28, 28, 0.12)";
+            e.currentTarget.style.boxShadow = "0 16px 34px rgba(185, 28, 28, 0.24)";
           }}
           onMouseLeave={(e) => {
+            setCursorVariant('default');
             e.currentTarget.style.backgroundColor = theme.cardBg;
+            e.currentTarget.style.boxShadow = "0 12px 30px rgba(185, 28, 28, 0.18)";
           }}
         >
           Donate

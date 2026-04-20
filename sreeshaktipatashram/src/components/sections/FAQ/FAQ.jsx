@@ -109,11 +109,11 @@ export default function FAQ({ theme, isDark, bgColor }) {
         scrollMarginTop: "128px",
       }}
     >
-      {/* Subtle RED accent overlay */}
+      {/* Subtle accent overlay */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse at bottom left, rgba(239, 68, 68, 0.03) 0%, transparent 50%)`,
+          background: `radial-gradient(ellipse at bottom left, ${theme.accent}1f 0%, transparent 54%)`,
         }}
       />
 
@@ -123,7 +123,7 @@ export default function FAQ({ theme, isDark, bgColor }) {
             <span 
               className="gradient-text"
               style={{
-                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.headingSecondary} 50%, ${theme.headingSecondary} 100%)`,
                 display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,

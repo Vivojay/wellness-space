@@ -3,23 +3,29 @@ import React from "react";
 import readImage from "@/assets/images/TIJ/read.jpg";
 import reflectImage from "@/assets/images/TIJ/reflect.jpg";
 import realizeImage from "@/assets/images/TIJ/realize.jpg";
+import readImageWebp from "@/assets/images/TIJ/read.webp";
+import reflectImageWebp from "@/assets/images/TIJ/reflect.webp";
+import realizeImageWebp from "@/assets/images/TIJ/realize.webp";
 
-const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
+const OfferingsSection = ({ theme, setCursorVariant, bgColor }) => {
   const offerings = [
     { 
       title: 'Read', 
       desc: 'Read and understand why this path is called Siddha Maha Yoga. Download all information freely. Click here for free PDFs, Audio Books and Videos.', 
-      img: readImage 
+      imgJpg: readImage,
+      imgWebp: readImageWebp,
     },
     { 
       title: 'Reflect', 
       desc: 'Contemplate on the profound yet, simple nature of this Yoga path.', 
-      img: reflectImage 
+      imgJpg: reflectImage,
+      imgWebp: reflectImageWebp,
     },
     { 
       title: 'Realize', 
       desc: 'You will quickly learn that this path of Yoga is very unique!. Shaktipat initiation is free. Click here to contact Shaktipat Guru Vartika Shukla in our lineage.', 
-      img: realizeImage 
+      imgJpg: realizeImage,
+      imgWebp: realizeImageWebp,
     }
   ];
 
@@ -32,11 +38,11 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
         scrollMarginTop: "128px",
       }}
     >
-      {/* Subtle RED accent overlay for this section */}
+      {/* Subtle accent overlay for this section */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse at top right, rgba(239, 68, 68, 0.03) 0%, transparent 50%)`,
+          background: `radial-gradient(ellipse at top right, ${theme.accent}1f 0%, transparent 54%)`,
         }}
       />
 
@@ -56,7 +62,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
             <span 
               className="gradient-text"
               style={{
-                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.headingSecondary} 50%, ${theme.headingSecondary} 100%)`,
                 display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
@@ -80,14 +86,24 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
             >
               <div className="group relative h-[340px] sm:h-[400px] lg:h-[450px] w-full overflow-hidden">
                 {/* Image */}
-                <img
-                  src={item.img}
-                  alt={item.title}
-                  className="absolute inset-0 w-full h-full object-cover hover-zoom"
-                  style={{ filter: 'contrast(0.95) saturate(0.9)' }}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <picture className="absolute inset-0 block w-full h-full">
+                  <source srcSet={item.imgWebp} type="image/webp" />
+                  <img
+                    src={item.imgJpg}
+                    alt={item.title}
+                    className="absolute inset-0 w-full h-full object-cover hover-zoom"
+                    style={{
+                      filter:
+                        idx === offerings.length - 1
+                          ? "contrast(0.95) saturate(0.9) brightness(1.12)"
+                          : "contrast(0.95) saturate(0.9)",
+                    }}
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 33vw, 100vw"
+                  />
+                </picture>
 
                 {/* Dark-to-transparent veil */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/70 to-transparent" />
@@ -120,7 +136,7 @@ const OfferingsSection = ({ theme, isDark, setCursorVariant, bgColor }) => {
 
                   <div
                     className="mt-5 h-[2px] hover-underline"
-                    style={{ backgroundColor: '#ef4444' }}
+                    style={{ backgroundColor: theme.accent }}
                   />
                 </div>
               </div>

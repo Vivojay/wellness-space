@@ -12,6 +12,7 @@ const RightFeed = ({
   feedItems,
   unreadCount = 0,
   onFeedOpened,
+  setCursorVariant,
   activeOverlay,
   setActiveOverlay,
   feedPanelRef,
@@ -25,10 +26,10 @@ const RightFeed = ({
   const [quickBusy, setQuickBusy] = useState(false);
   const [localItems, setLocalItems] = useState([]);
 
-  const minimizeButtonBaseBg = isDark ? "rgba(255, 255, 255, 0.92)" : theme.accentSecondary;
-  const minimizeButtonHoverBg = isDark ? "#ffffff" : theme.accent;
-  const minimizeButtonBorder = isDark ? "rgba(255, 255, 255, 0.98)" : theme.borderStrong;
-  const minimizeButtonIcon = isDark ? "#0f172a" : theme.text;
+  const minimizeButtonBaseBg = isDark ? "rgba(255, 255, 255, 0.92)" : "#000000";
+  const minimizeButtonHoverBg = isDark ? "#ffffff" : "#171717";
+  const minimizeButtonBorder = isDark ? "rgba(255, 255, 255, 0.98)" : "#000000";
+  const minimizeButtonIcon = isDark ? "#0f172a" : "#ffffff";
 
   useEffect(() => {
     if (feedRef.current) {
@@ -76,6 +77,16 @@ const RightFeed = ({
             zIndex: activeOverlay === "feed" ? 120 : 110 
           }}
           data-feed-trigger
+          onMouseEnter={(e) => {
+            setCursorVariant?.("hover");
+            e.currentTarget.style.backgroundColor = `${theme.accent}1f`;
+            e.currentTarget.style.borderColor = theme.accent;
+          }}
+          onMouseLeave={(e) => {
+            setCursorVariant?.("default");
+            e.currentTarget.style.backgroundColor = theme.cardBg;
+            e.currentTarget.style.borderColor = theme.border;
+          }}
         >
           <span 
             className="rotate-90 text-xs tracking-[0.3em]"
@@ -163,9 +174,11 @@ const RightFeed = ({
                 color: minimizeButtonIcon
               }}
               onMouseEnter={(e) => {
+                setCursorVariant?.("hover");
                 e.currentTarget.style.backgroundColor = minimizeButtonHoverBg;
               }}
               onMouseLeave={(e) => {
+                setCursorVariant?.("default");
                 e.currentTarget.style.backgroundColor = minimizeButtonBaseBg;
               }}
             >

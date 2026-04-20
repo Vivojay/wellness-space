@@ -79,7 +79,7 @@ class DonationDeclarationIntentCreate(BaseModel):
     residential_status: ResidentialStatus
     country: str
     email: EmailStr
-    details: str
+    details: Optional[str] = None
     declaration_date_local: Optional[str] = None
     client_timezone: Optional[str] = None
     confirm_legal_income: bool
@@ -87,7 +87,7 @@ class DonationDeclarationIntentCreate(BaseModel):
     confirm_charitable_use: bool
     acknowledge_fcra: bool
 
-    @field_validator("donor_name", "country", "details", mode="before")
+    @field_validator("donor_name", "country", mode="before")
     @classmethod
     def normalize_required_text(cls, value):
         if isinstance(value, str):
@@ -96,7 +96,7 @@ class DonationDeclarationIntentCreate(BaseModel):
             raise ValueError("This field is required")
         return value
 
-    @field_validator("declaration_date_local", "client_timezone", mode="before")
+    @field_validator("declaration_date_local", "client_timezone", "details", mode="before")
     @classmethod
     def normalize_optional_text(cls, value):
         if value is None:
@@ -136,6 +136,8 @@ class DonationDeclarationIntentCreate(BaseModel):
     def validate_amount(cls, value: Decimal):
         if value < Decimal("1"):
             raise ValueError("Amount must be at least INR 1")
+        if value != value.to_integral_value():
+            raise ValueError("Amount must be a whole-number INR value")
         if value > Decimal("10000000"):
             raise ValueError("Amount is too large")
         return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -187,6 +189,8 @@ class DonationDeclarationAuditCreate(BaseModel):
             raise ValueError("Amount must be a valid number") from exc
         if parsed < Decimal("1"):
             raise ValueError("Amount must be at least INR 1")
+        if parsed != parsed.to_integral_value():
+            raise ValueError("Amount must be a whole-number INR value")
         return parsed.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     @field_validator("declaration_date_local", "client_timezone", "notes", mode="before")

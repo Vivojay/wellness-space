@@ -1,36 +1,43 @@
-import { Menu, Minus, ArrowRight, Circle, Sun, Moon, MessageCircle, Send, X } from 'lucide-react';
-import { FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa';
-import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import Hero from "../components/sections/Hero";
-import RevealSection from "../components/sections/RevealSection";
-import LineageSection from "../components/sections/LineageSection";
-import OfferingsSection from "../components/sections/OfferingsSection";
-import TestimonialsSection from "../components/sections/TestimonialsSection";
-import CTASection from "../components/sections/CTASection";
+import LazyMount from "@/components/LazyMount";
 // import useLenisSmooth from "@/utils/lenisSmooth";
-import FAQ from "../components/sections/FAQ/FAQ";
 import { useOutletContext } from "react-router-dom";
+
+const RevealSection = lazy(() => import("../components/sections/RevealSection"));
+const LineageSection = lazy(() => import("../components/sections/LineageSection"));
+const OfferingsSection = lazy(() => import("../components/sections/OfferingsSection"));
+const TestimonialsSection = lazy(() => import("../components/sections/TestimonialsSection"));
+const CTASection = lazy(() => import("../components/sections/CTASection"));
+const FAQ = lazy(() => import("../components/sections/FAQ/FAQ"));
+
+const ABOUT_BG_IMAGE_URL =
+  "https://res.cloudinary.com/sidehustle-01/image/upload/f_auto,q_auto,w_1920/v1771367921/extended_bg_about_me_j7yco8.jpg";
+const ABOUT_PORTRAIT_URL =
+  "https://res.cloudinary.com/sidehustle-01/image/upload/f_auto,q_auto,w_900/v1771367922/IMG_20250512_143414_lxpoga.jpg";
+
+function SectionFallback({ bgColor, minHeight }) {
+  return <div className="w-full" style={{ minHeight, backgroundColor: bgColor }} aria-hidden />;
+}
+
+const FALLBACK_TESTIMONIALS = [
+  { author: "Ananya M.", text: "A profound transformation. The energy here is unlike anywhere else.", role: "Seeker" },
+  { author: "Rajesh K.", text: "Pure serenity. Every moment spent here deepens my practice.", role: "Practitioner" },
+  { author: "Priya S.", text: "Life-changing wisdom delivered with grace and compassion.", role: "Devotee" },
+  { author: "Vikram R.", text: "The sanctuary my soul was searching for.", role: "Wanderer" },
+  { author: "Meera D.", text: "Authentic spiritual guidance that resonates deeply within.", role: "Believer" },
+  { author: "Arjun P.", text: "A space where healing happens naturally and beautifully.", role: "Explorer" },
+];
 
 const WellnessWebsite = () => {
   const { isDark, theme, scrollProgress = 0 } = useOutletContext();
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-
   const [testimonials, setTestimonials] = useState([]);
-  const fallbackTestimonials = [
-    { author: 'Ananya M.', text: 'A profound transformation. The energy here is unlike anywhere else.', role: 'Seeker' },
-    { author: 'Rajesh K.', text: 'Pure serenity. Every moment spent here deepens my practice.', role: 'Practitioner' },
-    { author: 'Priya S.', text: 'Life-changing wisdom delivered with grace and compassion.', role: 'Devotee' },
-    { author: 'Vikram R.', text: 'The sanctuary my soul was searching for.', role: 'Wanderer' },
-    { author: 'Meera D.', text: 'Authentic spiritual guidance that resonates deeply within.', role: 'Believer' },
-    { author: 'Arjun P.', text: 'A space where healing happens naturally and beautifully.', role: 'Explorer' }
-  ];
 
   const sectionPalette = isDark
-    ? ["#1a241f", "#28211b", "#16242a"]
-    : ["#e6efe6", "#eadfd3", "#ddeef2"];
+    ? ["#101511", "#211913", "#12211e"]
+    : ["#f4eee4", "#e8dccf", "#dcebe6"];
   const getSectionBg = (index) => sectionPalette[index % sectionPalette.length];
 
 
@@ -45,10 +52,10 @@ const WellnessWebsite = () => {
         if (isMounted && Array.isArray(data) && data.length) {
           setTestimonials(data.slice(0, 10));
         } else if (isMounted) {
-          setTestimonials(fallbackTestimonials);
+          setTestimonials(FALLBACK_TESTIMONIALS);
         }
-      } catch (e) {
-        if (isMounted) setTestimonials(fallbackTestimonials);
+      } catch {
+        if (isMounted) setTestimonials(FALLBACK_TESTIMONIALS);
       }
     };
 
@@ -100,24 +107,24 @@ const WellnessWebsite = () => {
 
       {/* About Me */}
       <section
-        className="px-6 md:px-24 pt-24 pb-0 relative"
+        className="px-6 md:px-24 pt-32 md:pt-40 pb-0 relative overflow-hidden isolate"
         style={{
           backgroundColor: getSectionBg(0),
           backgroundImage: isDark
-            ? "linear-gradient(rgba(10, 14, 18, 0.55), rgba(10, 14, 18, 0.55)), linear-gradient(120deg, rgba(40, 86, 64, 0.35) 0%, rgba(123, 88, 60, 0.3) 45%, rgba(46, 94, 98, 0.35) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(https://res.cloudinary.com/sidehustle-01/image/upload/v1771367921/extended_bg_about_me_j7yco8.jpg)"
-            : "linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), linear-gradient(120deg, rgba(114, 186, 150, 0.45) 0%, rgba(210, 165, 120, 0.4) 45%, rgba(112, 186, 196, 0.45) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(https://res.cloudinary.com/sidehustle-01/image/upload/v1771367921/extended_bg_about_me_j7yco8.jpg)",
+            ? `linear-gradient(rgba(12, 18, 14, 0.63), rgba(12, 18, 14, 0.63)), linear-gradient(122deg, rgba(55, 87, 66, 0.34) 0%, rgba(91, 72, 52, 0.27) 46%, rgba(58, 116, 109, 0.3) 100%), linear-gradient(to top, rgba(236, 244, 238, 0.92) 0%, rgba(236, 244, 238, 0.54) 8%, rgba(236, 244, 238, 0.16) 16%, rgba(236, 244, 238, 0) 22%), url(${ABOUT_BG_IMAGE_URL})`
+            : `linear-gradient(rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.46)), linear-gradient(122deg, rgba(137, 173, 143, 0.43) 0%, rgba(176, 148, 119, 0.34) 46%, rgba(113, 176, 168, 0.4) 100%), linear-gradient(to top, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.64) 8%, rgba(255, 255, 255, 0.18) 16%, rgba(255, 255, 255, 0) 22%), url(${ABOUT_BG_IMAGE_URL})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          height: "90vh",
-          minHeight: "680px"
+          height: "92vh",
+          minHeight: "760px"
         }}
       >
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none z-0"
           style={{
             opacity: 1,
-            backgroundImage: "url(https://res.cloudinary.com/sidehustle-01/image/upload/v1771367921/extended_bg_about_me_j7yco8.jpg)",
+            backgroundImage: `url(${ABOUT_BG_IMAGE_URL})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -128,7 +135,7 @@ const WellnessWebsite = () => {
               "radial-gradient(circle at 52% 76%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 12%, rgba(0, 0, 0, 0.3) 24%, rgba(0, 0, 0, 0) 34%)"
           }}
         />
-        <div className="max-w-6xl mx-auto relative h-full">
+        <div className="absolute top-4 md:top-10 left-1/2 -translate-x-1/2 w-full max-w-6xl z-40 px-4 sm:px-6 md:px-0">
           <div className="text-center">
             <span
               className="text-[10px] tracking-[0.4em] mb-4 block"
@@ -144,7 +151,7 @@ const WellnessWebsite = () => {
               <span
                 className="gradient-text"
                 style={{
-                  background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                  background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.headingSecondary} 50%, ${theme.headingSecondary} 100%)`,
                   display: "inline-block",
                   fontFamily: "'Source Sans 3', sans-serif",
                   fontWeight: 300,
@@ -160,16 +167,16 @@ const WellnessWebsite = () => {
         </div>
 
         <div
-          className="absolute left-4 right-4 md:left-24 md:right-[56%] top-[28%] md:top-1/2 text-[10px]"
+          className="absolute z-[35] left-4 right-4 md:left-24 md:right-auto md:max-w-[38%] top-[38%] md:top-[48%] text-[10px]"
           style={{
             color: theme.textMuted,
-            transform: "translateY(-50%)"
+            transform: "none"
           }}
         >
           <div
-            className="inline-flex flex-col justify-start px-3 py-4 space-y-3"
+            className="flex flex-col justify-start px-3 py-4 space-y-3 md:pr-8"
             style={{
-              minHeight: "220px",
+              minHeight: "180px",
               // backgroundColor: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.65)",
               backgroundColor: isDark ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0)",
               color: isDark ? "#ffffff" : "rgba(12, 14, 18, 0.95)",
@@ -183,11 +190,12 @@ const WellnessWebsite = () => {
               Goddess Vartika (Grand Guru)
             </p>
             <p
-              className="text-sm sm:text-base leading-relaxed max-w-[56ch]"
+              className="text-sm sm:text-base leading-relaxed max-w-[48ch]"
               style={{
                 color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
                 whiteSpace: "normal",
-                overflowWrap: "anywhere"
+                wordBreak: "normal",
+                overflowWrap: "break-word"
               }}
             >
               Vartika Shukla carries the Siddha Maha Yoga lineage with clarity and compassion, guiding seekers to awaken inner stillness and integrate spiritual practice into everyday life.
@@ -196,21 +204,21 @@ const WellnessWebsite = () => {
         </div>
 
         <div
-          className="absolute left-6 md:left-24 right-6 md:right-24 bottom-0"
+          className="absolute z-[25] left-6 md:left-24 right-6 md:right-24 bottom-0"
           style={{
             fontFamily: "'Source Sans 3', sans-serif",
             color: theme.text
           }}
         >
-          <div
-            className="relative"
-            style={{
-              "--portrait-width": "clamp(210px, 40vw, 390px)",
-              "--portrait-height": "clamp(300px, 54vw, 560px)",
-              "--portrait-frame": "clamp(10px, 1.25vw, 20px)",
-              "--portrait-bottom": "clamp(2%, 3.5vh, 6%)"
-            }}
-          >
+            <div
+              className="relative"
+              style={{
+                "--portrait-width": "clamp(190px, 34vw, 350px)",
+                "--portrait-height": "clamp(280px, 46vw, 500px)",
+                "--portrait-frame": "clamp(10px, 1.1vw, 16px)",
+                "--portrait-bottom": "clamp(-1%, 0.5vh, 2%)"
+              }}
+            >
             <div
               className="absolute left-1/2 bottom-[3%] z-0"
               style={{
@@ -243,7 +251,7 @@ const WellnessWebsite = () => {
                 }}
               >
                 <img
-                  src="https://res.cloudinary.com/sidehustle-01/image/upload/v1771367922/IMG_20250512_143414_lxpoga.jpg"
+                  src={ABOUT_PORTRAIT_URL}
                   alt="Vartika Shukla"
                   className="block w-full h-full object-contain"
                   style={{
@@ -251,13 +259,14 @@ const WellnessWebsite = () => {
                   }}
                   loading="lazy"
                   decoding="async"
+                  fetchPriority="low"
                 />
               </div>
             </div>
             <div
               className="relative z-10 w-full whitespace-nowrap leading-[0.85] tracking-[0.05em] text-center overflow-hidden"
               style={{
-                fontSize: "clamp(2.75rem, 10.5vw, 12rem)",
+                fontSize: "clamp(2.5rem, 9.6vw, 10.5rem)",
                 fontWeight: 600,
                 fontFamily: "'Outfit', sans-serif",
                 color: isDark ? theme.text : "#04070b"
@@ -321,32 +330,70 @@ const WellnessWebsite = () => {
       </section>
 
       {/* Reveal Section - Notable Gurus */}
-      <RevealSection theme={theme} setCursorVariant={setCursorVariant} bgColor={getSectionBg(1)} />
+      <LazyMount minHeight={760}>
+        <Suspense fallback={<SectionFallback bgColor={getSectionBg(1)} minHeight={760} />}>
+          <RevealSection
+            theme={theme}
+            setCursorVariant={setCursorVariant}
+            isDark={isDark}
+            bgColor={getSectionBg(1)}
+          />
+        </Suspense>
+      </LazyMount>
 
       {/* Lineage Section */}
-      <LineageSection theme={theme} bgColor={getSectionBg(2)} />
+      <div data-scroll-anchor="lineage">
+        <LazyMount minHeight={640}>
+          <Suspense fallback={<SectionFallback bgColor={getSectionBg(2)} minHeight={640} />}>
+            <LineageSection theme={theme} bgColor={getSectionBg(2)} />
+          </Suspense>
+        </LazyMount>
+      </div>
 
-      {/* Offerings - with RED accent */}
-      <OfferingsSection theme={theme} isDark={isDark} setCursorVariant={setCursorVariant} bgColor={getSectionBg(0)} />
+      {/* Offerings */}
+      <div data-scroll-anchor="offerings">
+        <LazyMount minHeight={720}>
+          <Suspense fallback={<SectionFallback bgColor={getSectionBg(0)} minHeight={720} />}>
+            <OfferingsSection
+              theme={theme}
+              isDark={isDark}
+              setCursorVariant={setCursorVariant}
+              bgColor={getSectionBg(0)}
+            />
+          </Suspense>
+        </LazyMount>
+      </div>
 
       {/* Testimonials */}
-      <TestimonialsSection 
-        theme={theme} 
-        testimonials={testimonials}
-        setCursorVariant={setCursorVariant}
-        bgColor={getSectionBg(1)}
-      />
+      <LazyMount minHeight={620}>
+        <Suspense fallback={<SectionFallback bgColor={getSectionBg(1)} minHeight={620} />}>
+          <TestimonialsSection
+            theme={theme}
+            testimonials={testimonials}
+            setCursorVariant={setCursorVariant}
+            bgColor={getSectionBg(1)}
+          />
+        </Suspense>
+      </LazyMount>
 
       {/* CTA */}
-      <CTASection theme={theme} setCursorVariant={setCursorVariant} isDark={isDark} bgColor={getSectionBg(2)} />
+      <LazyMount minHeight={360}>
+        <Suspense fallback={<SectionFallback bgColor={getSectionBg(2)} minHeight={360} />}>
+          <CTASection theme={theme} setCursorVariant={setCursorVariant} isDark={isDark} bgColor={getSectionBg(2)} />
+        </Suspense>
+      </LazyMount>
 
-      {/* FAQs - with RED accent */}
-      <FAQ theme={theme} isDark={isDark} bgColor={getSectionBg(0)} />
+      {/* FAQs */}
+      <div data-scroll-anchor="faqs">
+        <LazyMount minHeight={620}>
+          <Suspense fallback={<SectionFallback bgColor={getSectionBg(0)} minHeight={620} />}>
+            <FAQ theme={theme} isDark={isDark} bgColor={getSectionBg(0)} />
+          </Suspense>
+        </LazyMount>
+      </div>
 
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
-
         @font-face {
           font-family: 'PetitFormal';
           src: url('/fonts/petit-formal-script.regular.ttf') format('truetype');

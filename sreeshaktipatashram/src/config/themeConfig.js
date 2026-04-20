@@ -8,43 +8,44 @@ export const colorPalettes = {
   light: {
     // Background colors
     bg: {
-      primary: '#faf8f5',      // Main background
-      secondary: '#ebe7e0',    // Alternate sections
-      card: 'rgba(255, 255, 255, 0.85)', // Cards/overlays
-      sidebar: 'rgba(255, 255, 255, 0.9)',
-      gallery: '#f5f5f5',      // Gallery background
+      primary: '#f5f1e9',
+      secondary: '#e5ddd0',
+      card: 'rgba(255, 255, 255, 0.88)',
+      sidebar: 'rgba(251, 252, 248, 0.92)',
+      gallery: '#e7ede2',
     },
     
     // Text colors
     text: {
-      primary: '#1a1a1a',      // Main text
-      secondary: '#666666',    // Secondary text
-      muted: '#999999',        // Muted text
-      light: 'rgba(0, 0, 0, 0.6)', // Light text
+      primary: '#1b251d',
+      secondary: '#4f5f54',
+      muted: '#758377',
+      light: 'rgba(19, 33, 24, 0.62)',
+      headingSecondary: '#2f6f61',
     },
     
     // Border colors
     border: {
-      primary: 'rgba(0, 0, 0, 0.1)',
-      secondary: 'rgba(0, 0, 0, 0.15)',
-      strong: 'rgba(0, 0, 0, 0.25)',
-      light: 'rgba(0, 0, 0, 0.05)',
+      primary: 'rgba(40, 62, 48, 0.15)',
+      secondary: 'rgba(40, 62, 48, 0.22)',
+      strong: 'rgba(40, 62, 48, 0.34)',
+      light: 'rgba(40, 62, 48, 0.08)',
     },
     
     // Accent colors
     accent: {
-      primary: '#15616c',      // Main accent (teal)
-      hover: '#0f4f58',        // Accent hover state
-      secondary: '#c9a77c',    // Secondary accent (gold)
-      tertiary: '#2dd4bf',     // Tertiary accent (bright teal)
+      primary: '#32796f',
+      hover: '#295f58',
+      secondary: '#8b6c49',
+      tertiary: '#479a8e',
     },
     
     // Social media colors (muted, professional)
     social: {
-      instagram: '#c77a96',    // Muted pink-purple
-      facebook: '#5a8bb8',     // Muted blue
-      youtube: '#c86b6b',      // Muted red
-      x: '#7a7a7a',           // Muted gray
+      instagram: '#a57784',
+      facebook: '#6c8793',
+      youtube: '#b48174',
+      x: '#7f877f',
     },
   },
   
@@ -52,43 +53,44 @@ export const colorPalettes = {
   dark: {
     // Background colors
     bg: {
-      primary: '#0b1013',      // Deep charcoal with subtle teal
-      secondary: '#182127',    // Clearer contrast for alternating sections
-      card: 'rgba(18, 24, 28, 0.85)',
-      sidebar: 'rgba(15, 20, 24, 0.9)',
-      gallery: '#0a0f12',      // Soft near-black
+      primary: '#0f1411',
+      secondary: '#1e1814',
+      card: 'rgba(20, 28, 23, 0.88)',
+      sidebar: 'rgba(16, 23, 19, 0.92)',
+      gallery: '#151d18',
     },
     
     // Text colors
     text: {
-      primary: '#f5f5f5',      // Near white
-      secondary: '#b0b0b0',    // Light gray
-      muted: '#808080',        // Medium gray
-      light: 'rgba(255, 255, 255, 0.7)',
+      primary: '#eef3ef',
+      secondary: '#bcc8bf',
+      muted: '#8e9a90',
+      light: 'rgba(236, 245, 239, 0.72)',
+      headingSecondary: '#aad8ce',
     },
     
     // Border colors
     border: {
-      primary: 'rgba(255, 255, 255, 0.1)',
-      secondary: 'rgba(255, 255, 255, 0.15)',
-      strong: 'rgba(255, 255, 255, 0.25)',
-      light: 'rgba(255, 255, 255, 0.05)',
+      primary: 'rgba(210, 226, 214, 0.16)',
+      secondary: 'rgba(210, 226, 214, 0.24)',
+      strong: 'rgba(210, 226, 214, 0.34)',
+      light: 'rgba(210, 226, 214, 0.1)',
     },
     
     // Accent colors
     accent: {
-      primary: '#2dd4bf',      // Bright teal for dark mode
-      hover: '#5eead4',        // Lighter teal on hover
-      secondary: '#d4a574',    // Warm gold
-      tertiary: '#14b8a6',     // Deep teal
+      primary: '#4b958a',
+      hover: '#5daca0',
+      secondary: '#a48662',
+      tertiary: '#60b2a5',
     },
     
     // Social media colors (muted for dark mode, slightly brighter than light)
     social: {
-      instagram: '#d98fb5',    // Soft pink-purple
-      facebook: '#7aa3c9',     // Soft blue
-      youtube: '#d98585',      // Soft red
-      x: '#999999',           // Light gray
+      instagram: '#b08d97',
+      facebook: '#87a2ad',
+      youtube: '#c09283',
+      x: '#9ba89f',
     },
   },
 };
@@ -110,6 +112,7 @@ export function getTheme(isDark) {
     textSecondary: palette.text.secondary,
     textMuted: palette.text.muted,
     textLight: palette.text.light,
+    headingSecondary: palette.text.headingSecondary,
     
     // Border classes
     border: palette.border.primary,
@@ -145,6 +148,7 @@ export function getThemeCSSVars(isDark) {
     '--color-text-secondary': palette.text.secondary,
     '--color-text-muted': palette.text.muted,
     '--color-text-light': palette.text.light,
+    '--color-text-heading-secondary': palette.text.headingSecondary,
     '--color-border-primary': palette.border.primary,
     '--color-border-secondary': palette.border.secondary,
     '--color-border-strong': palette.border.strong,

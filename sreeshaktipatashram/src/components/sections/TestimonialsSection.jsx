@@ -40,7 +40,7 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant, bgColor })
             <span 
               className="gradient-text"
               style={{
-                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+                background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.headingSecondary} 50%, ${theme.headingSecondary} 100%)`,
                 display: 'inline-block',
                 fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 300,
@@ -125,7 +125,7 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant, bgColor })
               key={`mobile-top-${idx}`}
               onMouseEnter={() => setCursorVariant("hover")}
               onMouseLeave={() => setCursorVariant("default")}
-              className="relative flex-shrink-0 w-[420px] px-6 pt-10 pb-8 md:px-10 md:pt-14 md:pb-10 flex flex-col min-h-[200px] md:min-h-[100px] border transition-colors duration-500"
+              className="relative flex-shrink-0 w-[420px] px-5 pt-7 pb-6 md:px-10 md:pt-14 md:pb-10 flex flex-col min-h-[156px] md:min-h-[100px] border transition-colors duration-500"
               style={{
                 backgroundColor: theme.colors.bg.card,
                 borderColor: theme.border
@@ -144,7 +144,7 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant, bgColor })
               />
 
               <p
-                className="text-[15px] font-light leading-[1.8] mb-10"
+                className="text-[15px] font-light leading-[1.65] mb-6"
                 style={{
                   color: theme.text,
                   fontFamily: "'Source Sans 3', sans-serif"
@@ -186,7 +186,7 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant, bgColor })
               key={`reverse-${idx}`}
               onMouseEnter={() => setCursorVariant("hover")}
               onMouseLeave={() => setCursorVariant("default")}
-              className="relative flex-shrink-0 w-[420px] px-6 pt-10 pb-8 md:px-10 md:pt-14 md:pb-10 flex flex-col min-h-[200px] md:min-h-[100px] border transition-colors duration-500"
+              className="relative flex-shrink-0 w-[420px] px-5 pt-7 pb-6 md:px-10 md:pt-14 md:pb-10 flex flex-col min-h-[156px] md:min-h-[100px] border transition-colors duration-500"
               style={{
                 backgroundColor: theme.colors.bg.card,
                 borderColor: theme.border
@@ -205,7 +205,7 @@ const TestimonialsSection = ({ theme, testimonials, setCursorVariant, bgColor })
               />
 
               <p
-                className="text-[15px] font-light leading-[1.8] mb-10"
+                className="text-[15px] font-light leading-[1.65] mb-6"
                 style={{
                   color: theme.text,
                   fontFamily: "'Source Sans 3', sans-serif"

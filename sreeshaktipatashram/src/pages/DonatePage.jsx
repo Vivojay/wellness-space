@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { ChevronDown, ChevronLeft, QrCode } from "lucide-react";
-import { Country } from "country-state-city";
 import { QRCodeSVG } from "qrcode.react";
 
 import { createDonationDeclarationAudit, createDonationDeclarationIntent } from "@/api/donateApi";
@@ -13,7 +12,7 @@ const STATUS_OPTIONS = [
 ];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const AMOUNT_REGEX = /^\d+(\.\d{0,2})?$/;
+const AMOUNT_REGEX = /^\d+$/;
 
 const INITIAL_FORM = {
   donorName: "",
@@ -28,6 +27,40 @@ const INITIAL_FORM = {
   acknowledgeFcra: false,
 };
 
+const TAPE_EDGE_OFFSET = 3;
+const TAPE_SIDE_LANE = 38;
+const TAPE_CORNER_SAFE = TAPE_EDGE_OFFSET + TAPE_SIDE_LANE;
+const HORIZONTAL_TAPE_UNIT = 112;
+const VERTICAL_TAPE_UNIT = 108;
+
+function computeTapeTrack(trackLength, unitSize, minGap, maxGap, minCount, maxCount) {
+  const safeTrack = Math.max(0, trackLength);
+  const computeGap = (count) => {
+    if (count <= 1) return minGap;
+    return (safeTrack - count * unitSize) / (count - 1);
+  };
+
+  let count = Math.floor((safeTrack + minGap) / (unitSize + minGap));
+  count = Math.max(minCount, Math.min(maxCount, count));
+
+  let gap = computeGap(count);
+  while (count > minCount && gap < minGap) {
+    count -= 1;
+    gap = computeGap(count);
+  }
+
+  while (count < maxCount && gap > maxGap) {
+    const nextCount = count + 1;
+    const nextGap = computeGap(nextCount);
+    if (nextGap < minGap) break;
+    count = nextCount;
+    gap = nextGap;
+  }
+
+  const normalizedGap = Number.isFinite(gap) ? Math.max(minGap, Math.min(maxGap, gap)) : minGap;
+  return { count, gap: normalizedGap };
+}
+
 function formatLocalDate() {
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -39,9 +72,17 @@ function formatLocalDate() {
 function normalizeAmountString(value) {
   const text = String(value || "").trim();
   if (!text || !AMOUNT_REGEX.test(text)) return text;
-  const numeric = Number(text);
+  const numeric = Number.parseInt(text, 10);
   if (!Number.isFinite(numeric) || numeric < 1) return text;
-  return numeric.toFixed(2);
+  return String(numeric);
+}
+
+function formatAmountForDisplay(value) {
+  const text = String(value || "").trim();
+  if (!text || !AMOUNT_REGEX.test(text)) return "";
+  const numeric = Number.parseInt(text, 10);
+  if (!Number.isFinite(numeric) || numeric < 1) return "";
+  return `${numeric}.00`;
 }
 
 function statusLabel(value) {
@@ -55,6 +96,21 @@ function MandatoryLabel({ children, theme }) {
         *
       </span>
       {children}
+    </span>
+  );
+}
+
+function PreviewToken({ value, placeholder, ready, theme, className = "" }) {
+  return (
+    <span
+      className={`inline-flex items-center border-b px-1 pb-0.5 transition-colors ${className}`}
+      title={ready ? value : placeholder}
+      style={{
+        borderBottomColor: ready ? "#15803d" : "#b91c1c",
+        color: ready ? theme.text : theme.textMuted,
+      }}
+    >
+      {ready ? value : placeholder}
     </span>
   );
 }
@@ -73,8 +129,17 @@ export default function DonatePage() {
   const [declarationDate] = useState(() => formatLocalDate());
   const [qrAuditDeclarationId, setQrAuditDeclarationId] = useState("");
   const [qrAuditError, setQrAuditError] = useState("");
+  const [countries, setCountries] = useState([]);
+  const [countriesLoading, setCountriesLoading] = useState(false);
 
   const countryContainerRef = useRef(null);
+  const tapeFrameRef = useRef(null);
+  const [tapeLayout, setTapeLayout] = useState({
+    horizontalCount: 5,
+    verticalCount: 6,
+    horizontalGap: 14,
+    verticalGap: 14,
+  });
 
   const clientTimezone = useMemo(() => {
     try {
@@ -84,10 +149,20 @@ export default function DonatePage() {
     }
   }, []);
 
-  const countries = useMemo(
-    () => Country.getAllCountries().map((country) => country.name).sort((a, b) => a.localeCompare(b)),
-    []
-  );
+  const loadCountries = useCallback(async () => {
+    if (countries.length || countriesLoading) return;
+    setCountriesLoading(true);
+
+    try {
+      const { Country } = await import("country-state-city");
+      const countryNames = Country.getAllCountries()
+        .map((country) => country.name)
+        .sort((a, b) => a.localeCompare(b));
+      setCountries(countryNames);
+    } finally {
+      setCountriesLoading(false);
+    }
+  }, [countries.length, countriesLoading]);
 
   const countriesByLowercase = useMemo(() => {
     const map = new Map();
@@ -132,6 +207,55 @@ export default function DonatePage() {
       document.removeEventListener("touchstart", onPointerDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (step !== "form") return;
+    const node = tapeFrameRef.current;
+    if (!node) return;
+
+    const updateTapeLayout = () => {
+      const rect = node.getBoundingClientRect();
+      const horizontalTrack = Math.max(0, rect.width - TAPE_CORNER_SAFE * 2);
+      const verticalTrack = Math.max(0, rect.height - TAPE_CORNER_SAFE * 2);
+
+      const horizontal = computeTapeTrack(horizontalTrack, HORIZONTAL_TAPE_UNIT, 14, 42, 3, 10);
+      const vertical = computeTapeTrack(verticalTrack, VERTICAL_TAPE_UNIT, 14, 34, 4, 8);
+
+      setTapeLayout((prev) => {
+        const next = {
+          horizontalCount: horizontal.count,
+          verticalCount: vertical.count,
+          horizontalGap: horizontal.gap,
+          verticalGap: vertical.gap,
+        };
+
+        if (
+          prev.horizontalCount === next.horizontalCount &&
+          prev.verticalCount === next.verticalCount &&
+          Math.abs(prev.horizontalGap - next.horizontalGap) < 0.5 &&
+          Math.abs(prev.verticalGap - next.verticalGap) < 0.5
+        ) {
+          return prev;
+        }
+
+        return next;
+      });
+    };
+
+    updateTapeLayout();
+
+    let observer;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(updateTapeLayout);
+      observer.observe(node);
+    }
+
+    window.addEventListener("resize", updateTapeLayout, { passive: true });
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", updateTapeLayout);
+    };
+  }, [step]);
 
   useEffect(() => {
     if (step !== "qr") return;
@@ -187,7 +311,36 @@ export default function DonatePage() {
     }
   };
 
-  const declarationAmountPreview = normalizeAmountString(form.amount) || "[Amount]";
+  const declarationAmountPreview = formatAmountForDisplay(form.amount) || "[Amount]";
+  const donorNamePreview = form.donorName.trim();
+  const isCountrySelected = Boolean(
+    countriesByLowercase.get(String(form.country || "").trim().toLowerCase())
+  );
+  const isAmountReady =
+    Boolean(String(form.amount || "").trim()) &&
+    AMOUNT_REGEX.test(String(form.amount).trim()) &&
+    Number(form.amount) >= 1;
+  const isEmailReady = EMAIL_REGEX.test(String(form.email || "").trim());
+  const isMandatoryFormReady =
+    Boolean(form.donorName.trim()) &&
+    isAmountReady &&
+    Boolean(form.residentialStatus) &&
+    isCountrySelected &&
+    isEmailReady &&
+    form.confirmLegalIncome &&
+    form.confirmVoluntary &&
+    form.confirmCharitableUse &&
+    form.acknowledgeFcra;
+  const declarationPreviewItems = [
+    { id: "legal-income", label: "Legal income", ready: form.confirmLegalIncome },
+    { id: "voluntary", label: "Voluntary", ready: form.confirmVoluntary },
+    { id: "charitable-use", label: "Charitable use", ready: form.confirmCharitableUse },
+    { id: "law-compliance", label: "Law compliance", ready: form.acknowledgeFcra },
+  ];
+  const submitDisabled = submitting || !isMandatoryFormReady;
+  const tapeTextColor = `${theme.accentSecondary}df`;
+  const tapeHorizontalBg = `linear-gradient(90deg, ${theme.accentSecondary}30 0%, ${theme.accent}26 50%, ${theme.accentSecondary}30 100%)`;
+  const tapeVerticalBg = `linear-gradient(180deg, ${theme.accentSecondary}30 0%, ${theme.accent}26 50%, ${theme.accentSecondary}30 100%)`;
 
   const validateForm = () => {
     const errors = {};
@@ -202,7 +355,7 @@ export default function DonatePage() {
     if (!amount) {
       errors.amount = "Donation amount is required.";
     } else if (!AMOUNT_REGEX.test(amount)) {
-      errors.amount = "Enter a valid INR amount with up to 2 decimals.";
+      errors.amount = "Enter a valid whole-number INR amount.";
     } else if (!Number.isFinite(parsedAmount) || parsedAmount < 1) {
       errors.amount = "Amount must be at least INR 1.";
     }
@@ -251,7 +404,7 @@ export default function DonatePage() {
       return;
     }
 
-    const normalizedAmount = Number(form.amount).toFixed(2);
+    const normalizedAmount = formatAmountForDisplay(form.amount);
     const payload = {
       donor_name: form.donorName.trim(),
       amount: normalizedAmount,
@@ -351,76 +504,126 @@ export default function DonatePage() {
               {declarationDate}
             </span>
           </div>
-          <div
-            className="inline-flex items-center gap-2 border px-3 py-2"
-            style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.card, color: theme.textMuted }}
-          >
-            <img src="/photos/logo_gpay.png" alt="Google Pay" className="w-4 h-4 object-contain" />
-            <span className="text-[11px]">Google Pay Secured Flow</span>
-          </div>
         </div>
 
         {step === "form" ? (
-          <div className="mt-10 grid xl:grid-cols-[minmax(300px,0.95fr)_minmax(0,1.15fr)] gap-6 items-start">
-            <aside
-              className="border p-5 sm:p-6 xl:sticky xl:top-28"
-              style={{
-                borderColor: theme.border,
-                backgroundColor: theme.colors.bg.card,
-                boxShadow: "0 12px 40px rgba(0, 0, 0, 0.12)",
-              }}
-            >
-              <p className="text-xs tracking-[0.22em] uppercase" style={{ color: theme.textMuted }}>
-                Donation Declaration
-              </p>
-              <p className="mt-1 text-[11px]" style={{ color: theme.textMuted }}>
-                Optional live preview
-              </p>
-
-              <div
-                className="mt-4 border p-4 text-sm leading-relaxed"
-                style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary, color: theme.textSecondary }}
-              >
-                I, <strong style={{ color: theme.text }}>{form.donorName.trim() || "[Donor Name]"}</strong>, hereby
-                declare that I am voluntarily contributing an amount of INR{" "}
-                <strong style={{ color: theme.text }}>{declarationAmountPreview}</strong> to{" "}
-                <strong style={{ color: theme.text }}>SIDDHA MAHAYOGA FOUNDATION</strong>, a registered non-profit
-                organization in India.
-              </div>
-
-              <div className="mt-4 space-y-2 text-xs" style={{ color: theme.textMuted }}>
-                <p>
-                  <span style={{ color: "#b91c1c" }} aria-hidden>
-                    *
-                  </span>{" "}
-                  Mandatory fields and declarations required.
-                </p>
-                <p>Country selection must be from dropdown list.</p>
-              </div>
-            </aside>
-
+          <div className="mt-10 max-w-5xl mx-auto">
             <form
+              ref={tapeFrameRef}
               onSubmit={handleDeclarationSubmit}
-              className="relative border p-5 sm:p-8"
+              className="relative border overflow-hidden"
               style={{
                 borderColor: theme.border,
                 backgroundColor: theme.colors.bg.card,
                 boxShadow: "0 22px 60px rgba(0, 0, 0, 0.14)",
               }}
             >
-              <div className="hidden lg:block absolute -top-3 -left-3 border px-2 py-1" style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary }}>
-                <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: theme.textMuted }}>
-                  <img src="/photos/logo_gpay.png" alt="Google Pay" className="w-3.5 h-3.5 object-contain" />
-                  Google Pay
-                </span>
-              </div>
-              <div className="hidden lg:block absolute -top-3 -right-3 border px-2 py-1" style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.secondary }}>
-                <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: theme.textMuted }}>
-                  <img src="/photos/logo_gpay.png" alt="Google Pay" className="w-3.5 h-3.5 object-contain" />
-                  Trusted
-                </span>
+              <div className="pointer-events-none absolute inset-0 hidden sm:block" aria-hidden>
+                <div
+                  className="absolute inset-2 border"
+                  style={{
+                    borderColor: `${theme.accent}66`,
+                    boxShadow: `inset 0 0 0 1px ${theme.accent}1f`,
+                  }}
+                />
+
+                <div
+                  className="absolute left-2 right-2 top-2 h-6"
+                  style={{
+                    background: tapeHorizontalBg,
+                    borderTop: `1px solid ${theme.accent}7a`,
+                    borderBottom: `1px solid ${theme.accentSecondary}4f`,
+                  }}
+                />
+                <div
+                  className="absolute left-2 right-2 bottom-2 h-6"
+                  style={{
+                    background: tapeHorizontalBg,
+                    borderTop: `1px solid ${theme.accent}7a`,
+                    borderBottom: `1px solid ${theme.accentSecondary}4f`,
+                  }}
+                />
+                <div
+                  className="absolute top-2 bottom-2 left-2 w-6"
+                  style={{
+                    background: tapeVerticalBg,
+                    borderLeft: `1px solid ${theme.accent}7a`,
+                    borderRight: `1px solid ${theme.accentSecondary}4f`,
+                  }}
+                />
+                <div
+                  className="absolute top-2 bottom-2 right-2 w-6"
+                  style={{
+                    background: tapeVerticalBg,
+                    borderLeft: `1px solid ${theme.accent}7a`,
+                    borderRight: `1px solid ${theme.accentSecondary}4f`,
+                  }}
+                />
+
+                <div
+                  className="absolute top-3 flex items-center justify-evenly overflow-hidden whitespace-nowrap"
+                  style={{ left: `${TAPE_CORNER_SAFE}px`, right: `${TAPE_CORNER_SAFE}px` }}
+                >
+                  {Array.from({ length: tapeLayout.horizontalCount }).map((_, idx) => (
+                    <span
+                      key={`top-${idx}`}
+                      className="inline-flex items-center gap-1 text-[10px] shrink-0"
+                      style={{ color: tapeTextColor }}
+                    >
+                      <img src="/photos/logo_gpay.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                      Google Pay
+                    </span>
+                  ))}
+                </div>
+
+                <div
+                  className="absolute bottom-3 flex items-center justify-evenly overflow-hidden whitespace-nowrap"
+                  style={{ left: `${TAPE_CORNER_SAFE}px`, right: `${TAPE_CORNER_SAFE}px` }}
+                >
+                  {Array.from({ length: tapeLayout.horizontalCount }).map((_, idx) => (
+                    <span
+                      key={`bottom-${idx}`}
+                      className="inline-flex items-center gap-1 text-[10px] rotate-180 shrink-0"
+                      style={{ color: tapeTextColor }}
+                    >
+                      <img src="/photos/logo_gpay.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                      Google Pay
+                    </span>
+                  ))}
+                </div>
+
+                <div
+                  className="absolute top-[25px] bottom-[25px] left-3 flex flex-col items-center justify-evenly overflow-hidden"
+                >
+                  {Array.from({ length: tapeLayout.verticalCount }).map((_, idx) => (
+                    <span
+                      key={`left-${idx}`}
+                      className="inline-flex flex-col items-center gap-[2px] text-[10px] shrink-0"
+                      style={{ color: tapeTextColor }}
+                    >
+                      <img src="/photos/logo_gpay.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                      <span style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}>Google Pay</span>
+                    </span>
+                  ))}
+                </div>
+
+                <div
+                  className="absolute top-[25px] bottom-[25px] right-3 flex flex-col items-center justify-evenly overflow-hidden"
+                >
+                  {Array.from({ length: tapeLayout.verticalCount }).map((_, idx) => (
+                    <span
+                      key={`right-${idx}`}
+                      className="inline-flex flex-col items-center gap-[2px] text-[10px] shrink-0"
+                      style={{ color: tapeTextColor }}
+                    >
+                      <img src="/photos/logo_gpay.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                      <span style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}>Google Pay</span>
+                    </span>
+                  ))}
+                </div>
               </div>
 
+              <div className="relative z-10 px-5 py-6 sm:px-14 sm:py-14">
               <div className="space-y-5">
                 <div>
                   <MandatoryLabel theme={theme}>Donor Name</MandatoryLabel>
@@ -444,14 +647,17 @@ export default function DonatePage() {
                   <input
                     type="number"
                     min="1"
-                    step="0.01"
+                    step="1"
                     value={form.amount}
-                    onChange={(e) => updateField("amount", e.target.value)}
+                    onChange={(e) => updateField("amount", e.target.value.replace(/[^\d]/g, ""))}
                     onBlur={handleAmountBlur}
                     className="show-number-spin w-full border px-4 py-3 text-sm bg-transparent outline-none"
                     style={{ borderColor: theme.border, color: theme.text }}
                     placeholder="100.00"
                   />
+                  <p className="mt-1 text-[11px]" style={{ color: theme.textMuted }}>
+                    A minimum of 1 is required
+                  </p>
                   {fieldErrors.amount && (
                     <p className="mt-1 text-xs" style={{ color: "#b91c1c" }}>
                       {fieldErrors.amount}
@@ -500,12 +706,18 @@ export default function DonatePage() {
                     <input
                       type="text"
                       value={countryQuery}
-                      onFocus={() => setCountryOpen(true)}
+                      onFocus={() => {
+                        setCountryOpen(true);
+                        void loadCountries();
+                      }}
                       onChange={(e) => {
                         const value = e.target.value;
                         setCountryQuery(value);
                         updateField("country", value);
                         setCountryOpen(true);
+                        if (!countries.length && !countriesLoading) {
+                          void loadCountries();
+                        }
                       }}
                       className="w-full border px-4 py-3 pr-10 text-sm bg-transparent outline-none"
                       style={{ borderColor: theme.border, color: theme.text }}
@@ -514,7 +726,10 @@ export default function DonatePage() {
                     />
                     <button
                       type="button"
-                      onClick={() => setCountryOpen((prev) => !prev)}
+                      onClick={() => {
+                        setCountryOpen((prev) => !prev);
+                        void loadCountries();
+                      }}
                       className="absolute right-3 top-1/2 -translate-y-1/2"
                       style={{ color: theme.textMuted }}
                       aria-label="Toggle country options"
@@ -526,7 +741,11 @@ export default function DonatePage() {
                         className="absolute z-40 mt-1 w-full max-h-56 overflow-y-auto border"
                         style={{ borderColor: theme.border, backgroundColor: theme.colors.bg.card }}
                       >
-                        {filteredCountries.length ? (
+                        {countriesLoading ? (
+                          <p className="px-4 py-3 text-sm" style={{ color: theme.textMuted }}>
+                            Loading country list...
+                          </p>
+                        ) : filteredCountries.length ? (
                           filteredCountries.map((country) => (
                             <button
                               key={country}
@@ -540,7 +759,7 @@ export default function DonatePage() {
                           ))
                         ) : (
                           <p className="px-4 py-3 text-sm" style={{ color: theme.textMuted }}>
-                            No country found for this search.
+                            {countries.length ? "No country found for this search." : "Start typing to load countries."}
                           </p>
                         )}
                       </div>
@@ -671,6 +890,67 @@ export default function DonatePage() {
                     </p>
                   )}
                 </div>
+
+                <div
+                  className="border p-4 sm:p-5"
+                  style={{
+                    borderColor: `${theme.accent}55`,
+                    background: `linear-gradient(140deg, ${theme.accent}16 0%, ${theme.accentSecondary}12 100%)`,
+                  }}
+                >
+                  <p className="text-xs tracking-[0.22em] uppercase" style={{ color: theme.textMuted }}>
+                    Live Preview
+                  </p>
+                  <p className="mt-2 text-[11px]" style={{ color: theme.textMuted }}>
+                    Updates as you type above.
+                  </p>
+
+                  <p className="mt-3 text-sm leading-7" style={{ color: theme.textSecondary }}>
+                    I,
+                    <PreviewToken
+                      value={donorNamePreview}
+                      placeholder="[Donor Name]"
+                      ready={Boolean(donorNamePreview)}
+                      theme={theme}
+                      className="ml-1 min-w-[120px] max-w-[240px] truncate"
+                    />
+                    , hereby declare a voluntary contribution of INR
+                    <PreviewToken
+                      value={declarationAmountPreview}
+                      placeholder="[Amount]"
+                      ready={isAmountReady}
+                      theme={theme}
+                      className="ml-1 min-w-[90px] justify-center"
+                    />
+                    to <strong style={{ color: theme.text }}>SIDDHA MAHAYOGA FOUNDATION</strong>, a registered
+                    non-profit organization in India.
+                  </p>
+
+                  <div className="mt-4">
+                    <p className="text-[10px] tracking-[0.14em] uppercase" style={{ color: theme.textMuted }}>
+                      Declarations
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {declarationPreviewItems.map((item) => (
+                        <span
+                          key={item.id}
+                          className="inline-flex items-center gap-1.5 border px-2.5 py-1 text-[11px]"
+                          style={{
+                            borderColor: item.ready ? "#15803d" : "#b91c1c",
+                            color: item.ready ? "#15803d" : "#b91c1c",
+                            backgroundColor: item.ready ? "rgba(21, 128, 61, 0.08)" : "rgba(185, 28, 28, 0.08)",
+                          }}
+                        >
+                          <span
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{ backgroundColor: item.ready ? "#15803d" : "#b91c1c" }}
+                          />
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {submitError && (
@@ -681,16 +961,19 @@ export default function DonatePage() {
 
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitDisabled}
                 className="mt-6 w-full border px-6 py-3 text-sm tracking-[0.2em] uppercase transition-colors"
                 style={{
-                  borderColor: theme.accent,
-                  color: theme.text,
-                  backgroundColor: submitting ? `${theme.accent}22` : `${theme.accent}14`,
+                  borderColor: submitDisabled ? theme.borderSecondary : theme.accent,
+                  color: submitDisabled ? theme.textMuted : theme.text,
+                  backgroundColor: submitDisabled ? `${theme.borderLight}` : `${theme.accent}14`,
+                  cursor: submitDisabled ? "not-allowed" : "pointer",
+                  opacity: submitDisabled ? 0.65 : 1,
                 }}
               >
                 {submitting ? "Generating QR..." : "Submit Declaration & Continue"}
               </button>
+              </div>
             </form>
           </div>
         ) : (

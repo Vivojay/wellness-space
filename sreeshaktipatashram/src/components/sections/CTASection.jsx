@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 const CTASection = ({ theme, setCursorVariant, isDark, bgColor }) => {
   const navigate = useNavigate();
-  const traceColor = isDark ? "rgba(94, 234, 212, 0.95)" : "rgba(191, 114, 73, 0.96)";
-  const traceSoft = isDark ? "rgba(94, 234, 212, 0.24)" : "rgba(191, 114, 73, 0.24)";
+  const traceColor = isDark ? "rgba(170, 216, 206, 0.98)" : "rgba(120, 82, 54, 0.95)";
+  const baseColor = isDark ? "rgba(170, 216, 206, 0.3)" : "rgba(120, 82, 54, 0.36)";
 
   return (
     <section 
@@ -23,7 +23,7 @@ const CTASection = ({ theme, setCursorVariant, isDark, bgColor }) => {
           <span
             className="gradient-text"
             style={{
-              background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, #ef4444 50%, #ef4444 100%)`,
+              background: `linear-gradient(165deg, ${theme.text} 0%, ${theme.text} 50%, ${theme.headingSecondary} 50%, ${theme.headingSecondary} 100%)`,
               display: "inline-block",
               fontFamily: "'Source Sans 3', sans-serif",
               fontWeight: 300,
@@ -52,22 +52,42 @@ const CTASection = ({ theme, setCursorVariant, isDark, bgColor }) => {
           onMouseLeave={() => {
             setCursorVariant("default");
           }}
-          className="joinus-btn relative px-16 py-5 hover:scale-105 transition-transform duration-300 overflow-hidden"
+          className="joinus-btn relative px-16 py-5 hover:scale-105 transition-transform duration-300"
           style={{ 
-            border: `1px solid ${isDark ? theme.accentSecondary : "#4a2c1f"}`,
+            border: "none",
             outline: "none",
             backgroundColor: theme.accent + '40',
             fontFamily: "'Source Sans 3', sans-serif"
           }}
           onClick={() => navigate("/booking")}
         >
-          <span
-            className="joinus-btn__trace absolute inset-0 pointer-events-none"
-            style={{
-              "--joinus-trace": traceColor,
-              "--joinus-trace-soft": traceSoft,
-            }}
-          />
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 100 40"
+            preserveAspectRatio="none"
+          >
+            <rect
+              x="1"
+              y="1"
+              width="98"
+              height="38"
+              fill="none"
+              stroke={baseColor}
+              strokeWidth="1.2"
+            />
+            <rect
+              x="1"
+              y="1"
+              width="98"
+              height="38"
+              fill="none"
+              stroke={traceColor}
+              strokeWidth="1.8"
+              pathLength="100"
+              strokeDasharray="18 82"
+              className="joinus-border-run"
+            />
+          </svg>
 
           <span 
             className="relative z-10 tracking-[0.2em] text-sm"

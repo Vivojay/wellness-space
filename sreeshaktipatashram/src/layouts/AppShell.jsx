@@ -246,11 +246,19 @@ export default function AppShell() {
     if (!targetId || !isHome) return;
 
     let attempts = 0;
+    const MAX_ATTEMPTS = 180;
     const getOffset = () => {
       const nav = document.querySelector("[data-navbar]");
       const navHeight = nav?.getBoundingClientRect().height || 110;
       return navHeight + 12;
     };
+
+    const resolveTarget = () => {
+      const directTarget = document.getElementById(targetId);
+      if (directTarget) return directTarget;
+      return document.querySelector(`[data-scroll-anchor="${targetId}"]`);
+    };
+
     const scrollToEl = (el) => {
       const scrollContainer = getScrollableContainer();
       const offset = getOffset();
@@ -276,14 +284,15 @@ export default function AppShell() {
         return;
       }
 
-      const el = document.getElementById(targetId);
+      const el = resolveTarget();
       if (el) {
         scrollToEl(el);
         navigate(location.pathname, { replace: true, state: {} });
         return;
       }
+
       attempts += 1;
-      if (attempts < 60) {
+      if (attempts < MAX_ATTEMPTS) {
         requestAnimationFrame(tryScroll);
       }
     };
@@ -498,6 +507,7 @@ export default function AppShell() {
         feedItems={feedItems}
         unreadCount={feedUnreadCount}
         onFeedOpened={markFeedAsRead}
+        setCursorVariant={setCursorVariant}
         activeOverlay={activeOverlay}
         setActiveOverlay={setActiveOverlay}
         feedPanelRef={feedPanelRef}

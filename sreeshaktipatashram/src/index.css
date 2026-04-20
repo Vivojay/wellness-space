@@ -112,37 +112,24 @@ body {
   transition: background 0.35s ease;
 }
 
-.lineage-highlight {
-  border: 1px solid transparent;
-  opacity: 0;
-  transition: opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+.group:hover .hover-zoom {
+  transform: scale(1.05);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .group:hover .hover-zoom {
-    transform: scale(1.05);
-  }
+.group:hover .hover-underline {
+  width: 6rem;
+  opacity: 1;
+}
 
-  .group:hover .hover-underline {
-    width: 6rem;
-    opacity: 1;
-  }
-
-  .lineage-card:hover .lineage-overlay {
-    background: linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.96) 0%,
-      rgba(0, 0, 0, 0.86) 24%,
-      rgba(0, 0, 0, 0.58) 34%,
-      rgba(0, 0, 0, 0.14) 44%,
-      rgba(0, 0, 0, 0) 54%
-    );
-  }
-
-  .lineage-card:hover .lineage-highlight {
-    opacity: 1;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 18px 42px rgba(0, 0, 0, 0.28);
-  }
+.lineage-card:hover .lineage-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.68) 0%,
+    rgba(0, 0, 0, 0.54) 24%,
+    rgba(0, 0, 0, 0.3) 38%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0) 62%
+  );
 }
 
 .nav-underline {
@@ -157,8 +144,11 @@ body {
 }
 
 @keyframes joinusRotate {
+  from {
+    stroke-dashoffset: 100;
+  }
   to {
-    transform: rotate(360deg);
+    stroke-dashoffset: 0;
   }
 }
 
@@ -172,24 +162,28 @@ body {
   }
 }
 
-.joinus-btn__trace::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 300deg,
-    var(--joinus-trace-soft) 324deg,
-    var(--joinus-trace) 346deg,
-    transparent 360deg
-  );
-  animation: joinusRotate 3.2s linear infinite, joinusPulse 1.8s ease-in-out infinite;
+@keyframes donateMinutePulse {
+  0%,
+  97%,
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 12px 30px rgba(185, 28, 28, 0.18);
+  }
+  98% {
+    transform: translateY(0) scale(1.03);
+    box-shadow: 0 16px 34px rgba(185, 28, 28, 0.26);
+  }
+  99% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 12px 30px rgba(185, 28, 28, 0.18);
+  }
 }
 
-.joinus-btn__trace::before {
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  padding: 1px;
+.donate-pulse {
+  animation: donateMinutePulse 60s ease-in-out infinite;
+}
+
+.joinus-border-run {
+  animation: joinusRotate 3.6s linear infinite, joinusPulse 2.2s ease-in-out infinite;
+  stroke-linecap: round;
 }

@@ -16,12 +16,12 @@ export default function Navbar({ isDark }) {
 
   // ✅ FIXED: Use actual scroll state on all pages
   const bgColor = scrolled
-    ? isDark ? 'rgba(26, 26, 26, 0.6)' : 'rgba(255, 255, 255, 0.75)'
-    : isDark ? 'rgba(0,0,0,0.22)' : 'rgba(255,255,255,0.22)';
+    ? isDark ? 'rgba(15, 21, 17, 0.9)' : 'rgba(249, 245, 237, 0.92)'
+    : isDark ? 'rgba(15, 21, 17, 0.76)' : 'rgba(249, 245, 237, 0.8)';
 
   const borderColor = scrolled
     ? isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.25)'
-    : 'rgba(21, 97, 108, 0.9)';
+    : isDark ? 'rgba(228, 236, 230, 0.24)' : 'rgba(44, 58, 47, 0.22)';
 
   const textColor = isDark ? '#ffffff' : scrolled ? '#1a1a1a' : '#000000ff';
 
@@ -30,7 +30,7 @@ export default function Navbar({ isDark }) {
       className={`fixed top-0 left-1/2 -translate-x-1/2 w-full h-[110px]
                   flex items-center justify-center
                   backdrop-blur-3xl border-b-4 transition-all duration-500
-                  z-[19] shadow-[0_10px_30px_rgba(0,0,0,0.12)]`}
+                  z-[1000] shadow-[0_10px_30px_rgba(0,0,0,0.12)]`}
       style={{ backgroundColor: bgColor, borderColor, color: textColor }}
       data-navbar
     >
@@ -38,7 +38,7 @@ export default function Navbar({ isDark }) {
         className="block text-center leading-none whitespace-nowrap"
         style={{
           fontFamily: "'Noto Sans', sans-serif",
-          fontSize: "clamp(0.62rem, 2.35vw, 1.5rem)",
+          fontSize: "clamp(0.68rem, 2.55vw, 1.62rem)",
           letterSpacing: "clamp(0.08em, 0.9vw, 0.3em)",
           maxWidth: "calc(100vw - 154px)",
         }}
