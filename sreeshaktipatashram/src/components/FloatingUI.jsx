@@ -586,6 +586,7 @@ export default function FloatingUI(props) {
             <nav className="space-y-5">
               {[
                 { name: 'Home', onClick: goHomeTop },
+                { name: 'Album', onClick: () => navigate("/album") },
                 { name: 'Readings', onClick: () => navigate("/readings") },
                 { name: 'Donate', onClick: () => navigate("/donate"), isDonate: true },
                 { name: 'Join Us', onClick: () => navigate("/booking") },

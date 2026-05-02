@@ -9,6 +9,7 @@ const ReadingsPage = lazy(() => import("./pages/ReadingsPage"));
 const BlogIndex = lazy(() => import("./pages/BlogIndex"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const AlbumPage = lazy(() => import("./pages/AlbumPage"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
 const BlogEditor = lazy(() => import("./pages/BlogEditor"));
 const DonatePage = lazy(() => import("./pages/DonatePage"));
@@ -36,6 +37,7 @@ function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/feed" element={<FeedPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/album" element={<AlbumPage />} />
           <Route path="/donate" element={<DonatePage />} />
           <Route path="/booking" element={<BookingPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
