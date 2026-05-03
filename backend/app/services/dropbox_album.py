@@ -17,14 +17,15 @@ _CACHE_LOCK = threading.Lock()
 
 def _get_dropbox_env() -> tuple[str, str]:
     token = os.getenv("DROPBOX_ACCESS_TOKEN", "").strip()
-    root = os.getenv("DROPBOX_ROOT_PATH", "").strip()
+    root = os.getenv("DROPBOX_ROOT_PATH")
 
     if not token:
         raise HTTPException(status_code=500, detail="Dropbox access token is not configured")
+
     if root is None:
         raise HTTPException(status_code=500, detail="Dropbox root path is not configured")
 
-    return token, _normalize_path(root)
+    return token, _normalize_path(root.strip())
 
 
 def _normalize_path(path: str) -> str:
@@ -233,7 +234,7 @@ def _build_media_item(token: str, entry: dict[str, Any], cache: dict[str, dict[s
 
 def fetch_album_media() -> dict[str, Any]:
     token, root_path = _get_dropbox_env()
-    photos_path = _ensure_within_root(root_path, _join_path(root_path, "photos"))
+    photos_path = _ensure_within_root(root_path, _join_path(root_path, "images"))
     videos_path = _ensure_within_root(root_path, _join_path(root_path, "videos"))
     cache = _load_shared_link_cache()
 
@@ -265,7 +266,7 @@ def fetch_album_media() -> dict[str, Any]:
 
 def stream_album_media_lines() -> Generator[str, None, None]:
     token, root_path = _get_dropbox_env()
-    photos_path = _ensure_within_root(root_path, _join_path(root_path, "photos"))
+    photos_path = _ensure_within_root(root_path, _join_path(root_path, "images"))
     videos_path = _ensure_within_root(root_path, _join_path(root_path, "videos"))
     cache = _load_shared_link_cache()
     photos_count = 0
