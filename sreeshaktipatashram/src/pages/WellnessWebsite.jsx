@@ -167,18 +167,25 @@ const WellnessWebsite = () => {
         </div>
 
         <div
-          className="absolute z-[35] left-4 right-4 md:left-24 md:right-auto md:max-w-[38%] top-[38%] md:top-[48%] text-[10px]"
+          className="absolute z-[35] left-4 right-4 top-[18%] md:left-16 md:right-auto md:top-[24%] md:w-[min(34vw,480px)] lg:left-24 lg:w-[min(32vw,520px)]"
           style={{
             color: theme.textMuted,
             transform: "none"
           }}
         >
           <div
-            className="flex flex-col justify-start px-3 py-4 space-y-3 md:pr-8"
+            className="flex flex-col justify-start space-y-4 rounded-[8px] px-4 py-5 md:px-5 md:py-6"
             style={{
               minHeight: "180px",
-              // backgroundColor: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.65)",
-              backgroundColor: isDark ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0)",
+              backgroundColor: isDark ? "rgba(8, 12, 10, 0.48)" : "rgba(255, 255, 255, 0.56)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              border: isDark
+                ? "1px solid rgba(255, 255, 255, 0.12)"
+                : "1px solid rgba(23, 36, 29, 0.08)",
+              boxShadow: isDark
+                ? "0 18px 40px rgba(0, 0, 0, 0.18)"
+                : "0 18px 40px rgba(64, 53, 37, 0.10)",
               color: isDark ? "#ffffff" : "rgba(12, 14, 18, 0.95)",
               fontFamily: "'Outfit', sans-serif"
             }}
@@ -196,7 +203,7 @@ const WellnessWebsite = () => {
               Grand Guru
             </p>
             <p
-              className="text-sm sm:text-base leading-relaxed max-w-[48ch]"
+              className="max-w-[34ch] text-[0.95rem] leading-8 sm:text-base"
               style={{
                 color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
                 whiteSpace: "normal",
@@ -207,7 +214,7 @@ const WellnessWebsite = () => {
               Goddess Vartika Shukla is a revered spiritual leader and Shaktipat Guru based in Gurgaon, India. She's the founder of the Siddha Mahayoga Foundation, which offers free Shaktipat initiation to genuine seekers of truth. Her journey into spirituality began from the age of 12, driven by her fascination with the occult and a desire for self-realization. She received Deekshadhikara, authorization to give Shaktipat initiation, from her Guru, Col. T Sreenivasulu.
             </p>
             <p
-              className="text-sm sm:text-base leading-relaxed max-w-[48ch]"
+              className="max-w-[34ch] text-[0.95rem] leading-8 sm:text-base"
               style={{
                 color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
                 whiteSpace: "normal",
@@ -219,7 +226,7 @@ const WellnessWebsite = () => {
             </p>
 
             <p
-              className="text-sm sm:text-base leading-relaxed max-w-[48ch]"
+              className="max-w-[34ch] text-[0.95rem] leading-8 sm:text-base"
               style={{
                 color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
                 whiteSpace: "normal",
@@ -233,7 +240,7 @@ const WellnessWebsite = () => {
         </div>
 
         <div
-          className="absolute z-[25] left-6 md:left-24 right-6 md:right-24 bottom-0"
+          className="absolute z-[25] left-4 right-4 bottom-0 md:left-20 md:right-20"
           style={{
             fontFamily: "'Source Sans 3', sans-serif",
             color: theme.text
@@ -242,10 +249,10 @@ const WellnessWebsite = () => {
             <div
               className="relative"
               style={{
-                "--portrait-width": "clamp(190px, 34vw, 350px)",
-                "--portrait-height": "clamp(280px, 46vw, 500px)",
-                "--portrait-frame": "clamp(10px, 1.1vw, 16px)",
-                "--portrait-bottom": "clamp(-1%, 0.5vh, 2%)"
+                "--portrait-width": "clamp(240px, 36vw, 460px)",
+                "--portrait-height": "clamp(360px, 58vh, 660px)",
+                "--portrait-frame": "clamp(10px, 1vw, 16px)",
+                "--portrait-bottom": "clamp(1%, 1vh, 4%)"
               }}
             >
             <div
@@ -293,9 +300,9 @@ const WellnessWebsite = () => {
               </div>
             </div>
             <div
-              className="relative z-10 w-full whitespace-nowrap leading-[0.85] tracking-[0.05em] text-center overflow-hidden"
+              className="relative z-10 w-full whitespace-nowrap leading-[0.85] tracking-[0.04em] text-center overflow-hidden"
               style={{
-                fontSize: "clamp(2.5rem, 9.6vw, 10.5rem)",
+                fontSize: "clamp(2.2rem, 8.2vw, 8rem)",
                 fontWeight: 600,
                 fontFamily: "'Outfit', sans-serif",
                 color: isDark ? theme.text : "#04070b"
