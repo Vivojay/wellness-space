@@ -17,8 +17,10 @@ def _get_dropbox_env() -> tuple[str, str]:
 
     if not token:
         raise HTTPException(status_code=500, detail="Dropbox access token is not configured")
-    if not root:
+    if root is None:
         raise HTTPException(status_code=500, detail="Dropbox root path is not configured")
+
+    root = root.strip()
 
     normalized_root = _normalize_path(root)
     return token, normalized_root
@@ -159,6 +161,8 @@ def fetch_album_media() -> dict[str, Any]:
             )
 
         entries.extend(payload.get("entries", []))
+        print([e.get("path_display") for e in entries[:20]]) # temp log
+
         if not payload.get("has_more"):
             break
         cursor = payload.get("cursor")
@@ -171,9 +175,17 @@ def fetch_album_media() -> dict[str, Any]:
             continue
 
         path_display = entry.get("path_display") or ""
-        lower_path = path_display.lower()
-        in_photos = lower_path.startswith(f"{images_path.lower()}/")
-        in_videos = lower_path.startswith(f"{videos_path.lower()}/")
+        path_lower = entry.get("path_lower") or path_display.lower()
+
+        in_photos = (
+            path_lower.startswith("/images/")
+            or "/images/" in path_lower
+        )
+
+        in_videos = (
+            path_lower.startswith("/videos/")
+            or "/videos/" in path_lower
+        )
 
         if not in_photos and not in_videos:
             continue
@@ -194,6 +206,13 @@ def fetch_album_media() -> dict[str, Any]:
             "modified_at": entry.get("server_modified"),
             "type": "video" if _is_video(path_display) else "image",
         }
+
+        print({
+            "tag": entry.get(".tag"),
+            "name": entry.get("name"),
+            "path_display": entry.get("path_display"),
+            "path_lower": entry.get("path_lower"),
+        })
 
         if in_photos:
             photos.append(media)
