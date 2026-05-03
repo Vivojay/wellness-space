@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Play, Sparkles } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 
-import { fetchAlbum } from "@/api/albumApi";
+import { fetchAlbum, streamAlbum } from "@/api/albumApi";
 
 function useNearViewport(rootMargin = "320px") {
   const ref = useRef(null);
@@ -134,25 +134,79 @@ export default function AlbumPage() {
   const [album, setAlbum] = useState({ photos: [], videos: [], rootPath: "", photosPath: "", videosPath: "", total: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [streaming, setStreaming] = useState(false);
 
   useEffect(() => {
     let mounted = true;
+    const controller = new AbortController();
 
     const loadAlbum = async () => {
       try {
         setLoading(true);
+        setStreaming(true);
         setError("");
-        const data = await fetchAlbum();
-        if (mounted) {
-          setAlbum(data);
+        let sawItem = false;
+
+        await streamAlbum({
+          signal: controller.signal,
+          onMeta: (meta) => {
+            if (!mounted) return;
+            setAlbum((prev) => ({
+              ...prev,
+              rootPath: meta.root_path || prev.rootPath,
+              photosPath: meta.photos_path || prev.photosPath,
+              videosPath: meta.videos_path || prev.videosPath,
+            }));
+          },
+          onItem: (item) => {
+            if (!mounted) return;
+            sawItem = true;
+            setAlbum((prev) => {
+              if (item.bucket === "videos") {
+                return {
+                  ...prev,
+                  videos: [...prev.videos, item],
+                  total: prev.total + 1,
+                };
+              }
+              return {
+                ...prev,
+                photos: [...prev.photos, item],
+                total: prev.total + 1,
+              };
+            });
+          },
+          onDone: (counts) => {
+            if (!mounted) return;
+            setStreaming(false);
+            setLoading(false);
+            setAlbum((prev) => ({
+              ...prev,
+              total: Number(counts?.total || prev.total),
+            }));
+          },
+        });
+
+        if (mounted && !sawItem) {
+          setStreaming(false);
+          setLoading(false);
         }
       } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : "Failed to load album");
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
+        if (!mounted || controller.signal.aborted) return;
+        try {
+          const data = await fetchAlbum();
+          if (mounted) {
+            setAlbum(data);
+            setStreaming(false);
+            setLoading(false);
+            return;
+          }
+        } catch {
+          if (mounted) {
+            setError(err instanceof Error ? err.message : "Failed to load album");
+            setStreaming(false);
+            setLoading(false);
+          }
         }
       }
     };
@@ -160,6 +214,7 @@ export default function AlbumPage() {
     loadAlbum();
     return () => {
       mounted = false;
+      controller.abort();
     };
   }, []);
 
@@ -218,6 +273,12 @@ export default function AlbumPage() {
             A living moodboard of spaces, rituals, and quiet details, sourced from the Dropbox media root and arranged as a calm, scrollable album.
           </p>
 
+          {!!mixedMedia.length && streaming && (
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-6" style={{ color: theme.textMuted }}>
+              Rendering as media arrives. {mixedMedia.length} item{mixedMedia.length === 1 ? "" : "s"} ready so far.
+            </p>
+          )}
+
           {!!album.videos.length && !loading && !error && (
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-6" style={{ color: theme.textMuted }}>
               Videos stay out of the way until they approach the viewport, then load with metadata only so the page keeps its pace.
@@ -225,11 +286,11 @@ export default function AlbumPage() {
           )}
         </header>
 
-        {loading ? (
+        {loading && !mixedMedia.length ? (
           <div className="grid min-h-[40vh] place-items-center">
             <div className="flex items-center gap-3 text-sm uppercase tracking-[0.24em]" style={{ color: theme.textMuted }}>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading album
+              Fetching first media
             </div>
           </div>
         ) : error ? (

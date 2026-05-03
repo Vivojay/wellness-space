@@ -1,7 +1,8 @@
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from app.services.instagram import fetch_instagram_feed
 from app.services.youtube import fetch_youtube_feed
-from app.services.dropbox_album import fetch_album_media
+from app.services.dropbox_album import fetch_album_media, stream_album_media_lines
 
 router = APIRouter(
     prefix="/gallery",
@@ -28,3 +29,8 @@ def x_feed():
 @router.get("/album")
 def album_feed():
     return fetch_album_media()
+
+
+@router.get("/album/stream")
+def album_feed_stream():
+    return StreamingResponse(stream_album_media_lines(), media_type="application/x-ndjson")
