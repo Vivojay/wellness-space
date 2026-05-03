@@ -185,9 +185,15 @@ const WellnessWebsite = () => {
           >
             <p
               className="text-[10px] sm:text-[11px] tracking-[0.28em] uppercase"
-              style={{ color: isDark ? theme.textMuted : "rgba(12, 14, 18, 0.75)" }}
+              style={{ color: isDark ? theme.textMuted : "rgba(44, 54, 75, 0.75)" }}
             >
-              Goddess Vartika (Grand Guru)
+              Goddess Vartika
+            </p>
+            <p
+              className="text-[9px] sm:text-[10px] tracking-[0.28em] uppercase"
+              style={{ color: isDark ? theme.textMuted : "rgba(12, 14, 18, 0.65)" }}
+            >
+              Grand Guru
             </p>
             <p
               className="text-sm sm:text-base leading-relaxed max-w-[48ch]"
