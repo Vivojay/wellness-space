@@ -232,7 +232,7 @@ def _build_media_item(token: str, entry: dict[str, Any], cache: dict[str, dict[s
 
 def fetch_album_media() -> dict[str, Any]:
     token, root_path = _get_dropbox_env()
-    photos_path = _ensure_within_root(root_path, _join_path(root_path, "photos"))
+    photos_path = _ensure_within_root(root_path, _join_path(root_path, "images"))
     videos_path = _ensure_within_root(root_path, _join_path(root_path, "videos"))
     cache = _load_shared_link_cache()
 
@@ -263,7 +263,7 @@ def fetch_album_media() -> dict[str, Any]:
 
 def stream_album_media_lines() -> Generator[str, None, None]:
     token, root_path = _get_dropbox_env()
-    photos_path = _ensure_within_root(root_path, _join_path(root_path, "photos"))
+    photos_path = _ensure_within_root(root_path, _join_path(root_path, "images"))
     videos_path = _ensure_within_root(root_path, _join_path(root_path, "videos"))
     cache = _load_shared_link_cache()
     photos_count = 0

@@ -51,77 +51,53 @@ function MediaCard({ item, index, theme, isDark }) {
           : "0 24px 50px rgba(29, 44, 34, 0.12)",
       }}
     >
-      <div className="relative overflow-hidden" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(20, 33, 25, 0.06)" }}>
-        {item.type === "video" ? (
-          isNearViewport ? (
-            <video
+      <a href={item.url} target="_blank" rel="noreferrer" className="block">
+        <div className="relative overflow-hidden" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(20, 33, 25, 0.06)" }}>
+          {item.type === "video" ? (
+            isNearViewport ? (
+              <video
+                src={item.url}
+                controls
+                playsInline
+                preload="metadata"
+                className="block w-full h-auto object-cover"
+              />
+            ) : (
+              <div className="grid aspect-[4/5] place-items-center">
+                <div
+                  className="grid h-14 w-14 place-items-center rounded-full border"
+                  style={{
+                    borderColor: theme.borderSecondary,
+                    color: theme.textSecondary,
+                    backgroundColor: theme.cardBg,
+                  }}
+                >
+                  <Play className="h-5 w-5" />
+                </div>
+              </div>
+            )
+          ) : isNearViewport ? (
+            <img
               src={item.url}
-              controls
-              playsInline
-              preload="metadata"
-              className="block w-full h-auto object-cover"
+              alt={item.name}
+              className="block w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
-            <div className="grid aspect-[4/5] place-items-center">
-              <div
-                className="flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.18em]"
-                style={{
-                  borderColor: theme.borderSecondary,
-                  color: theme.textSecondary,
-                  backgroundColor: theme.cardBg,
-                }}
-              >
-                <Play className="h-3.5 w-3.5" />
-                Lazy video
-              </div>
-            </div>
-          )
-        ) : isNearViewport ? (
-          <img
-            src={item.url}
-            alt={item.name}
-            className="block w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            loading="lazy"
-            decoding="async"
+            <div className="aspect-[4/5] w-full animate-pulse" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(20, 33, 25, 0.08)" }} />
+          )}
+
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: isDark
+                ? "linear-gradient(to top, rgba(9, 14, 11, 0.28), rgba(9, 14, 11, 0) 42%)"
+                : "linear-gradient(to top, rgba(18, 32, 23, 0.08), rgba(18, 32, 23, 0) 42%)",
+            }}
           />
-        ) : (
-          <div className="aspect-[4/5] w-full animate-pulse" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(20, 33, 25, 0.08)" }} />
-        )}
-
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: isDark
-              ? "linear-gradient(to top, rgba(9, 14, 11, 0.52), rgba(9, 14, 11, 0) 45%)"
-              : "linear-gradient(to top, rgba(18, 32, 23, 0.16), rgba(18, 32, 23, 0) 45%)",
-          }}
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <div className="min-w-0 flex-1">
-          <p
-            className="truncate text-sm"
-            style={{ color: theme.text, fontFamily: "'Source Sans 3', sans-serif" }}
-            title={item.name}
-          >
-            {item.name}
-          </p>
         </div>
-        <a
-          href={item.url}
-          target="_blank"
-          rel="noreferrer"
-          className="shrink-0 rounded-full border px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] transition-colors"
-          style={{
-            borderColor: theme.borderSecondary,
-            color: theme.textSecondary,
-            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.7)",
-          }}
-        >
-          Open
-        </a>
-      </div>
+      </a>
     </article>
   );
 }
@@ -131,7 +107,6 @@ export default function AlbumPage() {
   const [album, setAlbum] = useState({ photos: [], videos: [], rootPath: "", photosPath: "", videosPath: "", total: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [streaming, setStreaming] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -140,7 +115,6 @@ export default function AlbumPage() {
     const loadAlbum = async () => {
       try {
         setLoading(true);
-        setStreaming(true);
         setError("");
         let sawItem = false;
 
@@ -175,7 +149,6 @@ export default function AlbumPage() {
           },
           onDone: (counts) => {
             if (!mounted) return;
-            setStreaming(false);
             setLoading(false);
             setAlbum((prev) => ({
               ...prev,
@@ -185,7 +158,6 @@ export default function AlbumPage() {
         });
 
         if (mounted && !sawItem) {
-          setStreaming(false);
           setLoading(false);
         }
       } catch (err) {
@@ -194,14 +166,12 @@ export default function AlbumPage() {
           const data = await fetchAlbum();
           if (mounted) {
             setAlbum(data);
-            setStreaming(false);
             setLoading(false);
             return;
           }
         } catch {
           if (mounted) {
             setError(err instanceof Error ? err.message : "Failed to load album");
-            setStreaming(false);
             setLoading(false);
           }
         }
@@ -270,17 +240,6 @@ export default function AlbumPage() {
             A living moodboard of spaces, rituals, and quiet details, sourced from the Dropbox media root and arranged as a calm, scrollable album.
           </p>
 
-          {!!mixedMedia.length && streaming && (
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-6" style={{ color: theme.textMuted }}>
-              Rendering as media arrives. {mixedMedia.length} item{mixedMedia.length === 1 ? "" : "s"} ready so far.
-            </p>
-          )}
-
-          {!!album.videos.length && !loading && !error && (
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-6" style={{ color: theme.textMuted }}>
-              Videos stay out of the way until they approach the viewport, then load with metadata only so the page keeps its pace.
-            </p>
-          )}
         </header>
 
         {loading && !mixedMedia.length ? (
@@ -331,7 +290,7 @@ export default function AlbumPage() {
               No media found
             </p>
             <p className="mt-3 text-base leading-7" style={{ color: theme.textSecondary }}>
-              The configured Dropbox root is reachable, but the `photos/` and `videos/` subdirectories do not currently contain supported media files.
+              The configured Dropbox root is reachable, but the `images/` and `videos/` subdirectories do not currently contain supported media files.
             </p>
           </div>
         )}
