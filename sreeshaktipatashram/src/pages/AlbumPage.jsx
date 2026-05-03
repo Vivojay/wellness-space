@@ -190,7 +190,8 @@ export default function AlbumPage() {
   const heading = useMemo(() => {
     const count = album.photos.length;
     if (!count) return "Ashram Photo Album";
-    return `${count} Glimpses from the Ashram`;
+    // return `${count} Glimpses from the Ashram`;
+    return `Glimpses from the Ashram`;
   }, [album.photos.length]);
 
   const mixedMedia = useMemo(
