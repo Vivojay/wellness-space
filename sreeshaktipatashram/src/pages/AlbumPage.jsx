@@ -99,16 +99,13 @@ function MediaCard({ item, index, theme, isDark }) {
       </div>
 
       <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p
             className="truncate text-sm"
             style={{ color: theme.text, fontFamily: "'Source Sans 3', sans-serif" }}
             title={item.name}
           >
             {item.name}
-          </p>
-          <p className="mt-1 text-[11px] uppercase tracking-[0.22em]" style={{ color: theme.textMuted }}>
-            {item.type === "video" ? "Dropbox Video" : "Dropbox Photo"}
           </p>
         </div>
         <a

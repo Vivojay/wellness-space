@@ -1,18 +1,18 @@
 import json
 import os
-import threading
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 from typing import Any, Generator
 
 import requests
 from fastapi import HTTPException
 
+from app.core.firebase import db
+
 
 DROPBOX_API_BASE = "https://api.dropboxapi.com/2"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".avif", ".heic", ".heif"}
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".webm", ".avi", ".mkv"}
-SHARED_LINK_CACHE_PATH = Path(__file__).resolve().parents[2] / ".cache" / "dropbox_shared_links.json"
-_CACHE_LOCK = threading.Lock()
+SHARED_LINKS_COLLECTION = "dropbox_shared_links"
 
 
 def _get_dropbox_env() -> tuple[str, str]:
@@ -21,7 +21,6 @@ def _get_dropbox_env() -> tuple[str, str]:
 
     if not token:
         raise HTTPException(status_code=500, detail="Dropbox access token is not configured")
-
     if root is None:
         raise HTTPException(status_code=500, detail="Dropbox root path is not configured")
 
@@ -89,29 +88,25 @@ def _shared_link_to_raw(url: str) -> str:
     return f"{url}{separator}raw=1"
 
 
+def _cache_doc_id(path_lower: str) -> str:
+    return path_lower.replace("/", "__slash__")
+
+
 def _load_shared_link_cache() -> dict[str, dict[str, Any]]:
-    with _CACHE_LOCK:
-        if not SHARED_LINK_CACHE_PATH.exists():
-            return {}
-        try:
-            return json.loads(SHARED_LINK_CACHE_PATH.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
-            return {}
+    cache: dict[str, dict[str, Any]] = {}
+    for doc in db.collection(SHARED_LINKS_COLLECTION).stream():
+        data = doc.to_dict() or {}
+        path_lower = data.get("path_lower")
+        if path_lower:
+            cache[path_lower] = data
+    return cache
 
 
-def _save_shared_link_cache(cache: dict[str, dict[str, Any]]) -> None:
-    with _CACHE_LOCK:
-        SHARED_LINK_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        temp_path = SHARED_LINK_CACHE_PATH.with_suffix(".tmp")
-        temp_path.write_text(json.dumps(cache, ensure_ascii=True, separators=(",", ":")), encoding="utf-8")
-        temp_path.replace(SHARED_LINK_CACHE_PATH)
+def _save_shared_link_cache_entry(path_lower: str, data: dict[str, Any]) -> None:
+    db.collection(SHARED_LINKS_COLLECTION).document(_cache_doc_id(path_lower)).set(data, merge=True)
 
 
-def _get_cached_or_create_shared_link(
-    token: str,
-    entry: dict[str, Any],
-    cache: dict[str, dict[str, Any]],
-) -> str:
+def _get_cached_or_create_shared_link(token: str, entry: dict[str, Any], cache: dict[str, dict[str, Any]]) -> str:
     path_lower = entry.get("path_lower")
     if not path_lower:
         raise HTTPException(status_code=500, detail="Dropbox entry missing path_lower")
@@ -167,10 +162,13 @@ def _get_cached_or_create_shared_link(
             raise HTTPException(status_code=502, detail=f"Dropbox API error: {message}")
 
     raw_url = _shared_link_to_raw(shared_url)
-    cache[cache_key] = {
+    cache_payload = {
+        "path_lower": cache_key,
         **cache_signature,
         "url": raw_url,
     }
+    cache[cache_key] = cache_payload
+    _save_shared_link_cache_entry(cache_key, cache_payload)
     return raw_url
 
 
@@ -234,7 +232,7 @@ def _build_media_item(token: str, entry: dict[str, Any], cache: dict[str, dict[s
 
 def fetch_album_media() -> dict[str, Any]:
     token, root_path = _get_dropbox_env()
-    photos_path = _ensure_within_root(root_path, _join_path(root_path, "images"))
+    photos_path = _ensure_within_root(root_path, _join_path(root_path, "photos"))
     videos_path = _ensure_within_root(root_path, _join_path(root_path, "videos"))
     cache = _load_shared_link_cache()
 
@@ -250,7 +248,6 @@ def fetch_album_media() -> dict[str, Any]:
         else:
             photos.append(item)
 
-    _save_shared_link_cache(cache)
     photos.sort(key=lambda item: item.get("modified_at") or "", reverse=True)
     videos.sort(key=lambda item: item.get("modified_at") or "", reverse=True)
 
@@ -266,7 +263,7 @@ def fetch_album_media() -> dict[str, Any]:
 
 def stream_album_media_lines() -> Generator[str, None, None]:
     token, root_path = _get_dropbox_env()
-    photos_path = _ensure_within_root(root_path, _join_path(root_path, "images"))
+    photos_path = _ensure_within_root(root_path, _join_path(root_path, "photos"))
     videos_path = _ensure_within_root(root_path, _join_path(root_path, "videos"))
     cache = _load_shared_link_cache()
     photos_count = 0
@@ -282,20 +279,17 @@ def stream_album_media_lines() -> Generator[str, None, None]:
         ensure_ascii=True,
     ) + "\n"
 
-    try:
-        for entry in _iter_dropbox_entries(token, root_path):
-            item = _build_media_item(token, entry, cache, photos_path, videos_path)
-            if not item:
-                continue
+    for entry in _iter_dropbox_entries(token, root_path):
+        item = _build_media_item(token, entry, cache, photos_path, videos_path)
+        if not item:
+            continue
 
-            if item["bucket"] == "videos":
-                videos_count += 1
-            else:
-                photos_count += 1
+        if item["bucket"] == "videos":
+            videos_count += 1
+        else:
+            photos_count += 1
 
-            yield json.dumps({"type": "item", "item": item}, ensure_ascii=True) + "\n"
-    finally:
-        _save_shared_link_cache(cache)
+        yield json.dumps({"type": "item", "item": item}, ensure_ascii=True) + "\n"
 
     yield json.dumps(
         {
