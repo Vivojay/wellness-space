@@ -57,7 +57,9 @@ function MediaCard({ item, index, theme, isDark }) {
             isNearViewport ? (
               <video
                 src={item.url}
-                controls
+                autoPlay
+                muted
+                loop
                 playsInline
                 preload="metadata"
                 className="block w-full h-auto object-cover"
