@@ -198,7 +198,30 @@ const WellnessWebsite = () => {
                 overflowWrap: "break-word"
               }}
             >
-              Vartika Shukla carries the Siddha Maha Yoga lineage with clarity and compassion, guiding seekers to awaken inner stillness and integrate spiritual practice into everyday life.
+              Goddess Vartika Shukla is a revered spiritual leader and Shaktipat Guru based in Gurgaon, India. She's the founder of the Siddha Mahayoga Foundation, which offers free Shaktipat initiation to genuine seekers of truth. Her journey into spirituality began from the age of 12, driven by her fascination with the occult and a desire for self-realization. She received Deekshadhikara, authorization to give Shaktipat initiation, from her Guru, Col. T Sreenivasulu.
+            </p>
+            <p
+              className="text-sm sm:text-base leading-relaxed max-w-[48ch]"
+              style={{
+                color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
+                whiteSpace: "normal",
+                wordBreak: "normal",
+                overflowWrap: "break-word"
+              }}
+            >
+              Her path is rooted in Kundalini Yoga, and she's initiated many spiritual seekers worldwide. Her teachings emphasize the importance of self-awareness, spiritual growth, and philanthropy.
+            </p>
+
+            <p
+              className="text-sm sm:text-base leading-relaxed max-w-[48ch]"
+              style={{
+                color: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(12, 14, 18, 0.95)",
+                whiteSpace: "normal",
+                wordBreak: "normal",
+                overflowWrap: "break-word"
+              }}
+            >
+              Many have benefited from her guidance, sharing their transformative experiences.
             </p>
           </div>
         </div>
