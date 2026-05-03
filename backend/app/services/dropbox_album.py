@@ -21,7 +21,7 @@ def _get_dropbox_env() -> tuple[str, str]:
 
     if not token:
         raise HTTPException(status_code=500, detail="Dropbox access token is not configured")
-    if not root:
+    if root is None:
         raise HTTPException(status_code=500, detail="Dropbox root path is not configured")
 
     return token, _normalize_path(root)
