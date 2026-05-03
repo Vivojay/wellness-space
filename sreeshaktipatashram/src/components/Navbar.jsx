@@ -1,16 +1,6 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from "react-router-dom";
-
-const navItems = [
-  { label: "Home", to: "/" },
-  { label: "Album", to: "/album" },
-  { label: "Readings", to: "/readings" },
-  { label: "Blog", to: "/blog" },
-];
 
 export default function Navbar({ isDark }) {
-  const { pathname } = useLocation();
-
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -31,9 +21,6 @@ export default function Navbar({ isDark }) {
     : isDark ? 'rgba(228, 236, 230, 0.24)' : 'rgba(44, 58, 47, 0.22)';
 
   const textColor = isDark ? '#ffffff' : scrolled ? '#1a1a1a' : '#000000ff';
-  const pillBg = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.58)';
-  const activeBg = isDark ? 'rgba(170, 216, 206, 0.18)' : 'rgba(50, 121, 111, 0.14)';
-  const activeColor = isDark ? '#eef3ef' : '#17362f';
 
   return (
     <div
@@ -44,7 +31,7 @@ export default function Navbar({ isDark }) {
       style={{ backgroundColor: bgColor, borderColor, color: textColor }}
       data-navbar
     >
-      <div className="flex w-full max-w-6xl flex-col items-center gap-3 px-18 py-4 md:px-24">
+      <div className="flex w-full max-w-6xl items-center justify-center px-18 py-4 md:px-24">
         <span
           className="block text-center leading-none whitespace-nowrap"
           style={{
@@ -56,33 +43,6 @@ export default function Navbar({ isDark }) {
         >
           Sreeshaktipat Ashram
         </span>
-
-        <nav
-          className="flex max-w-full items-center gap-2 overflow-x-auto rounded-full border px-2 py-2"
-          style={{
-            borderColor,
-            backgroundColor: pillBg,
-            scrollbarWidth: "none",
-          }}
-          aria-label="Primary"
-        >
-          {navItems.map((item) => {
-            const isActive = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className="shrink-0 rounded-full px-4 py-2 text-xs uppercase tracking-[0.22em] transition-colors duration-300"
-                style={{
-                  backgroundColor: isActive ? activeBg : "transparent",
-                  color: isActive ? activeColor : textColor,
-                }}
-              >
-                {item.label}
-              </NavLink>
-            );
-          })}
-        </nav>
       </div>
     </div>
   );

@@ -1,11 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
-import { Image as ImageIcon, Loader2, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Loader2, Play, Sparkles } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 
 import { fetchAlbum } from "@/api/albumApi";
 
-function AlbumMasonryCard({ item, index, theme, isDark }) {
-  const heightClass = [
+function useNearViewport(rootMargin = "320px") {
+  const ref = useRef(null);
+  const [isNearViewport, setIsNearViewport] = useState(false);
+
+  useEffect(() => {
+    if (isNearViewport || !ref.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin }
+    );
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [isNearViewport, rootMargin]);
+
+  return [ref, isNearViewport];
+}
+
+function MediaCard({ item, index, theme, isDark }) {
+  const [ref, isNearViewport] = useNearViewport(item.type === "video" ? "520px" : "300px");
+  const offsetClass = [
     "md:mt-0",
     "md:mt-8",
     "md:mt-16",
@@ -15,7 +40,8 @@ function AlbumMasonryCard({ item, index, theme, isDark }) {
 
   return (
     <article
-      className={`group break-inside-avoid mb-5 overflow-hidden border ${heightClass}`}
+      ref={ref}
+      className={`group break-inside-avoid mb-5 overflow-hidden border ${offsetClass}`}
       style={{
         backgroundColor: theme.cardBg,
         borderColor: theme.border,
@@ -25,14 +51,43 @@ function AlbumMasonryCard({ item, index, theme, isDark }) {
           : "0 24px 50px rgba(29, 44, 34, 0.12)",
       }}
     >
-      <div className="relative overflow-hidden">
-        <img
-          src={item.url}
-          alt={item.name}
-          className="block w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-          loading="lazy"
-          decoding="async"
-        />
+      <div className="relative overflow-hidden" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(20, 33, 25, 0.06)" }}>
+        {item.type === "video" ? (
+          isNearViewport ? (
+            <video
+              src={item.url}
+              controls
+              playsInline
+              preload="metadata"
+              className="block w-full h-auto object-cover"
+            />
+          ) : (
+            <div className="grid aspect-[4/5] place-items-center">
+              <div
+                className="flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.18em]"
+                style={{
+                  borderColor: theme.borderSecondary,
+                  color: theme.textSecondary,
+                  backgroundColor: theme.cardBg,
+                }}
+              >
+                <Play className="h-3.5 w-3.5" />
+                Lazy video
+              </div>
+            </div>
+          )
+        ) : isNearViewport ? (
+          <img
+            src={item.url}
+            alt={item.name}
+            className="block w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="aspect-[4/5] w-full animate-pulse" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(20, 33, 25, 0.08)" }} />
+        )}
+
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -42,6 +97,7 @@ function AlbumMasonryCard({ item, index, theme, isDark }) {
           }}
         />
       </div>
+
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
           <p
@@ -52,7 +108,7 @@ function AlbumMasonryCard({ item, index, theme, isDark }) {
             {item.name}
           </p>
           <p className="mt-1 text-[11px] uppercase tracking-[0.22em]" style={{ color: theme.textMuted }}>
-            Dropbox Album
+            {item.type === "video" ? "Dropbox Video" : "Dropbox Photo"}
           </p>
         </div>
         <a
@@ -113,9 +169,14 @@ export default function AlbumPage() {
     return `${count} Glimpses from the Ashram`;
   }, [album.photos.length]);
 
+  const mixedMedia = useMemo(
+    () => [...album.photos, ...album.videos].sort((a, b) => (b.modified_at || "").localeCompare(a.modified_at || "")),
+    [album.photos, album.videos]
+  );
+
   return (
     <section
-      className="min-h-screen px-5 pb-20 pt-10 md:px-10 lg:px-16"
+      className="min-h-screen px-5 pb-20 pt-12 md:px-10 lg:px-16"
       style={{
         backgroundColor: theme.colors.bg.gallery,
         color: theme.text,
@@ -125,62 +186,43 @@ export default function AlbumPage() {
       }}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <header className="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.26em]" style={{ borderColor: theme.borderSecondary, color: theme.textMuted, backgroundColor: theme.cardBg }}>
-              <Sparkles className="h-3.5 w-3.5" />
-              Album
-            </div>
-            <h1
-              className="max-w-4xl text-4xl sm:text-5xl lg:text-6xl"
-              style={{
-                fontFamily: "'Source Sans 3', sans-serif",
-                fontWeight: 300,
-                lineHeight: 1.05,
-                color: theme.text,
-              }}
-            >
-              {heading}
-            </h1>
-            <p
-              className="mt-4 max-w-2xl text-base leading-7 sm:text-lg"
-              style={{ color: theme.textSecondary }}
-            >
-              A living moodboard of spaces, rituals, and quiet details, sourced directly from the Dropbox `photos/` directory inside the configured media root.
-            </p>
-          </div>
-
+        <header className="mx-auto mb-12 max-w-4xl text-center">
           <div
-            className="grid gap-3 border p-5"
+            className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.26em]"
             style={{
-              borderColor: theme.border,
+              borderColor: theme.borderSecondary,
+              color: theme.textMuted,
               backgroundColor: theme.cardBg,
-              borderRadius: "8px",
             }}
           >
-            <div className="flex items-center gap-3">
-              <div
-                className="grid h-11 w-11 place-items-center rounded-full"
-                style={{ backgroundColor: `${theme.accent}24`, color: theme.accent }}
-              >
-                <ImageIcon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em]" style={{ color: theme.textMuted }}>
-                  Collection
-                </p>
-                <p className="text-2xl" style={{ color: theme.text }}>
-                  {album.photos.length}
-                </p>
-              </div>
-            </div>
-            <p className="text-sm leading-6" style={{ color: theme.textSecondary }}>
-              Root: <span style={{ color: theme.text }}>{album.rootPath || "Not configured"}</span>
-            </p>
-            <p className="text-sm leading-6" style={{ color: theme.textSecondary }}>
-              Photos: <span style={{ color: theme.text }}>{album.photosPath || "Not configured"}</span>
-            </p>
+            <Sparkles className="h-3.5 w-3.5" />
+            Album
           </div>
+
+          <h1
+            className="mx-auto max-w-4xl text-4xl sm:text-5xl lg:text-6xl"
+            style={{
+              fontFamily: "'Source Sans 3', sans-serif",
+              fontWeight: 300,
+              lineHeight: 1.05,
+              color: theme.text,
+            }}
+          >
+            {heading}
+          </h1>
+
+          <p
+            className="mx-auto mt-5 max-w-2xl text-base leading-7 sm:text-lg"
+            style={{ color: theme.textSecondary }}
+          >
+            A living moodboard of spaces, rituals, and quiet details, sourced from the Dropbox media root and arranged as a calm, scrollable album.
+          </p>
+
+          {!!album.videos.length && !loading && !error && (
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-6" style={{ color: theme.textMuted }}>
+              Videos stay out of the way until they approach the viewport, then load with metadata only so the page keeps its pace.
+            </p>
+          )}
         </header>
 
         {loading ? (
@@ -206,10 +248,10 @@ export default function AlbumPage() {
               {error}
             </p>
           </div>
-        ) : album.photos.length ? (
+        ) : mixedMedia.length ? (
           <div className="columns-1 gap-5 sm:columns-2 xl:columns-3 2xl:columns-4">
-            {album.photos.map((item, index) => (
-              <AlbumMasonryCard
+            {mixedMedia.map((item, index) => (
+              <MediaCard
                 key={item.id || `${item.path}-${index}`}
                 item={item}
                 index={index}
@@ -228,10 +270,10 @@ export default function AlbumPage() {
             }}
           >
             <p className="text-xs uppercase tracking-[0.24em]" style={{ color: theme.textMuted }}>
-              No photos found
+              No media found
             </p>
             <p className="mt-3 text-base leading-7" style={{ color: theme.textSecondary }}>
-              The configured Dropbox root is reachable, but the `photos/` subdirectory does not currently contain supported image files.
+              The configured Dropbox root is reachable, but the `photos/` and `videos/` subdirectories do not currently contain supported media files.
             </p>
           </div>
         )}

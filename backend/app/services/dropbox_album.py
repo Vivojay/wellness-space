@@ -26,10 +26,10 @@ def _get_dropbox_env() -> tuple[str, str]:
 
 def _normalize_path(path: str) -> str:
     if not path:
-        return "/"
+        return ""
 
     normalized = str(PurePosixPath("/" + path.strip().strip("/")))
-    return normalized if normalized != "." else "/"
+    return "" if normalized == "/" else normalized
 
 
 def _join_path(base: str, child: str) -> str:
@@ -138,7 +138,7 @@ def _shared_link_to_raw(url: str) -> str:
 
 def fetch_album_media() -> dict[str, Any]:
     token, root_path = _get_dropbox_env()
-    photos_path = _ensure_within_root(root_path, _join_path(root_path, "photos"))
+    images_path = _ensure_within_root(root_path, _join_path(root_path, "images"))
     videos_path = _ensure_within_root(root_path, _join_path(root_path, "videos"))
 
     entries: list[dict[str, Any]] = []
@@ -172,7 +172,7 @@ def fetch_album_media() -> dict[str, Any]:
 
         path_display = entry.get("path_display") or ""
         lower_path = path_display.lower()
-        in_photos = lower_path.startswith(f"{photos_path.lower()}/")
+        in_photos = lower_path.startswith(f"{images_path.lower()}/")
         in_videos = lower_path.startswith(f"{videos_path.lower()}/")
 
         if not in_photos and not in_videos:
@@ -205,7 +205,7 @@ def fetch_album_media() -> dict[str, Any]:
 
     return {
         "root_path": root_path,
-        "photos_path": photos_path,
+        "photos_path": images_path,
         "videos_path": videos_path,
         "photos": photos,
         "videos": videos,
